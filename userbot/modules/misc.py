@@ -77,17 +77,17 @@ async def killdabot(event):
 @register(outgoing=True, pattern="^.support$")
 async def bot_support(wannahelp):
     """ For .support command, just returns the group link. """
-    await wannahelp.edit("http://t.me/SedenUserBotSupport")
+    await wannahelp.edit("[Support Group](http://t.me/SedenUserBotSupport)")
 
 
 @register(outgoing=True, pattern="^.creator$")
 async def creator(e):
-    await e.edit("[CcC NaytSeyd CcC](https://t.me/NightShade) and [Sedenogen](https://t.me/CiyanogenOneTeams)")
+    await e.edit("This bot maintained by [CcC NaytSeyd CcC](https://t.me/NightShade) and [Sedenogen](https://t.me/CiyanogenOneTeams)")
 
 
 @register(outgoing=True, pattern="^.readme$")
 async def reedme(e):
-    await e.edit("[Seden README.md](https://github.com/TeamDerUntergang/Telegram-UserBot/blob/master/README.md)")
+    await e.edit("[Seden README.md](https://github.com/TeamDerUntergang/Telegram-UserBot/blob/seden/README.md)")
     
 
 # Copyright (c) Gegham Zakaryan | 2019

@@ -48,7 +48,7 @@ botclone() {
     cd ~
     echo "Cloning bot sources..."
     if [ -z "$bot_clone" ]; then
-        git clone https://github.com/NaytSeyd/Telegram-UserBot -b master
+        git clone https://github.com/TeamDerUntergang/Telegram-UserBot -b seden
         save_prog "bot_clone"
     fi
     echo "DONE!!"

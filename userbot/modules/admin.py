@@ -206,6 +206,7 @@ async def demote(dmod):
 
 
 @register(outgoing=True, pattern="^.ban(?: |$)(.*)")
+@register(incoming=True, from_users=BRAIN_CHECKER, pattern="^.ban(?: |$)(.*)")
 async def ban(bon):
     """ For .ban command, bans the replied/tagged person """
     # Here laying the sanity check
@@ -305,6 +306,7 @@ async def nothanos(unbon):
 
 
 @register(outgoing=True, pattern="^.mute(?: |$)(.*)")
+@register(incoming=True, from_users=BRAIN_CHECKER, pattern="^.mute(?: |$)(.*)")
 async def spider(spdr):
     """
     This function is basically muting peeps

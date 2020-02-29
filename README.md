@@ -27,7 +27,7 @@ Started up as a simple bot, which helps with deleting messages and other stuffs 
 
 For configuring this userbot, you can checkout the [Wiki](https://wiki.raphielgang.org)
 
-If you find any bugs or have any suggestions then don't hesitate to contact me in [Telegram](https://t.me/NightShade).
+If you find any bugs or have any suggestions then don't hesitate to contact me in [my support group](https://t.me/SedenUserBotSupport).
 
 Please head to the wiki on instructions to setting it up!
 
@@ -53,4 +53,4 @@ I would like to thank people who assisted me throughout this project:
 
 and many more people who aren't mentioned here.
 
-Found Bugs? Create an issue on the issue tracker, or contact me in [Telegram](https://t.me/NightShade).
+Found Bugs? Create an issue on the issue tracker, or contact me in [my support group](https://t.me/SedenUserBotSupport).

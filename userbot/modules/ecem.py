@@ -132,5 +132,6 @@ async def ecem(e):
     
 CMD_HELP.update({
     "ecem":
-    ".ecem\
-\nUsage: Ecem quotes.\
+    ".ecem or reply to someones text with .ecem\
+    \nUsage: Ecem quotes."
+})

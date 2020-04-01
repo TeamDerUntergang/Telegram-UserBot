@@ -50,6 +50,7 @@ I would like to thank people who assisted me throughout this project:
 * [@NaytSeyd](https://github.com/NaytSeyd)
 * [@ReversedPosix](https://github.com/ReversedPosix)
 * [@quiec](https://github.com/quiec)
+* [@erdemozdemir98](https://github.com/erdemozdemir98)
 
 and many more people who aren't mentioned here.
 

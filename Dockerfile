@@ -1,5 +1,5 @@
-# We're using Alpine Edge
-FROM alpine:edge
+# We're using Alpine Latest
+FROM alpine:latest
 
 #
 # We have to uncomment Community repo for some packages

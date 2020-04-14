@@ -1,17 +1,18 @@
 {
-  "name": "Telegram-UserBot",
-  "description": "Telegram UserBot",
+  "name": "UserBot",
+  "description": "Seden UserBot",
   "logo": "https://i.imgur.com/ZLi4nDP.jpg",
   "keywords": [
     "telegram",
     "userbot",
+	"seden",
     "plugin",
     "modular",
     "productivity"
   ],
   "repository": "https://github.com/TeamDerUntergang/Telegram-UserBot",
-  "website":   "https://github.com/RaphielGang/Telegram-UserBot/wiki",
-  "success_url": "https://t.me/NightShade",
+  "website":   "https://github.com/TeamDerUntergang",
+  "success_url": "https://t.me/SedenUserBotSupport",
   "stack": "container",
   "env": {
     "API_KEY": {

@@ -120,9 +120,9 @@ async def promote(promt):
         await promt.edit(NO_ADMIN)
         return
 
-    new_rights = ChatAdminRights(add_admins=False,
+    new_rights = ChatAdminRights(add_admins=True,
                                  invite_users=True,
-                                 change_info=False,
+                                 change_info=True,
                                  ban_users=True,
                                  delete_messages=True,
                                  pin_messages=True)
@@ -206,7 +206,6 @@ async def demote(dmod):
 
 
 @register(outgoing=True, pattern="^.ban(?: |$)(.*)")
-@register(incoming=True, from_users=BRAIN_CHECKER, pattern="^.ban(?: |$)(.*)")
 async def ban(bon):
     """ For .ban command, bans the replied/tagged person """
     # Here laying the sanity check
@@ -306,7 +305,6 @@ async def nothanos(unbon):
 
 
 @register(outgoing=True, pattern="^.mute(?: |$)(.*)")
-@register(incoming=True, from_users=BRAIN_CHECKER, pattern="^.mute(?: |$)(.*)")
 async def spider(spdr):
     """
     This function is basically muting peeps

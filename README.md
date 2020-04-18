@@ -1,6 +1,6 @@
-# Telegram-UserBot
+# Seden-UserBot
 
-### If the CI builds pass, but you still get syntax errors when running locally it's most probably not a problem with the source but with your version of python
+### CI derlemesi başarılı, ancak yerel olarak çalışırken hala sözdizimi hataları alıyorsanız, muhtemelen kaynakla ilgili bir sorun değil, python sürümünüzle alakalı bir sorun.
 
 ### # Heroku Deploy
 [![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/TeamDerUntergang/Telegram-UserBot/tree/seden)
@@ -8,32 +8,29 @@
 ```
 #include <std/disclaimer.h>
 /**
-    Your Telegram account may get banned.
-    I am not responsible for any improper use of this bot
-    This bot is intended for the purpose of having fun with memes,
-    as well as efficiently managing groups.
-    You ended up spamming groups, getting reported left and right,
-    and you ended up in a Finale Battle with Telegram and at the end
-    Telegram Team deleted your account?
-    And after that, then you pointed your fingers at us
-    for getting your acoount deleted?
-    I will rolling on the floor laughing at you.
+    Telegram hesabınız yasaklanabilir.
+    Botun yanlış kullanımından sorumlu değilim sorumluluk size aittir.
+    Bu bot grupları verimli bir şekilde yönetmenin yanı sıra,
+    eğlenmek amacıyla tasarlanmıştır.
+    Grupları spamlayarak eğleneceğinizi düşünüyorsanız yanılıyorsunuz.
+    Herhangi bir spam ban yeme durumunda eğer gelipte hesabım banlandı diye yazarsanız
+    sadece size güleceğim.
 /**
 ```
 
-A modular telegram Python UserBot running on python3 with an sqlalchemy database.
+Python3 üzerinde bir sqlalchemy veritabanı ile çalışan modüler bir telegram Python kullanıcı Botu.
 
-Started up as a simple bot, which helps with deleting messages and other stuffs when I didn't possess a smartphone(selecting each message indeed difficult) with a ton of meme features kanged from [SkittBot](https://github.com/skittles9823/SkittBot), it has evolved, becoming extremely modular and simple to use.
+Bot PaperPlane tabanından alınarak, Türkçe'ye çevrilip birkaç özellik eklenmiştir. Eğlenceli özellikler [SkittBot](https://github.com/skittles9823/SkittBot)'dan alınmıştır. Son derece modüler ve kullanımı basit bir botdur.
 
-For configuring this userbot, you can checkout the [Wiki](https://wiki.raphielgang.org)
+Bu botu yapılandırmak için wiki sayfasını kontrol edebilirsiniz [Wiki](https://github.com/TeamDerUntergang/Telegram-UserBot/wiki/Bot-Kurulum-Rehberi)
 
-If you find any bugs or have any suggestions then don't hesitate to contact me in [my support group](https://t.me/SedenUserBotSupport).
+Herhangi bir istek & şikâyet & öneri varsa [destek grubundan](https://t.me/SedenUserBotSupport) bana ulaşabilirsiniz.
 
-Please head to the wiki on instructions to setting it up!
+Lütfen kurulum talimatları için [Wiki](https://github.com/TeamDerUntergang/Telegram-UserBot/wiki/Bot-Kurulum-Rehberi) sayfasına gidin! Talimatı okumadan verilen sorulara cevap verilmeyecektir.
 
-### Credits:
+### Teşekkürler:
 
-I would like to thank people who assisted me throughout this project:
+Bu proje boyunca bana yardımcı olan insanlara teşekkür etmek istiyorum:
 
 * [@YouTwitFace](https://github.com/YouTwitFace)
 * [@TheDevXen](https://github.com/TheDevXen)
@@ -51,7 +48,6 @@ I would like to thank people who assisted me throughout this project:
 * [@ReversedPosix](https://github.com/ReversedPosix)
 * [@quiec](https://github.com/quiec)
 * [@erdemozdemir98](https://github.com/erdemozdemir98)
+* [@Sedenogen](https://github.com/ciyanogen)
 
-and many more people who aren't mentioned here.
-
-Found Bugs? Create an issue on the issue tracker, or contact me in [my support group](https://t.me/SedenUserBotSupport).
+ve burada bahsedilmeyen daha birçok insan.

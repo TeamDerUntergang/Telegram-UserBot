@@ -24,7 +24,7 @@
       "required": true
     },
     "STRING_SESSION": {
-      "description": "Get this value by running python3 string_session.py locally.",
+      "description": "Get this value by running python3 GenerateStringSession.py locally.",
       "required": true
     },
     "HEROKU_MEMEZ": {
@@ -42,7 +42,8 @@
     },
     "UPSTREAM_REPO_URL": {
       "description": "In case you maintain a fork, add your repo URL here.",
-      "required": false
+      "value": "https://github.com/TeamDerUntergang/Telegram-UserBot",
+      "required": true
     },
     "COUNTRY": {
       "description": "Set your Country to be used in the .time and .date commands.",

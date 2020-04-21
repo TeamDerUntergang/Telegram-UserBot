@@ -53,12 +53,11 @@ async def setlang(prog):
     CARBONLANG = prog.pattern_match.group(1)
     await prog.edit(f"Language for carbon.now.sh set to {CARBONLANG}")
 
-
 @register(outgoing=True, pattern="^.carbon")
 async def carbon_api(e):
     """ A Wrapper for carbon.now.sh """
     await e.edit("`Processing..`")
-    CARBON = 'https://carbon.now.sh/?l={lang}&code={code}'
+    CARBON = 'https://carbon.now.sh/?bg=rgba(255%2C255%2C255%2C1)&t=base16-dark&wt=none&l=application%2Ftypescript&ds=true&dsyoff=20px&dsblur=68px&wc=true&wa=true&pv=56px&ph=56px&ln=false&fl=1&fm=Hack&fs=14px&lh=133%25&si=false&es=2x&wm=false&code={code}'
     global CARBONLANG
     textx = await e.get_reply_message()
     pcode = e.text
@@ -96,8 +95,8 @@ async def carbon_api(e):
     }
     command_result = driver.execute("send_command", params)
     driver.find_element_by_xpath("//button[contains(text(),'Export')]").click()
-    driver.find_element_by_xpath("//button[contains(text(),'4x')]").click()
-    driver.find_element_by_xpath("//button[contains(text(),'PNG')]").click()
+   # driver.find_element_by_xpath("//button[contains(text(),'4x')]").click()
+   # driver.find_element_by_xpath("//button[contains(text(),'PNG')]").click()
     await e.edit("`Processing..\n75%`")
     # Waiting for downloading
     while not os.path.isfile("./carbon.png"):

@@ -920,10 +920,10 @@ async def get_bots(show):
     title = info.title if info.title else "this chat"
     mentions = f'<b>Bots in {title}:</b>\n'
     try:
-        if isinstance(message.to_id, PeerChat):
-            await show.edit("`I heard that only Supergroups can have bots.`")
-            return
-        else:
+       # if isinstance(message.to_id, PeerChat):
+        #    await show.edit("`I heard that only Supergroups can have bots.`")
+         #   return
+       # else:
             async for user in show.client.iter_participants(
                     show.chat_id, filter=ChannelParticipantsBots):
                 if not user.deleted:

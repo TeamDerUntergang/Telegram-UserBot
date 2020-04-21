@@ -37,6 +37,14 @@
       "description": "Get this value by running python3 GenerateStringSession.py locally.",
       "required": true
     },
+    "GENIUS_API_TOKEN": {
+      "description": "Get this value from https://genius.com/developers.",
+      "value": "0"
+    },
+    "GENIUS": {
+      "description": "Get this value from https://genius.com/developers., basically same as GENIUS_API_TOKEN.",
+      "value": "0"
+    },
     "HEROKU_MEMEZ": {
       "description": "This should be True if the userbot is running on a Heroku Dyno.",
       "value": "True",

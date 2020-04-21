@@ -142,6 +142,13 @@ GDRIVE_FOLDER_ID = os.environ.get("GDRIVE_FOLDER_ID", None)
 TEMP_DOWNLOAD_DIRECTORY = os.environ.get("TMP_DOWNLOAD_DIRECTORY",
                                          "./downloads")
 
+
+# Genius lyrics get this value from https://genius.com/developers both has same values
+GENIUS_API_TOKEN = os.environ.get("GENIUS", None)
+# Genius lyrics get this value from https://genius.com/developers both has same values
+GENIUS = os.environ.get("GENIUS_API_TOKEN", None)
+
+
 # Setting Up CloudMail.ru and MEGA.nz extractor binaries,
 # and giving them correct perms to work properly.
 if not os.path.exists('bin'):

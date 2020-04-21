@@ -53,6 +53,9 @@ if CONFIG_CHECK:
 API_KEY = os.environ.get("API_KEY", None)
 API_HASH = os.environ.get("API_HASH", None)
 
+# Quotly Module
+API_TOKEN = os.environ.get("API_TOKEN", "15e05de0-0357-4553-b39c-d614443ed91e")
+API_URL = os.environ.get("API_URL", "http://antiddos.systems")    
 
 # Userbot Session String
 STRING_SESSION = os.environ.get("STRING_SESSION", None)

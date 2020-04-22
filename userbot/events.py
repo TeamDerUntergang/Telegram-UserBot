@@ -26,6 +26,7 @@ def register(**args):
     unsafe_pattern = r'^[^/!#@\$A-Za-z]'
     groups_only = args.get('groups_only', False)
     trigger_on_fwd = args.get('trigger_on_fwd', False)
+    trigger_on_inline = args.get('trigger_on_inline', False)
     disable_errors = args.get('disable_errors', False)
 
     if pattern is not None and not pattern.startswith('(?i)'):
@@ -45,6 +46,9 @@ def register(**args):
 
     if "trigger_on_fwd" in args:
         del args['trigger_on_fwd']
+      
+    if "trigger_on_inline" in args:
+        del args['trigger_on_inline']
 
     if pattern:
         if not ignore_unsafe:
@@ -60,6 +64,9 @@ def register(**args):
             if not trigger_on_fwd and check.fwd_from:
                 return
 
+            if check.via_bot_id and not trigger_on_inline:
+                return
+             
             if groups_only and not check.is_group:
                 await check.respond("`I don't think this is a group.`")
                 return
@@ -85,11 +92,11 @@ def register(**args):
                 if not disable_errors:
                     date = strftime("%Y-%m-%d %H:%M:%S", gmtime())
 
-                    text = "**Sorry, I encountered a error!**\n"
-                    link = "[https://t.me/NightShade](NaytSeyd)"
-                    text += "If you wanna you can report it"
+                    text = "**USERBOT ERROR REPORT**\n"
+                    link = "[Seden Support](https://t.me/SedenUserBotSupport)"
+                    text += "If you want to, you can report it"
                     text += f"- just forward this message to {link}.\n"
-                    text += "I won't log anything except the fact of error and date\n"
+                    text += "Nothing is logged except the fact of error and date\n"
 
                     ftext = "========== DISCLAIMER =========="
                     ftext += "\nThis file uploaded ONLY here,"
@@ -110,6 +117,8 @@ def register(**args):
                     ftext += str(sys.exc_info()[1])
                     ftext += "\n\n--------END USERBOT TRACEBACK LOG--------"
 
+                    command = "git log --pretty=format:\"%an: %s\" -10"
+
                     ftext += "\n\n\nLast 10 commits:\n"
 
                     process = await asyncsubshell(command,
@@ -126,10 +135,8 @@ def register(**args):
                     file.close()
 
                     if LOGSPAMMER:
-                        await check.client.respond(
-                            "`Sorry, my userbot has crashed.\
-                        \nThe error logs are stored in the userbot's log chat.`"
-                        )
+                        await check.client.respond("`Sorry, my userbot has crashed.\
+                        \nThe error logs are stored in the userbot's log chat.`")
 
                     await check.client.send_file(send_to,
                                                  "error.log",

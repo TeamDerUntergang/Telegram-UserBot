@@ -25,7 +25,6 @@ from wikipedia.exceptions import DisambiguationError, PageError
 from urbandict import define
 from requests import get
 from search_engine_parser import GoogleSearch
-from google_images_download import google_images_download
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from googletrans import LANGUAGES, Translator
@@ -42,13 +41,14 @@ from userbot import CMD_HELP, BOTLOG, BOTLOG_CHATID, YOUTUBE_API_KEY, CHROME_DRI
 from userbot.events import register
 from telethon.tl.types import DocumentAttributeAudio
 from userbot.modules.upload_download import progress, humanbytes, time_formatter
+from userbot.google_images_download import googleimagesdownload
 
 CARBONLANG = "auto"
 TTS_LANG = "tr"
 TRT_LANG = "tr"
 
 
-@register(outgoing=True, pattern="^.carbonlang (.*)")
+@register(outgoing=True, pattern="^.crblang (.*)")
 async def setlang(prog):
     global CARBONLANG
     CARBONLANG = prog.pattern_match.group(1)
@@ -132,8 +132,8 @@ async def img_sampler(event):
         lim = lim.replace("lim=", "")
         query = query.replace("lim=" + lim[0], "")
     except IndexError:
-        lim = 3
-    response = google_images_download.googleimagesdownload()
+        lim = 5
+    response = googleimagesdownload()
 
     # creating list of arguments
     arguments = {
@@ -197,9 +197,9 @@ async def gsearch(q_event):
     msg = ""
     for i in range(10):
         try:
-            title = gresults["başlıklar"][i]
-            link = gresults["bağlantılar"][i]
-            desc = gresults["açıklamalar"][i]
+            title = gresults["titles"][i]
+            link = gresults["links"][i]
+            desc = gresults["descriptions"][i]
             msg += f"[{title}]({link})\n`{desc}`\n\n"
         except IndexError:
             break

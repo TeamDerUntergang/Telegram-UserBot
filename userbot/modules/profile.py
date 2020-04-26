@@ -1,9 +1,11 @@
 # Copyright (C) 2019 The Raphielscape Company LLC.
+# Copyright (C) 2020 TeamDerUntergang.
 #
 # Licensed under the Raphielscape Public License, Version 1.c (the "License");
 # you may not use this file except in compliance with the License.
 #
-""" Userbot module for changing your Telegram profile details. """
+
+""" Telegram'daki profil detaylarınızı değişmeye yarayan UserBot modülüdür. """
 
 import os
 
@@ -27,22 +29,22 @@ from userbot import bot, CMD_HELP
 from userbot.events import register
 
 # ====================== CONSTANT ===============================
-INVALID_MEDIA = "```The extension of the media entity is invalid.```"
-PP_CHANGED = "```Profile picture changed successfully.```"
-PP_TOO_SMOL = "```This image is too small, use a bigger image.```"
-PP_ERROR = "```Failure occured while processing image.```"
+INVALID_MEDIA = "```Medya geçerli değil.```"
+PP_CHANGED = "```Profil resmi başarıyla değiştirildi.```"
+PP_TOO_SMOL = "```Bu resim çok küçük, daha büyük bir resim kullanın.```"
+PP_ERROR = "```Resim işlenirken bir hata oluştu.```"
 
-BIO_SUCCESS = "```Successfully edited Bio.```"
+BIO_SUCCESS = "```Biyografi başarıyla değiştirildi.```"
 
-NAME_OK = "```Your name was succesfully changed.```"
-USERNAME_SUCCESS = "```Your username was succesfully changed.```"
-USERNAME_TAKEN = "```This username is already taken.```"
+NAME_OK = "```Adın başarıyla değiştirildi.```"
+USERNAME_SUCCESS = "```Kullanıcı adın başarıyla değiştirildi.```"
+USERNAME_TAKEN = "```Kullanıcı adı müsait değil.```"
 # ===============================================================
 
 
 @register(outgoing=True, pattern="^.reserved$")
 async def mine(event):
-    """ For .reserved command, get a list of your reserved usernames. """
+    """ .reserved komutu ayırdığınız kullanıcı adlarını listeler. """
     result = await bot(GetAdminedPublicChannelsRequest())
     output_str = ""
     for channel_obj in result.chats:
@@ -52,7 +54,7 @@ async def mine(event):
 
 @register(outgoing=True, pattern="^.name")
 async def update_name(name):
-    """ For .name command, change your name in Telegram. """
+    """ .name komutu Telegram'daki isminizi değişir. """
     newname = name.text[6:]
     if " " not in newname:
         firstname = newname
@@ -69,7 +71,7 @@ async def update_name(name):
 
 @register(outgoing=True, pattern="^.setpfp$")
 async def set_profilepic(propic):
-    """ For .profilepic command, change your profile picture in Telegram. """
+    """ .profilepic komutu Telegram'daki profil resminizi yanıtladığınız resimle değişir. """
     replymsg = await propic.get_reply_message()
     photo = None
     if replymsg.media:
@@ -97,7 +99,7 @@ async def set_profilepic(propic):
 
 @register(outgoing=True, pattern="^.setbio (.*)")
 async def set_biograph(setbio):
-    """ For .setbio command, set a new bio for your profile in Telegram. """
+    """ .setbio komutu Telegram'da yeni bir biyografi ayarlamanızı sağlar. """
     newbio = setbio.pattern_match.group(1)
     await setbio.client(UpdateProfileRequest(about=newbio))
     await setbio.edit(BIO_SUCCESS)
@@ -105,7 +107,7 @@ async def set_biograph(setbio):
 
 @register(outgoing=True, pattern="^.username (.*)")
 async def update_username(username):
-    """ For .username command, set a new username in Telegram. """
+    """ .username komutu Telegram'da yeni bir kullanıcı adı belirlemenizi sağlar. """
     newusername = username.pattern_match.group(1)
     try:
         await username.client(UpdateUsernameRequest(newusername))
@@ -116,14 +118,14 @@ async def update_username(username):
 
 @register(outgoing=True, pattern="^.count$")
 async def count(event):
-    """ For .count command, get profile stats. """
+    """ .count komutu profil istatistiklerini gösterir. """
     u = 0
     g = 0
     c = 0
     bc = 0
     b = 0
     result = ""
-    await event.edit("`Processing..`")
+    await event.edit("`Lütfen bekleyin..`")
     dialogs = await bot.get_dialogs(limit=None, ignore_migrated=True)
     for d in dialogs:
         currrent_entity = d.entity
@@ -142,18 +144,18 @@ async def count(event):
         else:
             print(d)
 
-    result += f"`Users:`\t**{u}**\n"
-    result += f"`Groups:`\t**{g}**\n"
-    result += f"`Super Groups:`\t**{c}**\n"
-    result += f"`Channels:`\t**{bc}**\n"
-    result += f"`Bots:`\t**{b}**"
+    result += f"`Kullanıcılar:`\t**{u}**\n"
+    result += f"`Gruplar:`\t**{g}**\n"
+    result += f"`Süpergruplar:`\t**{c}**\n"
+    result += f"`Kanallar:`\t**{bc}**\n"
+    result += f"`Botlar:`\t**{b}**"
 
     await event.edit(result)
 
 
 @register(outgoing=True, pattern=r"^.delpfp")
 async def remove_profilepic(delpfp):
-    """ For .delpfp command, delete your current profile picture in Telegram. """
+    """ .delpfp komutu Telegram'daki şu anki profil resminizi kaldırır. """
     group = delpfp.text[8:]
     if group == 'all':
         lim = 0
@@ -175,23 +177,23 @@ async def remove_profilepic(delpfp):
                        file_reference=sep.file_reference))
     await delpfp.client(DeletePhotosRequest(id=input_photos))
     await delpfp.edit(
-        f"`Successfully deleted {len(input_photos)} profile picture(s).`")
+        f"`{len(input_photos)} adet profil fotoğrafı silindi.`")
 
 
 CMD_HELP.update({
     "profile":
-    ".username <new_username>\
-\nUsage: Changes your Telegram username.\
-\n\n.name <firstname> or .name <firstname> <lastname>\
-\nUsage: Changes your Telegram name.(First and last name will get split by the first space)\
+    ".username <yeni kullanıcı adı>\
+\nKullanımı: Telegram'daki kullanıcı adınızı değişir.\
+\n\n.name <isim> or .name <isim> <soyisim>\
+\nKullanımı: Telegram'daki isminizi değişir. (Ad ve soyad ilk boşluğa dayanarak birleştirilir.)\
 \n\n.setpfp\
-\nUsage: Reply with .setpfp to an image to change your Telegram profie picture.\
-\n\n.setbio <new_bio>\
-\nUsage: Changes your Telegram bio.\
-\n\n.delpfp or .delpfp <number>/<all>\
-\nUsage: Deletes your Telegram profile picture(s).\
+\nKullanımı: Bir resmi Telegram'da profil resmi yapmak için .setpfp komutuyla cevap verin.\
+\n\n.setbio <yeni biyografi>\
+\nKullanımı: Telegram'daki biyografinizi bu komutu kullanarak değiştirin..\
+\n\n.delpfp or .delpfp <numara>/<all>\
+\nKullanımı: Telegram profil fotoğrafınızı kaldırır.\
 \n\n.reserved\
-\nUsage: Shows usernames reserved by you.\
+\nKullanımı: Rezerve ettiğiniz kullanıcı adlarını gösterir.\
 \n\n.count\
-\nUsage: Counts your groups, chats, bots etc..."
+\nKullanımı: Gruplarınızı, sohbetlerinizi, aktif botları vs. sayar."
 })

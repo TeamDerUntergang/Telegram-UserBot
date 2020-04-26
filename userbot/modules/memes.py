@@ -1,8 +1,10 @@
 # Copyright (C) 2019 The Raphielscape Company LLC.
+# Copyright (C) 2020 TeamDerUntergang.
 #
 # Licensed under the Raphielscape Public License, Version 1.c (the "License");
 # you may not use this file except in compliance with the License.
-""" Userbot module for having some fun with people. """
+
+""" İnsanlarla eğlenmek için yapılmış olan UserBot modülü. """
 
 from asyncio import sleep
 from random import choice, getrandbits, randint
@@ -15,135 +17,11 @@ import requests
 
 from cowpy import cow
 
-from userbot import CMD_HELP
+from userbot import CMD_HELP, ZALG_LIST
 from userbot.events import register
 from userbot.modules.admin import get_user_from_event
 
 # ================= CONSTANT =================
-METOOSTR = [
-    "Me too thanks",
-    "Haha yes, me too",
-    "Same lol",
-    "Me irl",
-    "Same here",
-    "Haha yes",
-    "Me rn",
-]
-
-ZALG_LIST = [[
-    "̖",
-    " ̗",
-    " ̘",
-    " ̙",
-    " ̜",
-    " ̝",
-    " ̞",
-    " ̟",
-    " ̠",
-    " ̤",
-    " ̥",
-    " ̦",
-    " ̩",
-    " ̪",
-    " ̫",
-    " ̬",
-    " ̭",
-    " ̮",
-    " ̯",
-    " ̰",
-    " ̱",
-    " ̲",
-    " ̳",
-    " ̹",
-    " ̺",
-    " ̻",
-    " ̼",
-    " ͅ",
-    " ͇",
-    " ͈",
-    " ͉",
-    " ͍",
-    " ͎",
-    " ͓",
-    " ͔",
-    " ͕",
-    " ͖",
-    " ͙",
-    " ͚",
-    " ",
-],
-             [
-                 " ̍",
-                 " ̎",
-                 " ̄",
-                 " ̅",
-                 " ̿",
-                 " ̑",
-                 " ̆",
-                 " ̐",
-                 " ͒",
-                 " ͗",
-                 " ͑",
-                 " ̇",
-                 " ̈",
-                 " ̊",
-                 " ͂",
-                 " ̓",
-                 " ̈́",
-                 " ͊",
-                 " ͋",
-                 " ͌",
-                 " ̃",
-                 " ̂",
-                 " ̌",
-                 " ͐",
-                 " ́",
-                 " ̋",
-                 " ̏",
-                 " ̽",
-                 " ̉",
-                 " ͣ",
-                 " ͤ",
-                 " ͥ",
-                 " ͦ",
-                 " ͧ",
-                 " ͨ",
-                 " ͩ",
-                 " ͪ",
-                 " ͫ",
-                 " ͬ",
-                 " ͭ",
-                 " ͮ",
-                 " ͯ",
-                 " ̾",
-                 " ͛",
-                 " ͆",
-                 " ̚",
-             ],
-             [
-                 " ̕",
-                 " ̛",
-                 " ̀",
-                 " ́",
-                 " ͘",
-                 " ̡",
-                 " ̢",
-                 " ̧",
-                 " ̨",
-                 " ̴",
-                 " ̵",
-                 " ̶",
-                 " ͜",
-                 " ͝",
-                 " ͞",
-                 " ͟",
-                 " ͠",
-                 " ͢",
-                 " ̸",
-                 " ̷",
-                 " ͡",
-             ]]
-
 EMOJIS = [
     "😂",
     "😂",
@@ -173,71 +51,6 @@ EMOJIS = [
     "👅",
     "😩",
     "🚰",
-]
-
-INSULT_STRINGS = [
-    "Owww ... Such a stupid idiot.",
-    "Don't drink and type.",
-    "I think you should go home or better a mental asylum.",
-    "Command not found. Just like your brain.",
-    "Do you realize you are making a fool of yourself? Apparently not.",
-    "You can type better than that.",
-    "Bot rule 544 section 9 prevents me from replying to stupid humans like you.",
-    "Sorry, we do not sell brains.",
-    "Believe me you are not normal.",
-    "I bet your brain feels as good as new, seeing that you never use it.",
-    "If I wanted to kill myself I'd climb your ego and jump to your IQ.",
-    "Zombies eat brains... you're safe.",
-    "You didn't evolve from apes, they evolved from you.",
-    "Come back and talk to me when your I.Q. exceeds your age.",
-    "I'm not saying you're stupid, I'm just saying you've got bad luck when it comes to thinking.",
-    "What language are you speaking? Cause it sounds like bullshit.",
-    "Stupidity is not a crime so you are free to go.",
-    "You are proof that evolution CAN go in reverse.",
-    "I would ask you how old you are but I know you can't count that high.",
-    "As an outsider, what do you think of the human race?",
-    "Brains aren't everything. In your case they're nothing.",
-    "Ordinarily people live and learn. You just live.",
-    "I don't know what makes you so stupid, but it really works.",
-    "Keep talking, someday you'll say something intelligent! (I doubt it though)",
-    "Shock me, say something intelligent.",
-    "Your IQ's lower than your shoe size.",
-    "Alas! Your neurotransmitters are no more working.",
-    "Are you crazy you fool.",
-    "Everyone has the right to be stupid but you are abusing the privilege.",
-    "I'm sorry I hurt your feelings when I called you stupid. I thought you already knew that.",
-    "You should try tasting cyanide.",
-    "Your enzymes are meant to digest rat poison.",
-    "You should try sleeping forever.",
-    "Pick up a gun and shoot yourself.",
-    "You could make a world record by jumping from a plane without parachute.",
-    "Stop talking BS and jump in front of a running bullet train.",
-    "Try bathing with Hydrochloric Acid instead of water.",
-    "Try this: if you hold your breath underwater for an hour, you can then hold it forever.",
-    "Go Green! Stop inhaling Oxygen.",
-    "God was searching for you. You should leave to meet him.",
-    "give your 100%. Now, go donate blood.",
-    "Try jumping from a hundred story building but you can do it only once.",
-    "You should donate your brain seeing that you never used it.",
-    "Volunteer for target in an firing range.",
-    "Head shots are fun. Get yourself one.",
-    "You should try swimming with great white sharks.",
-    "You should paint yourself red and run in a bull marathon.",
-    "You can stay underwater for the rest of your life without coming back up.",
-    "How about you stop breathing for like 1 day? That'll be great.",
-    "Try provoking a tiger while you both are in a cage.",
-    "Have you tried shooting yourself as high as 100m using a canon.",
-    "You should try holding TNT in your mouth and igniting it.",
-    "Try playing catch and throw with RDX its fun.",
-    "I heard phogine is poisonous but i guess you wont mind inhaling it for fun.",
-    "Launch yourself into outer space while forgetting oxygen on Earth.",
-    "You should try playing snake and ladders, with real snakes and no ladders.",
-    "Dance naked on a couple of HT wires.",
-    "Active Volcano is the best swimming pool for you.",
-    "You should try hot bath in a volcano.",
-    "Try to spend one day in a coffin and it will be yours forever.",
-    "Hit Uranium with a slow moving neutron in your presence. It will be a worthwhile experience.",
-    "You can be the first person to step on sun. Have a try.",
 ]
 
 UWUS = [
@@ -362,99 +175,77 @@ FACEREACTS = [
 ]
 
 RUNS_STR = [
-    "Runs to Thanos..",
-    "Runs far, far away from earth..",
-    "Running faster than Bolt coz i'mma userbot !!",
-    "Runs to Marie..",
-    "This Group is too cancerous to deal with.",
-    "Cya bois",
-    "Kys",
-    "I go away",
-    "I am just walking off, coz me is too fat.",
-    "I Fugged off!",
-    "Will run for chocolate.",
-    "I run because I really like food.",
-    "Running...\nbecause dieting is not an option.",
-    "Wicked fast runnah",
-    "If you wanna catch me, you got to be fast...\nIf you wanna stay with me, you got to be good...\nBut if you wanna pass me...\nYou've got to be kidding.",
-    "Anyone can run a hundred meters, it's the next forty-two thousand and two hundred that count.",
-    "Why are all these people following me?",
-    "Are the kids still chasing me?",
-    "Running a marathon...there's an app for that.",
-]
-
-CHASE_STR = [
-    "Where do you think you're going?",
-    "Huh? what? did they get away?",
-    "ZZzzZZzz... Huh? what? oh, just them again, nevermind.",
-    "Get back here!",
-    "Not so fast...",
-    "Look out for the wall!",
-    "Don't leave me alone with them!!",
-    "You run, you die.",
-    "Jokes on you, I'm everywhere",
-    "You're gonna regret that...",
-    "You could also try /kickme, I hear that's fun.",
-    "Go bother someone else, no-one here cares.",
-    "You can run, but you can't hide.",
-    "Is that all you've got?",
-    "I'm behind you...",
-    "You've got company!",
-    "We can do this the easy way, or the hard way.",
-    "You just don't get it, do you?",
-    "Yeah, you better run!",
-    "Please, remind me how much I care?",
-    "I'd run faster if I were you.",
-    "That's definitely the droid we're looking for.",
-    "May the odds be ever in your favour.",
-    "Famous last words.",
-    "And they disappeared forever, never to be seen again.",
-    "\"Oh, look at me! I'm so cool, I can run from a bot!\" - this person",
-    "Yeah yeah, just tap /kickme already.",
-    "Here, take this ring and head to Mordor while you're at it.",
-    "Legend has it, they're still running...",
-    "Unlike Harry Potter, your parents can't protect you from me.",
-    "Fear leads to anger. Anger leads to hate. Hate leads to suffering. If you keep running in fear, you might "
-    "be the next Vader.",
-    "Multiple calculations later, I have decided my interest in your shenanigans is exactly 0.",
-    "Legend has it, they're still running.",
-    "Keep it up, not sure we want you here anyway.",
-    "You're a wiza- Oh. Wait. You're not Harry, keep moving.",
-    "NO RUNNING IN THE HALLWAYS!",
-    "Hasta la vista, baby.",
-    "Who let the dogs out?",
-    "It's funny, because no one cares.",
-    "Ah, what a waste. I liked that one.",
-    "Frankly, my dear, I don't give a damn.",
-    "My milkshake brings all the boys to yard... So run faster!",
-    "You can't HANDLE the truth!",
-    "A long time ago, in a galaxy far far away... Someone would've cared about that. Not anymore though.",
-    "Hey, look at them! They're running from the inevitable banhammer... Cute.",
-    "Han shot first. So will I.",
-    "What are you running after, a white rabbit?",
-    "As The Doctor would say... RUN!",
+    "Hey! Nereye gidiyorsun?",
+    "Ha? Ne? kaçtılar mı?",
+    "ZZzzZZzz... Noldu? oh, yine onlarmış, boşver.",
+    "Geri gel!",
+    "Kaçın OneBot geliyor !!",
+    "Duvara dikkat et!",
+    "Beni onlarla sakın yalnız bırakma!!",
+    "Kaçarsan, ölürsün.",
+    "Şakacı seni, Ben heryerdeyim.",
+    "Bunu yaptığına pişman olacaksın...",
+    "/kickme tuşunuda deneyebilirsin, Eğlenceli olduğunu söylüyorlar.",
+    "Git başka birini rahatsız et, burda kimse takmıyor.",
+    "Kaçabilirsin ama saklanamazsın.",
+    "Yapabildiklerin bunlar mı?",
+    "Arkandayım...",
+    "Misafirlerin var!",
+    "Bunu kolay yoldan yapabiliriz, yada zor yoldan.",
+    "Anlamıyorsun, değil mi?",
+    "Haha, kaçsan iyi edersin.!",
+    "Lütfen, hatırlat bana ne kadar aldırıyorum?",
+    "Senin yerinde olsam daha hızlı kaçardım.",
+    "Bu kesinlikle aradığımız robot.",
+    "Belki şans sana güler.",
+    "Ünlü son sözler.",
+    "Ve sonsuza dek yok oldular, hiç görünmediler.",
+    "\"Hey, bana bakın! Bottan kaçabiliyorum çok havalıyım!\" - bu kişi",
+    "Evet evet, /kickme tuşuna şimdiden bas.",
+    "İşte, bu yüzüğü alın ve Mordor'a gidin.",
+    "Efsaneye göre onlar hala çalışıyor...",
+    "Harry Potter'ın aksine, ebeveynlerin seni benden koruyamaz.",
+    "Korku öfkeye, öfke nefrete, nefret acıya yol açar. Korku içinde kaçmaya devam edersen,"
+    "bir sonraki Vader sen olabilirsin.",
+    "Birden fazla hesaplama yapıldıktan sonra, dalaverelerine olan ilgimin tam olarak 0 olduğuna karar verdim.",
+    "Efsaneye göre onlar hala çalışıyor.",
+    "Devam et, seni burda istediğimize emin değilim.",
+    "Sen bir sihirb- Oh. Bekle. Sen Harry değilsin, devam et.",
+    "KORİDORDA KOŞMAYIN!",
+    "Görüşürüz bebeğim.",
+    "Kim köpekleri saldı?",
+    "Komik çünkü kimse takmıyor.",
+    "Ah, ne büyük kayıp. Bu seferkini sevmiştim.",
+    "Açıkcası canım, umrumda değil.",
+    "Sütüm tüm erkekleri avluya çekiyor... Daha hızlı koş!",
+    "Gerçeği KALDIRAMAZSIN!",
+    "Uzun zaman önce, çok çok uzaktaki bir galakside birileri takabilirdi. Ama artık değil.",
+    "Hey, onlara bak! Kaçınılmaz banhammer'dan kaçıyorlar... Ne kadarda tatlı.",
+    "Han önce vuruldu. Ben de öyle yapacağım",
+    "Beyaz tavşanın, arkasında ne yapıyorsun?",
+    "Doktorunda söyleyeceği gibi... KAÇ!",
 ]
 
 HELLOSTR = [
-    "Hi !",
-    "‘Ello, gov'nor!",
-    "What’s crackin’?",
-    "‘Sup, homeslice?",
-    "Howdy, howdy ,howdy!",
-    "Hello, who's there, I'm talking.",
-    "You know who this is.",
-    "Yo!",
-    "Whaddup.",
-    "Greetings and salutations!",
-    "Hello, sunshine!",
-    "Hey, howdy, hi!",
-    "What’s kickin’, little chicken?",
-    "Peek-a-boo!",
-    "Howdy-doody!",
-    "Hey there, freshman!",
-    "I come in peace!",
-    "Ahoy, matey!",
-    "Hiya!",
+    "Merhaba!",
+    "‘Naber Müdür!",
+    "Nasılsın’?",
+    "‘Hey N'oluyor?",
+    "Selam, selam, selam!",
+    "Merhaba, kim var orada?, Ben konuşuyorum.",
+    "Bunun kim oldugunu biliyorsun",
+    "Hey Yo!",
+    "N'aber.",
+    "Selamlar ve selamlar!",
+    "Merhaba, günışığı!",
+    "Hey, n'aber, merhaba!",
+    "Nasıl gidiyor’, küçük civciv?",
+    "Ce-e!",
+    "Naber-doody!",
+    "Selam, birinci sınıf veledi!",
+    "Barışalım!",
+    "Selam, dostum!",
+    "M-merhaba!",
 ]
 
 SHGS = [
@@ -517,100 +308,72 @@ CRI = [
 ]
 
 SLAP_TEMPLATES = [
-    "{hits} {victim} with a {item}.",
-    "{hits} {victim} in the face with a {item}.",
-    "{hits} {victim} around a bit with a {item}.",
-    "{throws} a {item} at {victim}.",
-    "grabs a {item} and {throws} it at {victim}'s face.",
-    "{hits} a {item} at {victim}.", "{throws} a few {item} at {victim}.",
-    "grabs a {item} and {throws} it in {victim}'s face.",
-    "launches a {item} in {victim}'s general direction.",
-    "sits on {victim}'s face while slamming a {item} {where}.",
-    "starts slapping {victim} silly with a {item}.",
-    "pins {victim} down and repeatedly {hits} them with a {item}.",
-    "grabs up a {item} and {hits} {victim} with it.",
-    "starts slapping {victim} silly with a {item}.",
-    "holds {victim} down and repeatedly {hits} them with a {item}.",
-    "prods {victim} with a {item}.",
-    "picks up a {item} and {hits} {victim} with it.",
-    "ties {victim} to a chair and {throws} a {item} at them.",
-    "{hits} {victim} {where} with a {item}.",
-    "ties {victim} to a pole and whips them {where} with a {item}."
-    "gave a friendly push to help {victim} learn to swim in lava.",
-    "sent {victim} to /dev/null.", "sent {victim} down the memory hole.",
-    "beheaded {victim}.", "threw {victim} off a building.",
-    "replaced all of {victim}'s music with Nickelback.",
-    "spammed {victim}'s email.", "made {victim} a knuckle sandwich.",
-    "slapped {victim} with pure nothing.",
-    "hit {victim} with a small, interstellar spaceship.",
-    "quickscoped {victim}.", "put {victim} in check-mate.",
-    "RSA-encrypted {victim} and deleted the private key.",
-    "put {victim} in the friendzone.",
-    "slaps {victim} with a DMCA takedown request!"
+    "{victim} kullanıcısını {item} ile {hits} .",
+    "{victim} kullanıcısını {item} ile yüzüne {hits} .",
+    "{victim} kullanıcısını {item} ile biraz {hits} .",
+    "{victim} kullanıcısına {item} {throws} .",
+    "{victim} kullanıcısını {item} ile yüzüne {throws} .",
+    "{victim} kullanıcısına doğru {item} fırlatıyor.",
+    "{victim} aptalına {item} ile tokat atıyor.",
+    "{victim} kullanıcısını yere sabitleyıp ardı ardına {item} ile {hits} .",
+    "{item} alarak {victim} {hits}.",
+    "{victim} kullanıcısını sandalyeye bağlayıp {item} {throws} .",
+    "{victim} kullanıcısını arkadaşca ittirerek lavda yüzmeyi öğrenmesini sağlıyor."
 ]
 
 ITEMS = [
-    "cast iron skillet",
-    "large trout",
-    "baseball bat",
-    "cricket bat",
-    "wooden cane",
-    "nail",
-    "printer",
-    "shovel",
-    "pair of trousers",
-    "CRT monitor",
-    "diamond sword",
-    "baguette",
-    "physics textbook",
-    "toaster",
-    "portrait of Richard Stallman",
-    "television",
-    "mau5head",
-    "five ton truck",
-    "roll of duct tape",
-    "book",
-    "laptop",
-    "old television",
-    "sack of rocks",
-    "rainbow trout",
-    "cobblestone block",
-    "lava bucket",
-    "rubber chicken",
-    "spiked bat",
-    "gold block",
-    "fire extinguisher",
-    "heavy rock",
-    "chunk of dirt",
-    "beehive",
-    "piece of rotten meat",
-    "bear",
-    "ton of bricks",
+    "demir tencere",
+    "büyük alabalık",
+    "beyzbol sopası",
+    "kriket sopası",
+    "tahta baston",
+    "çivi",
+    "yazıcı",
+    "kürek",
+    "tüplü monitör",
+    "fizik defteri",
+    "tost makinası",
+    "Richard Stallman'ın portresi",
+    "televizyon",
+    "beş ton kamyon",
+    "koli bandı",
+    "kitap",
+    "dizüstü bilgisayar",
+    "eski televizyon",
+    "kayalı çuval",
+    "gökkuşağı alabalığı",
+    "plastik tavuk",
+    "çivili sopa",
+    "yangın söndürücü",
+    "ağır taş",
+    "kir yığını",
+    "arı kovanı",
+    "çürük et parçası",
+    "ayı",
+    "tonlarca tuğla",
 ]
 
 THROW = [
-    "throws",
-    "flings",
-    "chucks",
-    "hurls",
+    "atıyor",
+    "fırlatıyor",
+    "savuruyor",
+    "yağdırıyor",
 ]
 
 HIT = [
-    "hits",
-    "whacks",
-    "slaps",
-    "smacks",
-    "bashes",
+    "vuruyor",
+    "sert vuruyor",
+    "tokatlıyor",
+    "yumrukluyor",
+    "geçiriyor",
 ]
-
-WHERE = ["in the chest", "on the head", "on the butt", "on the crotch"]
 
 # ===========================================
 
 
 @register(outgoing=True, pattern=r"^.(\w+)say (.*)")
 async def univsaye(cowmsg):
-    """ For .cowsay module, userbot wrapper for cow which says things. """
+    """ .cowsay komutu bir şeyler söyleyen inek yapar """
     arg = cowmsg.pattern_match.group(1).lower()
     text = cowmsg.pattern_match.group(2)
 
@@ -626,44 +389,16 @@ async def univsaye(cowmsg):
 
 @register(outgoing=True, pattern="^:/$", ignore_unsafe=True)
 async def kek(keks):
-    """ Check yourself ;)"""
+    """ Kendinizi kontrol edin ;)"""
     uio = ["/", "\\"]
     for i in range(1, 15):
         time.sleep(0.3)
         await keks.edit(":" + uio[i % 2])
 
 
-@register(outgoing=True, pattern=r"^.coinflip (.*)")
-async def coin(event):
-    r = choice(["heads", "tails"])
-    input_str = event.pattern_match.group(1)
-    if input_str:
-        input_str = input_str.lower()
-    if r == "heads":
-        if input_str == "heads":
-            await event.edit(
-                "The coin landed on: **Heads**.\nYou were correct.")
-        elif input_str == "tails":
-            await event.edit(
-                "The coin landed on: **Heads**.\nYou weren't correct, try again ..."
-            )
-        else:
-            await event.edit("The coin landed on: **Heads**.")
-    elif r == "tails":
-        if input_str == "tails":
-            await event.edit(
-                "The coin landed on: **Tails**.\nYou were correct.")
-        elif input_str == "heads":
-            await event.edit(
-                "The coin landed on: **Tails**.\nYou weren't correct, try again ..."
-            )
-        else:
-            await event.edit("The coin landed on: **Tails**.")
-
-
 @register(pattern="^.slap(?: |$)(.*)", outgoing=True)
 async def who(event):
-    """ slaps a user, or get slapped if not a reply. """
+    """ Hedeflenen kullanıcıya tokat atar. """
     replied_user = await get_user_from_event(event)
     if replied_user:
         replied_user = replied_user[0]
@@ -676,12 +411,12 @@ async def who(event):
 
     except BaseException:
         await event.edit(
-            "`Can't slap this person, need to fetch some sticks and stones !!`"
+            "`Bu kişiyi tokatlayamam, yanıma sopa ve taş almam gerekecek !!`"
         )
 
 
 async def slap(replied_user, event):
-    """ Construct a funny slap sentence !! """
+    """ Tokat atarken komik cümle kur !! """
     user_id = replied_user.id
     first_name = replied_user.first_name
     username = replied_user.username
@@ -695,36 +430,20 @@ async def slap(replied_user, event):
     item = choice(ITEMS)
     hit = choice(HIT)
     throw = choice(THROW)
-    where = choice(WHERE)
 
-    caption = "..." + temp.format(
-        victim=slapped, item=item, hits=hit, throws=throw, where=where)
+    caption = "Seden " + temp.format(
+        victim=slapped, item=item, hits=hit, throws=throw)
 
     return caption
 
 
 @register(outgoing=True, pattern="^-_-$", ignore_unsafe=True)
 async def lol(lel):
-    """ Ok... """
+    """ Tamam... """
     okay = "-_-"
     for i in range(10):
         okay = okay[:-1] + "_-"
         await lel.edit(okay)
-
-
-@register(outgoing=True, pattern="^.(yes|no|maybe|decide)$")
-async def decide(event):
-    decision = event.pattern_match.group(1).lower()
-    message_id = event.reply_to_msg_id if event.reply_to_msg_id else None
-    if decision != "decide":
-        r = requests.get(f"https://yesno.wtf/api?force={decision}").json()
-    else:
-        r = requests.get(f"https://yesno.wtf/api").json()
-    await event.delete()
-    await event.client.send_message(event.chat_id,
-                                    str(r["answer"]).upper(),
-                                    reply_to=message_id,
-                                    file=r["image"])
 
 
 @register(outgoing=True, pattern="^;_;$", ignore_unsafe=True)
@@ -737,25 +456,19 @@ async def fun(e):
 
 @register(outgoing=True, pattern="^.fp$")
 async def facepalm(e):
-    """ Facepalm  🤦‍♂ """
+    """ Utanmak  🤦‍♂ """
     await e.edit("🤦‍♂")
 
 
 @register(outgoing=True, pattern="^.cry$")
 async def cry(e):
-    """ y u du dis, i cry everytime !! """
+    """ bunu yaparsan, her zaman ağlarım !! """
     await e.edit(choice(CRI))
-
-
-@register(outgoing=True, pattern="^.insult$")
-async def insult(e):
-    """ I make you cry !! """
-    await e.edit(choice(INSULT_STRINGS))
 
 
 @register(outgoing=True, pattern="^.cp(?: |$)(.*)")
 async def copypasta(cp_e):
-    """ Copypasta the famous meme """
+    """ copypasta """
     textx = await cp_e.get_reply_message()
     message = cp_e.pattern_match.group(1)
 
@@ -764,11 +477,10 @@ async def copypasta(cp_e):
     elif textx:
         message = textx.text
     else:
-        await cp_e.edit("`😂🅱️IvE👐sOME👅text👅for✌️Me👌tO👐MAkE👀iT💞funNy!💦`")
+        await cp_e.edit("`😂Bana💯BIR✌️mE🅱️In👐Ver👏`")
         return
 
     reply_text = choice(EMOJIS)
-    # choose a random character in the message to be substituted with 🅱️
     b_char = choice(message).lower()
     for owo in message:
         if owo == " ":
@@ -789,7 +501,7 @@ async def copypasta(cp_e):
 
 @register(outgoing=True, pattern="^.vapor(?: |$)(.*)")
 async def vapor(vpr):
-    """ Vaporize everything! """
+    """ Her şeyi vaporlaştırın! """
     reply_text = list()
     textx = await vpr.get_reply_message()
     message = vpr.pattern_match.group(1)
@@ -798,7 +510,7 @@ async def vapor(vpr):
     elif textx:
         message = textx.text
     else:
-        await vpr.edit("`Ｇｉｖｅ ｓｏｍｅ ｔｅｘｔ ｆｏｒ ｖａｐｏｒ！`")
+        await vpr.edit("`Ｂａｎａ ｂｉｒ ｍｅｔｉｎ ｖｅｒ!`")
         return
 
     for charac in message:
@@ -814,7 +526,7 @@ async def vapor(vpr):
 
 @register(outgoing=True, pattern="^.str(?: |$)(.*)")
 async def stretch(stret):
-    """ Stretch it."""
+    """ Mesajı iyice uzatın."""
     textx = await stret.get_reply_message()
     message = stret.text
     message = stret.pattern_match.group(1)
@@ -823,7 +535,7 @@ async def stretch(stret):
     elif textx:
         message = textx.text
     else:
-        await stret.edit("`GiiiiiiiB sooooooomeeeeeee teeeeeeext!`")
+        await stret.edit("`Baaaaanaaaaa biiiiir meeeeetiiiiin veeeeer!`")
         return
 
     count = randint(3, 10)
@@ -834,7 +546,7 @@ async def stretch(stret):
 
 @register(outgoing=True, pattern="^.zal(?: |$)(.*)")
 async def zal(zgfy):
-    """ Invoke the feeling of chaos. """
+    """ Kaos duygusunu çağırın. """
     reply_text = list()
     textx = await zgfy.get_reply_message()
     message = zgfy.pattern_match.group(1)
@@ -844,7 +556,7 @@ async def zal(zgfy):
         message = textx.text
     else:
         await zgfy.edit(
-            "`gͫ ̆ i̛ ̺ v͇̆ ȅͅ   a̢ͦ   s̴̪ c̸̢ ä̸ rͩͣ y͖͞   t̨͚ é̠ x̢͖  t͔͛`"
+            "`Ｂ̺ͬａ̠͑ｎ̵̉ａ̬͜ ｂ̶͔ｉ̼͚ｒ͈͞ ｍ̼͘ｅ̨̝ｔ͔͙ｉ̢ͮｎ̜͗ ｖ͢͜ｅ̗͐ｒ̴ͮ`"
         )
         return
 
@@ -854,26 +566,16 @@ async def zal(zgfy):
             continue
 
         for _ in range(0, 3):
-            randint = randint(0, 2)
-
-            if randint == 0:
-                charac = charac.strip() + \
-                    choice(ZALG_LIST[0]).strip()
-            elif randint == 1:
-                charac = charac.strip() + \
-                    choice(ZALG_LIST[1]).strip()
-            else:
-                charac = charac.strip() + \
-                    choice(ZALG_LIST[2]).strip()
+            charac += choice(ZALG_LIST[randint(0,2)]).strip()
 
         reply_text.append(charac)
 
     await zgfy.edit("".join(reply_text))
-
+    
 
 @register(outgoing=True, pattern="^.hi$")
 async def hoi(hello):
-    """ Greet everyone! """
+    """ Herkesi selamlayın """
     await hello.edit(choice(HELLOSTR))
 
 
@@ -887,7 +589,7 @@ async def faces(owo):
     elif textx:
         message = textx.text
     else:
-        await owo.edit("` UwU no text given! `")
+        await owo.edit("` UwU bana bir metin ver! `")
         return
 
     reply_text = sub(r"(r|l)", "w", message)
@@ -902,7 +604,7 @@ async def faces(owo):
 
 @register(outgoing=True, pattern="^.react$")
 async def react_meme(react):
-    """ Make your userbot react to everything. """
+    """ UserBot'un her şeye tepki vermesini sağlayın. """
     await react.edit(choice(FACEREACTS))
 
 
@@ -912,54 +614,68 @@ async def shrugger(shg):
     await shg.edit(choice(SHGS))
 
 
-@register(outgoing=True, pattern="^.chase$")
-async def police(chase):
-    """ Run boi run, i'm gonna catch you !! """
-    await chase.edit(choice(CHASE_STR))
-
-
 @register(outgoing=True, pattern="^.run$")
 async def runner_lol(run):
-    """ Run, run, RUNNN! """
     await run.edit(choice(RUNS_STR))
 
 
-@register(outgoing=True, pattern="^.metoo$")
-async def metoo(hahayes):
-    """ Haha yes """
-    await hahayes.edit(choice(METOOSTR))
+@register(outgoing=True, pattern="^oof$")
+async def oof(e):
+    t = "oof"
+    for j in range(16):
+        t = t[:-1] + "of"
+        await e.edit(t)
 
-
-@register(outgoing=True, pattern="^.Oof$")
+                      
+@register(outgoing=True, pattern="^Oof$")
 async def Oof(e):
     t = "Oof"
     for j in range(16):
         t = t[:-1] + "of"
         await e.edit(t)
 
-                      
-@register(outgoing=True, pattern="^.oem$")
-async def Oem(e):
-    t = "Oem"
-    for j in range(16):
-        t = t[:-1] + "em"
-        await e.edit(t)
 
-
-
-
-@register(outgoing=True, pattern="^.Oem$")
-async def Oem(e):
-    t = "Oem"
-    for j in range(16):
-        t = t[:-1] + "em"
-        await e.edit(t)
-
-
-
-@register(outgoing=True, pattern="^.iqless$")
+@register(outgoing=True, pattern="^.10iq$")
 async def iqless(e):
-    await e.edit("♿ ah yes you retard af")
+    await e.edit(
+    "DÜÜÜT DÜÜÜTT AÇ YOLU AÇÇ HADİ ASLAN PARÇASI YOLU AÇ \n"
+    "HADİ BAK ENGELLİ BEKLİYO BURDA HADİ DÜÜÜTTT ♿️ BAK \n"
+    "SİNİRLENDİ ARKADAŞ HADİ YOLU AÇ HADİİ DÜÜÜT DÜÜTT BİİİPP \n"
+    "HADİ BE HIZLI OLL DÜÜÜTT BİİİPPP ♿️♿️ BAK HIZLANDI ENGELLİ \n"
+    "KARDEŞİMİZ SERİ KÖZ GETİR SERİ DÜÜÜTT DÜÜÜT DÜÜÜÜTTTTT \n"
+    "BİİİİPPP BİİİİİPPP DÜÜÜTTT ♿️♿️♿️♿️ BAK ARTIYO SAYILARI \n"
+    "AÇTIN MI YOLU AÇMADIN PÜÜÜÜ REZİİİLL DÜÜÜÜTTT ♿️♿️♿️ \n"
+    "♿️♿️♿️ BAK KALABALIKLASTI BAK DELI GELIYOR DELIRDI DELI \n"
+    "AC YOLU DUTDUTDURURURUDUTTT♿️♿️♿️♿️♿️♿️♿️♿️♿️ \n"
+    "♿️♿️♿️♿️♿️KAFAYI YEDI BUNLAR AC LAAAAN YOLU"
+    )
+    
+    
+@register(outgoing=True, pattern="^.mizah$")
+async def mizahshow(e):
+    await e.edit(
+    "⚠️⚠️⚠️MmMmMmMizahh Şoww😨😨😨😨😱😱😱😱😱 \n"
+    "😱😱⚠️⚠️ 😂😂😂😂😂😂😂😂😂😂😂😂😂😂😱😵 \n"
+    "😂😂👍👍👍👍👍👍👍👍👍👍👍👍👍 MiZah \n"
+    "ŞeLaLesNdEn b1r yUdm aLdım✔️✔️✔️✔️ \n"
+    "AHAHAHAHAHAHHAHAHAHAHAHAHAHAHAHAHAHHAHAHAHAHA \n"
+    "HAHAHAHAHAHAHHAHAHAHAHAHAHA😂😂😂😂😂😂😂😂 \n"
+    "😂 KOMİK LAN KOMİİİK \n"
+    "heLaL LaN ✔️✔️✔️✔️✔️✔️✔️✔️👏👏👏👏👏👏👏👏 \n"
+    "👏 EfSaNe mMmMiZah şooooovv 👏👏👏👏👏😂😂😂😂 \n"
+    "😂😂😂😂😂😂⚠️ \n"
+    "💯💯💯💯💯💯💯💯💯 \n"
+    "KNK AYNI BİİİZ 😂😂😂👏👏 \n"
+    "💯💯⚠️⚠️♿️AÇ YOLU POST SAHİBİ VE ONU ♿️SAVUNANLAR \n"
+    "GELIYOR ♿️♿️ DÜÜTT♿️ \n"
+    "DÜÜÜÜT♿️DÜÜT♿️💯💯⚠️ \n"
+    "♿️KOMİİİK ♿️ \n"
+    "CJWJCJWJXJJWDJJQUXJAJXJAJXJWJFJWJXJAJXJWJXJWJFIWIXJQJJQJASJAXJ \n"
+    "AJXJAJXJJAJXJWJFWJJFWIIFIWICIWIFIWICJAXJWJFJEICIIEICIEIFIWICJSXJJS \n"
+    "CJEIVIAJXBWJCJIQICIWJX💯💯💯💯💯💯😂😂😂😂😂😂😂 \n"
+    "😂⚠️😂😂😂😂😂😂⚠️⚠️⚠️😂😂😂😂♿️♿️♿️😅😅 \n"
+    "😅😂👏💯⚠️👏♿️🚨"
+    )    
 
 
 @register(outgoing=True, pattern="^.moon$")
@@ -988,7 +704,7 @@ async def clock(event):
 
 @register(outgoing=True, pattern="^.mock(?: |$)(.*)")
 async def spongemocktext(mock):
-    """ Do it and find the real fun. """
+    """ Yap ve gerçek eğlenceyi bul. """
     reply_text = list()
     textx = await mock.get_reply_message()
     message = mock.pattern_match.group(1)
@@ -997,7 +713,7 @@ async def spongemocktext(mock):
     elif textx:
         message = textx.text
     else:
-        await mock.edit("`gIvE sOMEtHInG tO MoCk!`")
+        await mock.edit("`bANa bIr mETin vEr!`")
         return
 
     for charac in message:
@@ -1012,7 +728,7 @@ async def spongemocktext(mock):
 
 @register(outgoing=True, pattern="^.clap(?: |$)(.*)")
 async def claptext(memereview):
-    """ Praise people! """
+    """ İnsanları övün! """
     textx = await memereview.get_reply_message()
     message = memereview.pattern_match.group(1)
     if message:
@@ -1020,21 +736,12 @@ async def claptext(memereview):
     elif textx:
         message = textx.text
     else:
-        await memereview.edit("`Hah, I don't clap pointlessly!`")
+        await memereview.edit("`Hah, anlamı olmadan alkışlamıyorum!`")
         return
     reply_text = "👏 "
     reply_text += message.replace(" ", " 👏 ")
     reply_text += " 👏"
     await memereview.edit(reply_text)
-
-
-@register(outgoing=True, pattern="^.bt$")
-async def bluetext(bt_e):
-    """ Believe me, you will find this useful. """
-    if await bt_e.get_reply_message() and bt_e.is_group:
-        await bt_e.edit(
-            "/BLUETEXT /MUST /CLICK.\n"
-            "/ARE /YOU /A /STUPID /ANIMAL /WHICH /IS /ATTRACTED /TO /COLOURS?")
 
 
 @register(outgoing=True, pattern=r"^.f (.*)")
@@ -1060,30 +767,30 @@ async def let_me_google_that_for_you(lmgtfy_q):
     lfy_url = f"http://lmgtfy.com/?s=g&iie=1&q={query_encoded}"
     payload = {'format': 'json', 'url': lfy_url}
     r = requests.get('http://is.gd/create.php', params=payload)
-    await lmgtfy_q.edit(f"Here you are, help yourself.\
+    await lmgtfy_q.edit(f"İşte, keyfine bak.\
     \n[{query}]({r.json()['shorturl']})")
 
 
 @register(pattern=r".scam(?: |$)(.*)", outgoing=True)
 async def scam(event):
-    """ Just a small command to fake chat actions for fun !! """
+    """ Sahte sohbet eylemleri için küçük bir komut !! """
     options = [
         'typing', 'contact', 'game', 'location', 'voice', 'round', 'video',
         'photo', 'document', 'cancel'
     ]
     input_str = event.pattern_match.group(1)
     args = input_str.split()
-    if len(args) is 0:  # Let bot decide action and time
+    if len(args) is 0:
         scam_action = choice(options)
         scam_time = randint(30, 60)
-    elif len(args) is 1:  # User decides time/action, bot decides the other.
+    elif len(args) is 1:
         try:
             scam_action = str(args[0]).lower()
             scam_time = randint(30, 60)
         except ValueError:
             scam_action = choice(options)
             scam_time = int(args[0])
-    elif len(args) is 2:  # User decides both action and time
+    elif len(args) is 2:
         scam_action = str(args[0]).lower()
         scam_time = int(args[1])
     else:
@@ -1100,7 +807,7 @@ async def scam(event):
 
 @register(pattern=r".type(?: |$)(.*)", outgoing=True)
 async def typewriter(typew):
-    """ Just a small command to make your keyboard become a typewriter! """
+    """ Klavyenizi daktilo haline getirmek için küçük bir komut! """
     textx = await typew.get_reply_message()
     message = typew.pattern_match.group(1)
     if message:
@@ -1108,7 +815,7 @@ async def typewriter(typew):
     elif textx:
         message = textx.text
     else:
-        await typew.edit("`Give a text to type!`")
+        await typew.edit("`Bana bir metin ver!`")
         return
     sleep_time = 0.03
     typing_symbol = "|"
@@ -1127,69 +834,59 @@ async def typewriter(typew):
 CMD_HELP.update({
     "memes":
     ".cowsay\
-\nUsage: cow which says things.\
+\nKullanım: bir şeyler söyleyen inek.\
 \n\n:/\
-\nUsage: Check yourself ;)\
+\nKullanım: Kendinizi kontrol edin ;)\
 \n\n-_-\
-\nUsage: Ok...\
+\nKullanım: Tamam...\
 \n\n;_;\
-\nUsage: Like `-_-` but crying.\
+\nKullanım: `-_-` gibi ama ağlıyor.\
 \n\n.cp\
-\nUsage: Copypasta the famous meme\
+\nKullanım: Meşhur copypasta modülü\
 \n\n.vapor\
-\nUsage: Vaporize everything!\
+\nKullanım: Her şeyi vaporlaştırın!\
 \n\n.str\
-\nUsage: Stretch it.\
-\n\n.iqless\
-\nUsage: You retard !!\
+\nKullanım: Mesajı iyice uzatın.\
+\n\n.10iq\
+\nKullanım: Aptallık seviyenizi ölçün !!\
+\n\n.mizah\
+\nKullanım: Aptallık seviyenizi ölçün !!\
 \n\n.zal\
-\nUsage: Invoke the feeling of chaos.\
-\n\nOem\
-\nUsage: Oeeeem\
-\n\nOof\
-\nUsage: Ooooof\
+\nKullanım: Kaos duygusunu çağırın.\
+\n\noof\
+\nKullanım: ooooof\
 \n\n.fp\
-\nUsage: Facepalm :P\
+\nKullanım: Utanmak  🤦‍♂\
 \n\n.moon\
-\nUsage: kensar moon animation.\
+\nKullanım: Ay animasyonu.\
 \n\n.clock\
-\nUsage: kensar clock animation.\
+\nKullanım: Saat animasyonu.\
 \n\n.hi\
-\nUsage: Greet everyone!\
-\n\n.coinflip <heads/tails>\
-\nUsage: Flip a coin !!\
+\nKullanım: Herkesi selamlayın!\
 \n\n.owo\
-\nUsage: UwU\
+\nKullanım: UwU\
 \n\n.react\
-\nUsage: Make your userbot react to everything.\
+\nKullanım: UserBot'un her şeye tepki vermesini sağlayın.\
 \n\n.slap\
-\nUsage: reply to slap them with random objects !!\
+\nKullanım: rastgele nesnelerle tokatlamak için mesaja cevap verin !!\
 \n\n.cry\
-\nUsage: y u du dis, i cri.\
+\nKullanım: bunu yaparsan, her zaman ağlarım.\
 \n\n.shg\
-\nUsage: Shrug at it !!\
+\nKullanım: ¯\_(ツ)_/¯\
 \n\n.run\
-\nUsage: Let Me Run, run, RUNNN!\
-\n\n.chase\
-\nUsage: You better start running\
-\n\n.metoo\
-\nUsage: Haha yes\
+\nKullanım: UserBot'un koşmasını sağlar!\
 \n\n.mock\
-\nUsage: Do it and find the real fun.\
+\nKullanım: Yap ve gerçek eğlenceyi bul.\
 \n\n.clap\
-\nUsage: Praise people!\
-\n\n.f <emoji/character>\
-\nUsage: Pay Respects.\
-\n\n.bt\
-\nUsage: Believe me, you will find this useful.\
+\nKullanım: İnsanları övün!\
+\n\n.f <emoji/karakter>\
+\nKullanım: Saygılar..\
 \n\n.type\
-\nUsage: Just a small command to make your keyboard become a typewriter!\
-\n\n.lfy <query>\
-\nUsage: Let me Google that for you real quick !!\
-\n\n.decide [Alternates: (.yes, .no, .maybe)]\
-\nUsage: Make a quick decision.\
-\n\n.scam <action> <time>\
-\n[Available Actions: (typing, contact, game, location, voice, round, video, photo, document, cancel)]\
-\nUsage: Create fake chat actions, for fun. (Default action: typing)\
-\n\n\nThanks to 🅱️ottom🅱️ext🅱️ot (@NotAMemeBot) for some of these."
+\nKullanım: Klavyenizi daktilo haline getirmek için küçük bir komut!\
+\n\n.lfy <sorgu>\
+\nKullanım: Bırakın Google bunu sizin için araştırsın.\
+\n\n.scam <eylem> <süre>\
+\n[Mevcut eylemler: (typing, contact, game, location, voice, round, video, photo, document, cancel)]\
+\nKullanım: Create fake chat actions, for fun. (Varsayılan eylem: typing)\
+\n\n\nBunlardan bazıları için teşekkürler 🅱️ottom🅱️ext🅱️ot (@NotAMemeBot)."
 })

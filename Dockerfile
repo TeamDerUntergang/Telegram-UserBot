@@ -1,13 +1,13 @@
-# We're using Alpine Latest
+# Biz Alpine Latest kullanıyoruz
 FROM alpine:latest
 
 #
-# We have to uncomment Community repo for some packages
+# Bazı paketler için topluluk reposunun eklenmesi gerek
 #
 RUN sed -e 's;^#http\(.*\)/edge/community;http\1/edge/community;g' -i /etc/apk/repositories
 
 #
-# Installing Packages
+# Paketleri yükle
 #
 RUN apk add --no-cache=true --update \
         bash \
@@ -65,19 +65,19 @@ RUN python3 -m ensurepip \
     rm -r /root/.cache
 
 #
-# Clone repo and prepare working directory
+# Repoyu klonla ve çalışma dizinini hazırla
 #
 RUN git clone -b seden https://github.com/TeamDerUntergang/Telegram-UserBot /root/userbot
 RUN mkdir /root/userbot/bin/
 WORKDIR /root/userbot/
 
 #
-# Copies session and config (if it exists)
+# Oturum ve yapılandırmayı kopyala (varsa)
 #
 COPY ./sample_config.env ./userbot.session* ./config.env* /root/userbot/
 
 #
-# Install requirements
+# Gereksinimleri yükle
 #
 RUN pip3 install -r requirements.txt
 CMD ["python3","-m","userbot"]

@@ -1,4 +1,5 @@
 # Copyright (C) 2019 The Raphielscape Company LLC.
+# Copyright (C) 2020 TeamDerUntergang.
 #
 # Licensed under the Raphielscape Public License, Version 1.c (the "License");
 # you may not use this file except in compliance with the License.
@@ -10,7 +11,7 @@ from userbot import LOGS, CMD_HELP
 from userbot.events import register
 from requests import get
 
-# Get best trackers for improved download speeds, thanks K-E-N-W-A-Y.
+# Gelişmiş indirme hızları için en iyi trackerları çağırır, bunun için K-E-N-W-A-Y'e teşekkürler.
 trackers_list = get(
     'https://raw.githubusercontent.com/ngosang/trackerslist/master/trackers_best.txt'
 ).text.replace('\n\n', ',')
@@ -41,12 +42,12 @@ aria2 = aria2p.API(aria2p.Client(host="http://localhost", port=6800,
 @register(outgoing=True, pattern="^.amag(?: |$)(.*)")
 async def magnet_download(event):
     magnet_uri = event.pattern_match.group(1)
-    # Add Magnet URI Into Queue
+    # Magnet URI'ı kuyruğa ekler.
     try:
         download = aria2.add_magnet(magnet_uri)
     except Exception as e:
         LOGS.info(str(e))
-        await event.edit("Error:\n`" + str(e) + "`")
+        await event.edit("Hata:\n`" + str(e) + "`")
         return
     gid = download.gid
     await check_progress_for_dl(gid=gid, event=event, previous=None)
@@ -58,7 +59,7 @@ async def magnet_download(event):
 @register(outgoing=True, pattern="^.ator(?: |$)(.*)")
 async def torrent_download(event):
     torrent_file_path = event.pattern_match.group(1)
-    # Add Torrent Into Queue
+    # Torrent'i kuyruğa ekler.
     try:
         download = aria2.add_torrent(torrent_file_path,
                                      uris=None,
@@ -74,11 +75,11 @@ async def torrent_download(event):
 @register(outgoing=True, pattern="^.aurl(?: |$)(.*)")
 async def magnet_download(event):
     uri = [event.pattern_match.group(1)]
-    try:  # Add URL Into Queue
+    try:  # URL'yi kuyruğa ekler.
         download = aria2.add_uris(uri, options=None, position=None)
     except Exception as e:
         LOGS.info(str(e))
-        await event.edit("Error :\n`{}`".format(str(e)))
+        await event.edit("Hata :\n`{}`".format(str(e)))
         return
     gid = download.gid
     await check_progress_for_dl(gid=gid, event=event, previous=None)
@@ -95,30 +96,30 @@ async def remove_all(event):
         aria2.purge_all()
     except:
         pass
-    if not removed:  # If API returns False Try to Remove Through System Call.
+    if not removed:  # Eğer API False olarak dönerse sistem vasıtasıyla kaldırılmaya çalışılır.
         system("aria2p remove-all")
-    await event.edit("`Clearing on-going downloads... `")
+    await event.edit("`Devam eden indirmeler temizleniyor... `")
     await sleep(2.5)
-    await event.edit("`Successfully cleared all downloads.`")
+    await event.edit("`Tüm indirilenler başarıyla temizlendi.`")
     await sleep(2.5)
 
 
 @register(outgoing=True, pattern="^.apause(?: |$)(.*)")
 async def pause_all(event):
-    # Pause ALL Currently Running Downloads.
+    # Tüm devam eden indirmeleri duraklatır.
     paused = aria2.pause_all(force=True)
-    await event.edit("`Pausing downloads...`")
+    await event.edit("`İndirmeler duraklatılıyor...`")
     await sleep(2.5)
-    await event.edit("`Successfully paused on-going downloads.`")
+    await event.edit("`Devam eden indirmeler başarıyla durduruldu.`")
     await sleep(2.5)
 
 
 @register(outgoing=True, pattern="^.aresume(?: |$)(.*)")
 async def resume_all(event):
     resumed = aria2.resume_all()
-    await event.edit("`Resuming downloads...`")
+    await event.edit("`İndirmeler devam ettiriliyor...`")
     await sleep(1)
-    await event.edit("`Downloads resumed.`")
+    await event.edit("`İndirmeler devam ettirildi.`")
     await sleep(2.5)
     await event.delete()
 
@@ -129,18 +130,18 @@ async def show_all(event):
     downloads = aria2.get_downloads()
     msg = ""
     for download in downloads:
-        msg = msg + "File: `" + str(download.name) + "`\nSpeed: " + str(
-            download.download_speed_string()) + "\nProgress: " + str(
-                download.progress_string()) + "\nTotal Size: " + str(
-                    download.total_length_string()) + "\nStatus: " + str(
-                        download.status) + "\nETA:  " + str(
+        msg = msg + "Dosya: `" + str(download.name) + "`\nHız: " + str(
+            download.download_speed_string()) + "\nİşlem: " + str(
+                download.progress_string()) + "\nToplam Boyut: " + str(
+                    download.total_length_string()) + "\nDurum: " + str(
+                        download.status) + "\nTahmini bitiş:  " + str(
                             download.eta_string()) + "\n\n"
     if len(msg) <= 4096:
-        await event.edit("`On-going Downloads: `\n" + msg)
+        await event.edit("`Devam eden indirmeler: `\n" + msg)
         await sleep(5)
         await event.delete()
     else:
-        await event.edit("`Output is too big, sending it as a file...`")
+        await event.edit("`Çıktı çok büyük, bu sebepten dolayı dosya olarak gönderiliyor...`")
         with open(output, 'w') as f:
             f.write(msg)
         await sleep(2)
@@ -158,7 +159,7 @@ async def show_all(event):
 async def check_metadata(gid):
     file = aria2.get_download(gid)
     new_gid = file.followed_by_ids[0]
-    LOGS.info("Changing GID " + gid + " to" + new_gid)
+    LOGS.info("GID " + gid + " şu değerden şu değere değiştiriliyor:" + new_gid)
     return new_gid
 
 
@@ -169,12 +170,12 @@ async def check_progress_for_dl(gid, event, previous):
         complete = file.is_complete
         try:
             if not complete and not file.error_message:
-                msg = f"\nDownloading File: `{file.name}`"
-                msg += f"\nSpeed: {file.download_speed_string()}"
-                msg += f"\nProgress: {file.progress_string()}"
-                msg += f"\nTotal Size: {file.total_length_string()}"
-                msg += f"\nStatus: {file.status}"
-                msg += f"\nETA: {file.eta_string()}"
+                msg = f"\nİndirilen dosya: `{file.name}`"
+                msg += f"\nHız: {file.download_speed_string()}"
+                msg += f"\nİşlem: {file.progress_string()}"
+                msg += f"\nToplam Boyut: {file.total_length_string()}"
+                msg += f"\nDurum: {file.status}"
+                msg += f"\nTahmini bitiş: {file.eta_string()}"
                 if msg != previous:
                     await event.edit(msg)
                     msg = previous
@@ -186,30 +187,30 @@ async def check_progress_for_dl(gid, event, previous):
             file = aria2.get_download(gid)
             complete = file.is_complete
             if complete:
-                await event.edit(f"File Downloaded Successfully: `{file.name}`"
+                await event.edit(f"Dosya başarıyla indirdi: `{file.name}`"
                                  )
                 return False
         except Exception as e:
             if " not found" in str(e) or "'file'" in str(e):
-                await event.edit("Download Canceled :\n`{}`".format(file.name))
+                await event.edit("İndirme iptal edildi :\n`{}`".format(file.name))
                 await sleep(2.5)
                 await event.delete()
                 return
             elif " depth exceeded" in str(e):
                 file.remove(force=True)
                 await event.edit(
-                    "Download Auto Canceled :\n`{}`\nYour Torrent/Link is Dead."
+                    "İndirme otomatik olarak iptal edildi:\n`{}`\nTorrent ya da link ölü."
                     .format(file.name))
 
 
 CMD_HELP.update({
     "aria":
-    ".aurl [URL] (or) .amag [Magnet Link] (or) .ator [path to torrent file]\
-    \nUsage: Downloads the file into your userbot server storage.\
-    \n\n.apause (or) .aresume\
-    \nUsage: Pauses/resumes on-going downloads.\
+    ".aurl [URL] (ya da) .amag [Magnet Linki] (ya da) .ator [torrent dosyasının yolu]\
+    \nKullanım: Bir dosyayı userbot sunucusuna indirir.\
+    \n\n.apause (ya da) .aresume\
+    \nKullanım: Devam eden indirmeyi durdurur ya da devam ettirir.\
     \n\n.aclear\
-    \nUsage: Clears the download queue, deleting all on-going downloads.\
+    \nKullanım: İndirme kuyruğunu temizler, devam eden tüm indirmeleri siler.\
     \n\n.ashow\
-    \nUsage: Shows progress of the on-going downloads."
+    \nKullanım: Devam eden indirmelerin durumunu gösterir."
 })

@@ -1,4 +1,5 @@
 # Copyright (C) 2019 The Raphielscape Company LLC.
+# Copyright (C) 2020 TeamDerUntergang.
 #
 # Licensed under the Raphielscape Public License, Version 1.c (the "License");
 # you may not use this file except in compliance with the License.
@@ -68,10 +69,10 @@ async def locks(event):
         what = "everything"
     else:
         if not input_str:
-            await event.edit("`I can't lock nothing !!`")
+            await event.edit("`Hiçliği kilitleyemem dostum!`")
             return
         else:
-            await event.edit(f"`Invalid lock type:` {input_str}")
+            await event.edit(f"`Geçersiz medya tipi:` {input_str}")
             return
 
     lock_rights = ChatBannedRights(
@@ -91,10 +92,10 @@ async def locks(event):
         await event.client(
             EditChatDefaultBannedRightsRequest(peer=peer_id,
                                                banned_rights=lock_rights))
-        await event.edit(f"`Locked {what} for this chat !!`")
+        await event.edit(f"`{what} bu sohbet için kilitlendi!`")
     except BaseException as e:
         await event.edit(
-            f"`Do I have proper rights for that ??`\n**Error:** {str(e)}")
+            f"`Bunun için gerekli haklara sahip olduğuna emin misin?`\n**Hata:** {str(e)}")
         return
 
 
@@ -156,10 +157,10 @@ async def rem_locks(event):
         what = "everything"
     else:
         if not input_str:
-            await event.edit("`I can't unlock nothing !!`")
+            await event.edit("`Hiçliğin kilidini açamam!`")
             return
         else:
-            await event.edit(f"`Invalid unlock type:` {input_str}")
+            await event.edit(f"`Geçersiz medya tipi:` {input_str}")
             return
 
     unlock_rights = ChatBannedRights(
@@ -179,18 +180,18 @@ async def rem_locks(event):
         await event.client(
             EditChatDefaultBannedRightsRequest(peer=peer_id,
                                                banned_rights=unlock_rights))
-        await event.edit(f"`Unlocked {what} for this chat !!`")
+        await event.edit(f"`Bu sohbet için {what} kilidi açıldı!`")
     except BaseException as e:
         await event.edit(
-            f"`Do I have proper rights for that ??`\n**Error:** {str(e)}")
+            f"`Bunun için gerekli haklara sahip misin?`\n**Hata:** {str(e)}")
         return
 
 
 CMD_HELP.update({
     "locks":
-    ".lock <all (or) type(s)> or .unlock <all (or) type(s)>\
-\nUsage: Allows you to lock/unlock some common message types in the chat.\
-[NOTE: Requires proper admin rights in the chat !!]\
-\n\nAvailable message types to lock/unlock are: \
+    ".lock <kilitlenecek medya tipi> veya .unlock <kilitlenecek medya tipi>\
+\nKullanım: Sohbetteki birtakım şeyleri engelleyebilmeni sağlar. (sticker atmak, oyun oynamak vs.)\
+[Not: Yönetici hakları gerektirir!]\
+\n\nKilitleyebileceğin ve kilidini açabileceklerin şunlardır: \
 \n`all, msg, media, sticker, gif, game, inline, poll, invite, pin, info`"
 })

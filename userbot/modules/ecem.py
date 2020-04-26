@@ -2,9 +2,10 @@
 #
 # Licensed under the TeamDerUntergang Public License;
 # you may not use this file except in compliance with the License.
-""" Ecem module for having some fun with people. """
-""" Made love by Sedenogen """
-""" Powered by NaytSeyd """
+
+# İnsanlarla biraz eğlenmek için Ecem modülü.
+# Sedenogen tarafından sevgi ile hazırlanmıştır.
+# NaytSeyd tarafından güçlendirilmiştir.
 
 from asyncio import sleep
 from random import choice, getrandbits, randint
@@ -345,12 +346,12 @@ ECEM_STRINGS = [
 
 @register(outgoing=True, pattern="^.ecem$")
 async def ecem(e):
-    """ Ecem's dictionary """
+    """ Ecem'in sözlüğü """
     await e.edit(choice(ECEM_STRINGS))
     
     
 CMD_HELP.update({
     "ecem":
-    ".ecem or reply to someones text with .ecem\
-    \nUsage: Ecem quotes."
+    ".ecem veya .ecem ile birinin metnine cevap verin.\
+    \nKullanım: Ecem'den alıntılar."
 })

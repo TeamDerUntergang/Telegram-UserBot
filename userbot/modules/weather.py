@@ -1,9 +1,11 @@
 # Copyright (C) 2019 The Raphielscape Company LLC.
+# Copyright (C) 2020 TeamDerUntergang.
 #
 # Licensed under the Raphielscape Public License, Version 1.c (the "License");
 # you may not use this file except in compliance with the License.
 #
-""" Userbot module for getting the weather of a city. """
+
+"""Bir bölgenin hava durumunu gösterir."""
 
 import json
 from requests import get
@@ -25,8 +27,8 @@ else:
 
 
 async def get_tz(con):
-    """ Get time zone of the given country. """
-    """ Credits: @aragon12 and @zakaryan2004. """
+    """ Verilen ülkenin zaman dilimini alır. """
+    """ @aragon12 ve @zakaryan2004'e teşekkürler. """
     for c_code in c_n:
         if con == c_n[c_code]:
             return tz(c_tz[c_code][0])
@@ -39,11 +41,11 @@ async def get_tz(con):
 
 @register(outgoing=True, pattern="^.weather(?: |$)(.*)")
 async def get_weather(weather):
-    """ For .weather command, gets the current weather of a city. """
+    """ .weather komutu bir bölgenin hava durumunu OpenWeatherMap üzerinden alır. """
 
     if not OWM_API:
         await weather.edit(
-            "`Get an API key from` https://openweathermap.org/ `first.`")
+            "`Önce` https://openweathermap.org/ `adresinden bir API anahtarı almalısın.`")
         return
 
     APPID = OWM_API
@@ -52,7 +54,7 @@ async def get_weather(weather):
         CITY = DEFCITY
         if not CITY:
             await weather.edit(
-                "`Please specify a city or set one as default using the WEATHER_DEFCITY config variable.`"
+                "`WEATHER_DEFCITY değişkeniyle bir şehri varsayılan olarak belirt, ya da komutu yazarken hangi şehrin hava durumunu istediğini de belirt!`"
             )
             return
     else:
@@ -72,7 +74,7 @@ async def get_weather(weather):
             try:
                 countrycode = timezone_countries[f'{country}']
             except KeyError:
-                await weather.edit("`Invalid country.`")
+                await weather.edit("`Geçersiz ülke.`")
                 return
             CITY = newcity[0].strip() + "," + countrycode.strip()
 
@@ -81,7 +83,7 @@ async def get_weather(weather):
     result = json.loads(request.text)
 
     if request.status_code != 200:
-        await weather.edit(f"`Invalid country.`")
+        await weather.edit(f"`Geçersiz ülke.`")
         return
 
     cityname = result['name']
@@ -122,20 +124,20 @@ async def get_weather(weather):
         return xx
 
     await weather.edit(
-        f"**Temperature:** `{celsius(curtemp)}°C | {fahrenheit(curtemp)}°F`\n"
+        f"**Sıcaklık:** `{celsius(curtemp)}°C | {fahrenheit(curtemp)}°F`\n"
         +
-        f"**Min. Temp.:** `{celsius(min_temp)}°C | {fahrenheit(min_temp)}°F`\n"
+        f"**En Düşük Sıcaklık:** `{celsius(min_temp)}°C | {fahrenheit(min_temp)}°F`\n"
         +
-        f"**Max. Temp.:** `{celsius(max_temp)}°C | {fahrenheit(max_temp)}°F`\n"
-        + f"**Humidity:** `{humidity}%`\n" +
-        f"**Wind:** `{kmph[0]} kmh | {mph[0]} mph, {findir}`\n" +
-        f"**Sunrise:** `{sun(sunrise)}`\n" +
-        f"**Sunset:** `{sun(sunset)}`\n\n" + f"**{desc}**\n" +
+        f"**En Yüksek Sıcaklık:** `{celsius(max_temp)}°C | {fahrenheit(max_temp)}°F`\n"
+        + f"**Nem:** `{humidity}%`\n" +
+        f"**Rüzgar Hızı:** `{kmph[0]} kmh | {mph[0]} mph, {findir}`\n" +
+        f"**Gündoğumu:** `{sun(sunrise)}`\n" +
+        f"**Günbatımı:** `{sun(sunset)}`\n\n" + f"**{desc}**\n" +
         f"`{cityname}, {fullc_n}`\n" + f"`{time}`")
 
 
 CMD_HELP.update({
     "weather":
-    ".weather <city> or .weather <city>, <country name/code>\
-    \nUsage: Gets the weather of a city."
+    "Kullanım: .weather şehir adı veya .weather şehir adı, ülke adı/ülke kodu\
+    \nBir bölgenin hava durumunu verir."
 })

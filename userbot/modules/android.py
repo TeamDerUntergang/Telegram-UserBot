@@ -1,9 +1,11 @@
 # Copyright (C) 2019 The Raphielscape Company LLC.
+# Copyright (C) 2020 TeamDerUntergang.
 #
 # Licensed under the Raphielscape Public License, Version 1.c (the "License");
 # you may not use this file except in compliance with the License.
 #
-""" Userbot module containing commands related to android"""
+
+""" Android ile ilgili komutları içeren UserBot modülü """
 
 import re
 from requests import get
@@ -19,7 +21,7 @@ DEVICES_DATA = 'https://raw.githubusercontent.com/androidtrackers/' \
 
 @register(outgoing=True, pattern="^.magisk$")
 async def magisk(request):
-    """ magisk latest releases """
+    """ Güncel Magisk sürümleri """
     magisk_dict = {
         "Stable":
         "https://raw.githubusercontent.com/topjohnwu/magisk_files/master/stable.json",
@@ -30,7 +32,7 @@ async def magisk(request):
         "Canary (Debug)":
         "https://raw.githubusercontent.com/topjohnwu/magisk_files/canary/debug.json"
     }
-    releases = 'Latest Magisk Releases:\n'
+    releases = 'Güncel Magisk sürümleri:\n'
     for name, release_url in magisk_dict.items():
         data = get(release_url).json()
         releases += f'{name}: [ZIP v{data["magisk"]["version"]}]({data["magisk"]["link"]}) | ' \
@@ -40,7 +42,7 @@ async def magisk(request):
 
 @register(outgoing=True, pattern=r"^.device(?: |$)(\S*)")
 async def device_info(request):
-    """ get android device basic info from its codename """
+    """ Kod adı ile cihaz hakkında bilgi alın """
     textx = await request.get_reply_message()
     device = request.pattern_match.group(1)
     if device:
@@ -48,14 +50,14 @@ async def device_info(request):
     elif textx:
         device = textx.text
     else:
-        await request.edit("`Usage: .device <codename> / <model>`")
+        await request.edit("`Kullanım: .device <kod adı> / <model>`")
         return
     found = [
         i for i in get(DEVICES_DATA).json()
         if i["device"] == device or i["model"] == device
     ]
     if found:
-        reply = f'Search results for {device}:\n\n'
+        reply = f'{device} için arama sonuçları:\n\n'
         for item in found:
             brand = item['brand']
             name = item['name']
@@ -65,13 +67,13 @@ async def device_info(request):
                 f'**Codename**: `{codename}`\n' \
                 f'**Model**: {model}\n\n'
     else:
-        reply = f"`Couldn't find info about {device}!`\n"
+        reply = f"`{device} için bilgi bulunamadı!`\n"
     await request.edit(reply)
 
 
 @register(outgoing=True, pattern=r"^.codename(?: |)([\S]*)(?: |)([\s\S]*)")
 async def codename_info(request):
-    """ search for android codename """
+    """ Cihazın kod adını bulmak için arama yapın """
     textx = await request.get_reply_message()
     brand = request.pattern_match.group(1).lower()
     device = request.pattern_match.group(2).lower()
@@ -81,7 +83,7 @@ async def codename_info(request):
         brand = textx.text.split(' ')[0]
         device = ' '.join(textx.text.split(' ')[1:])
     else:
-        await request.edit("`Usage: .codename <brand> <device>`")
+        await request.edit("`Kullanım: .codename <marka> <cihaz>`")
         return
     found = [
         i for i in get(DEVICES_DATA).json()
@@ -90,7 +92,7 @@ async def codename_info(request):
     if len(found) > 8:
         found = found[:8]
     if found:
-        reply = f'Search results for {brand.capitalize()} {device.capitalize()}:\n\n'
+        reply = f'{brand.capitalize()} {device.capitalize()} için arama sonuçları:\n\n'
         for item in found:
             brand = item['brand']
             name = item['name']
@@ -100,13 +102,13 @@ async def codename_info(request):
                 f'**Codename**: `{codename}`\n' \
                 f'**Model**: {model}\n\n'
     else:
-        reply = f"`Couldn't find {device} codename!`\n"
+        reply = f"`{device} için kod adı bulunamadı!`\n"
     await request.edit(reply)
 
 
 @register(outgoing=True, pattern=r"^.specs(?: |)([\S]*)(?: |)([\s\S]*)")
 async def devices_specifications(request):
-    """ Mobile devices specifications """
+    """ Mobil cihaz özellikleri """
     textx = await request.get_reply_message()
     brand = request.pattern_match.group(1).lower()
     device = request.pattern_match.group(2).lower()
@@ -116,10 +118,10 @@ async def devices_specifications(request):
         brand = textx.text.split(' ')[0]
         device = ' '.join(textx.text.split(' ')[1:])
     else:
-        await request.edit("`Usage: .specs <brand> <device>`")
+        await request.edit("`Kullanım: .specs <marka> <cihaz>`")
         return
     all_brands = BeautifulSoup(
-        get('https://www.devicespecifications.com/en/brand-more').content,
+        get('https://www.devicespecifications.com/tr/brand-more').content,
         'lxml').find('div', {
             'class': 'brand-listing-container-news'
         }).findAll('a')
@@ -129,7 +131,7 @@ async def devices_specifications(request):
             i['href'] for i in all_brands if brand == i.text.strip().lower()
         ][0]
     except IndexError:
-        await request.edit(f'`{brand} is unknown brand!`')
+        await request.edit(f'`{brand} bilinmeyen marka!`')
     devices = BeautifulSoup(get(brand_page_url).content, 'lxml') \
         .findAll('div', {'class': 'model-listing-container-80'})
     device_page_url = None
@@ -140,7 +142,7 @@ async def devices_specifications(request):
             if device in i.text.strip().lower()
         ]
     except IndexError:
-        await request.edit(f"`can't find {device}!`")
+        await request.edit(f"`{device} bulunamadı!`")
     if len(device_page_url) > 2:
         device_page_url = device_page_url[:2]
     reply = ''
@@ -159,7 +161,7 @@ async def devices_specifications(request):
 
 @register(outgoing=True, pattern=r"^.twrp(?: |$)(\S*)")
 async def twrp(request):
-    """ get android device twrp """
+    """ Android cihazlar için TWRP """
     textx = await request.get_reply_message()
     device = request.pattern_match.group(1)
     if device:
@@ -167,11 +169,11 @@ async def twrp(request):
     elif textx:
         device = textx.text.split(' ')[0]
     else:
-        await request.edit("`Usage: .twrp <codename>`")
+        await request.edit("`Kullanım: .twrp <kod adı>`")
         return
     url = get(f'https://dl.twrp.me/{device}/')
     if url.status_code == 404:
-        reply = f"`Couldn't find twrp downloads for {device}!`\n"
+        reply = f"`{device} için resmi twrp bulunamadı!`\n"
         await request.edit(reply)
         return
     page = BeautifulSoup(url.content, 'lxml')
@@ -180,22 +182,22 @@ async def twrp(request):
     dl_file = download.text
     size = page.find("span", {"class": "filesize"}).text
     date = page.find("em").text.strip()
-    reply = f'**Latest TWRP for {device}:**\n' \
+    reply = f'**{device} için güncel twrp:**\n' \
         f'[{dl_file}]({dl_link}) - __{size}__\n' \
-        f'**Updated:** __{date}__\n'
+        f'**Güncelleme tarihi:** __{date}__\n'
     await request.edit(reply)
 
 
 CMD_HELP.update({
     "android":
     ".magisk\
-\nGet latest Magisk releases\
-\n\n.device <codename>\
-\nUsage: Get info about android device codename or model.\
-\n\n.codename <brand> <device>\
-\nUsage: Search for android device codename.\
-\n\n.specs <brand> <device>\
-\nUsage: Get device specifications info.\
-\n\n.twrp <codename>\
-\nUsage: Get latest twrp download for android device."
+\nGüncel Magisk sürümleri\
+\n\n.device <kod adı>\
+\nKullanım: Android cihazı hakkında bilgi\
+\n\n.codename <marka> <cihaz>\
+\nKullanım: Android cihaz kod adlarını arayın.\
+\n\n.specs <marka> <cihaz>\
+\nKullanım: Cihaz özellikleri hakkında bilgi alın.\
+\n\n.twrp <kod adı>\
+\nKullanım: Hedeflenen cihaz için resmi olan güncel twrp sürümlerini alın."
 })

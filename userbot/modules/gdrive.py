@@ -1,4 +1,5 @@
 # Copyright (C) 2019 The Raphielscape Company LLC.
+# Copyright (C) 2020 TeamDerUntergang.
 #
 # Licensed under the Raphielscape Public License, Version 1.c (the "License");
 # you may not use this file except in compliance with the License.
@@ -24,25 +25,25 @@ import httplib2
 import subprocess
 from userbot.modules.upload_download import progress, humanbytes, time_formatter
 
-# Path to token json file, it should be in same directory as script
+# Json dosyasının yolu, script ile aynı dizinde bulunmalıdır.
 G_DRIVE_TOKEN_FILE = "./auth_token.txt"
-# Copy your credentials from the APIs Console
+# API konsolundan kişisel bilgilerinizi kopyalar
 CLIENT_ID = G_DRIVE_CLIENT_ID
 CLIENT_SECRET = G_DRIVE_CLIENT_SECRET
-# Check https://developers.google.com/drive/scopes for all available scopes
+# Mevcut alan tüm alanları kontrol eder: https://developers.google.com/drive/scopes
 OAUTH_SCOPE = "https://www.googleapis.com/auth/drive.file"
-# Redirect URI for installed apps, can be left as is
+# URI'yi yüklü uygulamalar için yönlendirir, olduğu gibi bırakılabilir.
 REDIRECT_URI = "urn:ietf:wg:oauth:2.0:oob"
-# global variable to set Folder ID to upload to
+# Yüklenecek klasör IDsini ayarlamaya yarayan evrensel değer
 parent_id = GDRIVE_FOLDER_ID
-# global variable to indicate mimeType of directories in gDrive
+# Dizinlerin mimeType değerini belirten evrensel değer
 G_DRIVE_DIR_MIME_TYPE = "application/vnd.google-apps.folder"
 
 
 @register(pattern=r"^.gdrive(?: |$)(.*)", outgoing=True)
 async def gdrive_upload_function(dryb):
-    """ For .gdrive command, upload files to google drive. """
-    await dryb.edit("Processing ...")
+    """ .gdrive komutu dosyalarınızı Google Drive'a uploadlar. """
+    await dryb.edit("İşleniyor ...")
     input_str = dryb.pattern_match.group(1)
     if CLIENT_ID is None or CLIENT_SECRET is None:
         return
@@ -82,10 +83,10 @@ async def gdrive_upload_function(dryb):
             try:
                 current_message = f"{status}...\
                 \nURL: {url}\
-                \nFile Name: {file_name}\
+                \nDosya adı: {file_name}\
                 \n{progress_str}\
                 \n{humanbytes(downloaded)} of {humanbytes(total_length)}\
-                \nETA: {estimated_total_time}"
+                \nBitiş: {estimated_total_time}"
 
                 if round(diff %
                          10.00) == 0 and current_message != display_message:
@@ -96,21 +97,21 @@ async def gdrive_upload_function(dryb):
                 pass
         if downloader.isSuccessful():
             await dryb.edit(
-                "Downloaded to `{}` successfully !!\nInitiating Upload to Google Drive.."
+                "`{}` dizinine indirme başarılı. \nGoogle Drive'a yükleme başlatılıyor.."
                 .format(downloaded_file_name))
             required_file_name = downloaded_file_name
         else:
-            await dryb.edit("Incorrect URL\n{}".format(url))
+            await dryb.edit("Geçersiz URL\n{}".format(url))
     elif input_str:
         input_str = input_str.strip()
         if os.path.exists(input_str):
             required_file_name = input_str
             await dryb.edit(
-                "Found `{}` in local server, Initiating Upload to Google Drive.."
+                "`{}` dosyası sunucuda bulundu. Google Drive'a yükleme başlatılıyor.."
                 .format(input_str))
         else:
             await dryb.edit(
-                "File not found in local server. Give me a valid file path !")
+                "Sunucuda dosya bulunamadı. Lütfen doğru dosya konumunu belirtin.")
             return False
     elif dryb.reply_to_msg_id:
         try:
@@ -119,85 +120,83 @@ async def gdrive_upload_function(dryb):
                 await dryb.get_reply_message(),
                 TEMP_DOWNLOAD_DIRECTORY,
                 progress_callback=lambda d, t: asyncio.get_event_loop(
-                ).create_task(progress(d, t, dryb, c_time, "Downloading...")))
+                ).create_task(progress(d, t, dryb, c_time, "İndiriliyor...")))
         except Exception as e:
             await dryb.edit(str(e))
         else:
             required_file_name = downloaded_file_name
             await dryb.edit(
-                "Downloaded to `{}` Successfully !!\nInitiating Upload to Google Drive.."
+                "`{}` dizinine indirme başarrılı. \nGoogle Drive'a yükleme başlatılıyor.."
                 .format(downloaded_file_name))
     if required_file_name:
         if G_DRIVE_AUTH_TOKEN_DATA is not None:
             with open(G_DRIVE_TOKEN_FILE, "w") as t_file:
                 t_file.write(G_DRIVE_AUTH_TOKEN_DATA)
-        # Check if token file exists, if not create it by requesting
-        # authorization code
+        # Token dosyasının olup olmadığını kontrol eder, eğer yoksa yetkilendirme kodu ile oluşturur.
         if not os.path.isfile(G_DRIVE_TOKEN_FILE):
             storage = await create_token_file(G_DRIVE_TOKEN_FILE, dryb)
             http = authorize(G_DRIVE_TOKEN_FILE, storage)
-        # Authorize, get file parameters, upload file and print out result URL
-        # for download
+        # Yetkilendirir, dosya parametrelerini edinir, dosyayı uploadlar ve URL'yi indirme için paylaşır.
         http = authorize(G_DRIVE_TOKEN_FILE, None)
         file_name, mime_type = file_ops(required_file_name)
-        # required_file_name will have the full path
-        # Sometimes API fails to retrieve starting URI, we wrap it.
+        # required_file_name tam dosya yoluna sahiptir.
+        # Bazen API başlangıç URI'sini geri alırken hatayla karşılaşır.
         try:
             g_drive_link = await upload_file(http, required_file_name,
                                              file_name, mime_type, dryb,
                                              parent_id)
             await dryb.edit(
-                f"File:`{required_file_name}`\nwas Successfully Uploaded to [Google Drive]({g_drive_link})!"
+                f"Dosya :`{required_file_name}`\nUpload başarılı! \nİndirme linki: [Google Drive]({g_drive_link})!"
             )
         except Exception as e:
             await dryb.edit(
-                f"Error while Uploading to Google Drive\nError Code:\n`{e}`")
+                f"Google Drive'a yükleme başarısız.\nHata kodu:\n`{e}`")
 
 
 @register(pattern=r"^.ggd(?: |$)(.*)", outgoing=True)
 async def upload_dir_to_gdrive(event):
-    await event.edit("Processing ...")
+    await event.edit("İşleniyor ...")
     if CLIENT_ID is None or CLIENT_SECRET is None:
         return
     input_str = event.pattern_match.group(1)
     if os.path.isdir(input_str):
-        # TODO: remove redundant code
+        # Yapılacaklar: Gereksiz kodlar kaldırılacak.
         if G_DRIVE_AUTH_TOKEN_DATA is not None:
             with open(G_DRIVE_TOKEN_FILE, "w") as t_file:
                 t_file.write(G_DRIVE_AUTH_TOKEN_DATA)
-        # Check if token file exists, if not create it by requesting authorization code
+        # Token dosyasının olup olmadığını kontrol eder, eğer yoksa yetkilendirme kodunu isteyerek oluşturur.
         storage = None
         if not os.path.isfile(G_DRIVE_TOKEN_FILE):
             storage = await create_token_file(G_DRIVE_TOKEN_FILE, event)
         http = authorize(G_DRIVE_TOKEN_FILE, storage)
-        # Authorize, get file parameters, upload file and print out result URL for download
-        # first, create a sub-directory
+        # Yetkilendirir, dosya parametrelerini edinir, dosyayı uploadlar ve URL'yi indirme için paylaşır.
+        # Öncelikle alt dizin oluşturur.
         dir_id = await create_directory(
             http, os.path.basename(os.path.abspath(input_str)), parent_id)
         await DoTeskWithDir(http, input_str, event, dir_id)
         dir_link = "https://drive.google.com/folderview?id={}".format(dir_id)
-        await event.edit(f"Here is your Google Drive [link]({dir_link})")
+        await event.edit(f"Google Drive bağlantın [burada]({dir_link})")
     else:
-        await event.edit(f"Directory {input_str} does not seem to exist")
+        await event.edit(f"{input_str} dizini bulunamadı.")
 
 
 @register(pattern=r"^.list(?: |$)(.*)", outgoing=True)
 async def gdrive_search_list(event):
-    await event.edit("Processing ...")
+    await event.edit("İşleniyor ...")
     if CLIENT_ID is None or CLIENT_SECRET is None:
         return
     input_str = event.pattern_match.group(1).strip()
-    # TODO: remove redundant code
+    # Yapılacaklar: Gereksiz kodlar kaldırılacak.
     if G_DRIVE_AUTH_TOKEN_DATA is not None:
         with open(G_DRIVE_TOKEN_FILE, "w") as t_file:
             t_file.write(G_DRIVE_AUTH_TOKEN_DATA)
-    # Check if token file exists, if not create it by requesting authorization code
+    # Token dosyasının olup olmadığını kontrol eder, eğer yoksa yetkilendirme kodunu isteyerek oluşturur.
     storage = None
     if not os.path.isfile(G_DRIVE_TOKEN_FILE):
         storage = await create_token_file(G_DRIVE_TOKEN_FILE, event)
     http = authorize(G_DRIVE_TOKEN_FILE, storage)
-    # Authorize, get file parameters, upload file and print out result URL for download
-    await event.edit(f"Searching for {input_str} in your Google Drive ...")
+    # Yetkilendirir, dosya parametrelerini edinir, dosyayı uploadlar ve URL'yi indirme için paylaşır.
+    await event.edit(f"Google Drive'ınızda {input_str} aranıyor...")
     gsearch_results = await gdrive_search(http, input_str)
     await event.edit(gsearch_results, link_preview=False)
 
@@ -207,27 +206,27 @@ async def gdrive_search_list(event):
     r"^.gsetf https?://drive\.google\.com/drive/u/\d/folders/([-\w]{25,})",
     outgoing=True)
 async def download(set):
-    """For .gsetf command, allows you to set path"""
-    await set.edit("Processing ...")
+    """ .gsetf komutu dizini belirtmenizi sağlar. """
+    await set.edit("İşleniyor ...")
     input_str = set.pattern_match.group(1)
     if input_str:
         parent_id = input_str
         await set.edit(
-            "Custom Folder ID set successfully. The next uploads will upload to {parent_id} till `.gdriveclear`"
+            "Özel Klasör ID'si başarıyla ayarlandı. Sonraki uploadlar şuraya uploadlanacak: {parent_id} (`.gsetclear` komutunu vermediğiniz sürece)"
         )
         await set.delete()
     else:
         await set.edit(
-            "Use `.gdrivesp <link to GDrive Folder>` to set the folder to upload new files to."
+            ".gdrivesp <GDrive Klasörü> komutuyla yeni dosyaların uploadlanacağı klasörü belirtebilirsiniz."
         )
 
 
 @register(pattern="^.gsetclear$", outgoing=True)
 async def download(gclr):
-    """For .gsetclear command, allows you clear ur curnt custom path"""
-    await gclr.reply("Processing ...")
+    """ .gsetclear komutu özel dizini kaldırmanıza yarar. """
+    await gclr.reply("İşleniyor ...")
     parent_id = GDRIVE_FOLDER_ID
-    await gclr.edit("Custom Folder ID cleared successfully.")
+    await gclr.edit("Özel Klasör ID'si başarıyla temizlendi.")
 
 
 @register(pattern="^.gfolder$", outgoing=True)
@@ -235,15 +234,15 @@ async def show_current_gdrove_folder(event):
     if parent_id:
         folder_link = f"https://drive.google.com/drive/folders/" + parent_id
         await event.edit(
-            f"My userbot is currently uploading files [here]({folder_link})")
+            f"UserBot'um dosyaları [şuraya]({folder_link}) uploadlıyor.")
     else:
         await event.edit(
-            f"My userbot is currently uploading files to the root of my Google Drive storage.\
-            \nFind uploaded files [here](https://drive.google.com/drive/my-drive)"
+            f"UserBot'um dosyaları Google Drive'ın kök dizinine uploadlıyor.\
+            \nUploadlanan dosyalar [burada](https://drive.google.com/drive/my-drive)"
         )
 
 
-# Get mime type and name of given file
+# Dosyanın tipini ve ismini çağırır
 def file_ops(file_path):
     mime_type = guess_type(file_path)[0]
     mime_type = mime_type if mime_type else "text/plain"
@@ -252,7 +251,7 @@ def file_ops(file_path):
 
 
 async def create_token_file(token_file, event):
-    # Run through the OAuth flow and retrieve credentials
+    # OAuth üzerinden kişisel bilgileri geri alır.
     flow = OAuth2WebServerFlow(CLIENT_ID,
                                CLIENT_SECRET,
                                OAUTH_SCOPE,
@@ -260,7 +259,7 @@ async def create_token_file(token_file, event):
     authorize_url = flow.step1_get_authorize_url()
     async with event.client.conversation(BOTLOG_CHATID) as conv:
         await conv.send_message(
-            f"Go to the following link in your browser: {authorize_url} and reply the code"
+            f"Bu linke git ve kodu kopyalayıp yanıtla: {authorize_url}"
         )
         response = conv.wait_event(
             events.NewMessage(outgoing=True, chats=BOTLOG_CHATID))
@@ -273,11 +272,11 @@ async def create_token_file(token_file, event):
 
 
 def authorize(token_file, storage):
-    # Get credentials
+    # Kişisel bilgilei alır
     if storage is None:
         storage = Storage(token_file)
     credentials = storage.get()
-    # Create an httplib2.Http object and authorize it with our credentials
+    # httplib2.Http objesi oluşturur ve kişisel bilgilerinizle yetkilendirir.
     http = httplib2.Http()
     credentials.refresh(http)
     http = credentials.authorize(http)
@@ -285,26 +284,26 @@ def authorize(token_file, storage):
 
 
 async def upload_file(http, file_path, file_name, mime_type, event, parent_id):
-    # Create Google Drive service instance
+    # Google Drive servis örneği oluşturur.
     drive_service = build("drive", "v2", http=http, cache_discovery=False)
-    # File body description
+    # Dosya tipi açıklaması
     media_body = MediaFileUpload(file_path, mimetype=mime_type, resumable=True)
     body = {
         "title": file_name,
-        "description": "Uploaded using PaperplaneExtended Userbot",
+        "description": "Seden UserBot kullanılarak yüklendi.",
         "mimeType": mime_type,
     }
     if parent_id:
         body["parents"] = [{"id": parent_id}]
-    # Permissions body description: anyone who has link can upload
-    # Other permissions can be found at https://developers.google.com/drive/v2/reference/permissions
+    # İzinlerin açıklaması: Linke sahip olan herkes görebilir.
+    # Diğer izinler şurada bulunabilir: https://developers.google.com/drive/v2/reference/permissions
     permissions = {
         "role": "reader",
         "type": "anyone",
         "value": None,
         "withLink": True
     }
-    # Insert a file
+    # Dosyayı ekler
     file = drive_service.files().insert(body=body, media_body=media_body)
     response = None
     display_message = ""
@@ -318,7 +317,7 @@ async def upload_file(http, file_path, file_name, mime_type, event, parent_id):
                 "".join(["▱"
                          for i in range(10 - math.floor(percentage / 10))]),
                 round(percentage, 2))
-            current_message = f"Uploading to Google Drive\nFile Name: {file_name}\n{progress_str}"
+            current_message = f"Google Drive'a uploadlanıyor.\nDosya Adı: {file_name}\n{progress_str}"
             if display_message != current_message:
                 try:
                     await event.edit(current_message)
@@ -327,10 +326,10 @@ async def upload_file(http, file_path, file_name, mime_type, event, parent_id):
                     LOGS.info(str(e))
                     pass
     file_id = response.get("id")
-    # Insert new permissions
+    # Yeni izinleri ekler.
     drive_service.permissions().insert(fileId=file_id,
                                        body=permissions).execute()
-    # Define file instance and get url for download
+    # Dosya örneğini tanımlar ve indirmek için bağlantıyı edinir.
     file = drive_service.files().get(fileId=file_id).execute()
     download_url = file.get("webContentLink")
     return download_url
@@ -373,29 +372,29 @@ async def DoTeskWithDir(http, input_directory, event, parent_id):
                                          current_dir_id)
         else:
             file_name, mime_type = file_ops(current_file_name)
-            # current_file_name will have the full path
+            # current_file_name tam dosya dizinine sahiptir.
             g_drive_link = await upload_file(http, current_file_name,
                                              file_name, mime_type, event,
                                              parent_id)
             r_p_id = parent_id
-    # TODO: there is a #bug here :(
+    # Yapılacaklar: Burada bir bug var :(
     return r_p_id
 
 
 async def gdrive_list_file_md(service, file_id):
     try:
         file = service.files().get(fileId=file_id).execute()
-        # LOGS.info(file)
+        # LOGS.info(dosya)
         file_meta_data = {}
         file_meta_data["title"] = file["title"]
         mimeType = file["mimeType"]
         file_meta_data["createdDate"] = file["createdDate"]
         if mimeType == G_DRIVE_DIR_MIME_TYPE:
-            # is a dir.
+            # bir klasör ise
             file_meta_data["mimeType"] = "directory"
             file_meta_data["previewURL"] = file["alternateLink"]
         else:
-            # is a file.
+            # bir dosya ise
             file_meta_data["mimeType"] = file["mimeType"]
             file_meta_data["md5Checksum"] = file["md5Checksum"]
             file_meta_data["fileSize"] = str(humanbytes(int(file["fileSize"])))
@@ -436,22 +435,22 @@ async def gdrive_search(http, search_query):
         except Exception as e:
             res += str(e)
             break
-    msg = f"**Google Drive Query**:\n`{search_query}`\n\n**Results**\n\n{res}"
+    msg = f"**Google Drive Araması**:\n`{search_query}`\n\n**Sonuçlar**\n\n{res}"
     return msg
 
 
 CMD_HELP.update({
     "gdrive":
-    ".gdrive <file_path / reply / URL|file_name>\
-    \nUsage: Uploads the file in reply , URL or file path in server to your Google Drive.\
-    \n\n.gsetf <GDrive Folder URL>\
-    \nUsage: Sets the folder to upload new files to.\
+    ".gdrive <dosya yolu / yanıtlayarak / URL|dosya-adı>\
+    \nKullanım: Belirtilen dosyayı Google Drive'a uploadlar.\
+    \n\n.gsetf <GDrive Klasör URL'si>\
+    \nKullanım: Yeni dosyaların upladlanacağı klasörü belirler.\
     \n\n.gsetclear\
-    \nUsage: Reverts to default upload destination.\
+    \nKullanım: Varsayılan upload dizinine geri döndürür.\
     \n\n.gfolder\
-    \nUsage: Shows your current upload destination/folder.\
-    \n\n.list <query>\
-    \nUsage: Looks for files and folders in your Google Drive.\
-    \n\n.ggd <path_to_folder_in_server>\
-    \nUsage: Uploads all the files in the directory to a folder in Google Drive."
+    \nKullanım: Halihazırda kullanılan upload dizinini gösterir.\
+    \n\n.list <sorgu>\
+    \nKullanım: Google Drive'da bulunan dosyalar ve dizinlerde arama yapar.\
+    \n\n.ggd <sunucudaki-klasör-yolu>\
+    \nKullanım: Belirtilen dizindeki tüm dosyaları Google Drive'a uploadlar."
 })

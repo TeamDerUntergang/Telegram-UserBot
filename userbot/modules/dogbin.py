@@ -1,9 +1,11 @@
 # Copyright (C) 2019 The Raphielscape Company LLC.
+# Copyright (C) 2020 TeamDerUntergang.
 #
 # Licensed under the Raphielscape Public License, Version 1.c (the "License");
 # you may not use this file except in compliance with the License.
 #
-""" Userbot module containing commands for interacting with dogbin(https://del.dog)"""
+
+""" Dogbin ile etkileşim için komutlar içeren UserBot modülü(https://del.dog)"""
 
 from requests import get, post, exceptions
 import asyncio
@@ -16,13 +18,13 @@ DOGBIN_URL = "https://del.dog/"
 
 @register(outgoing=True, pattern=r"^.paste(?: |$)([\s\S]*)")
 async def paste(pstl):
-    """ For .paste command, pastes the text directly to dogbin. """
+    """ .paste komutu metni doğrudan dogbine yapıştırır """
     dogbin_final_url = ""
     match = pstl.pattern_match.group(1).strip()
     reply_id = pstl.reply_to_msg_id
 
     if not match and not reply_id:
-        await pstl.edit("`Elon Musk said I cannot paste void.`")
+        await pstl.edit("`Elon Musk boşluğu yapıştıramayacağımı söyledi.`")
         return
 
     if match:
@@ -45,7 +47,7 @@ async def paste(pstl):
             message = message.message
 
     # Dogbin
-    await pstl.edit("`Pasting text . . .`")
+    await pstl.edit("`Metin yapıştırılıyor . . .`")
     resp = post(DOGBIN_URL + "documents", data=message.encode('utf-8'))
 
     if resp.status_code == 200:
@@ -54,30 +56,30 @@ async def paste(pstl):
         dogbin_final_url = DOGBIN_URL + key
 
         if response['isUrl']:
-            reply_text = ("`Pasted successfully!`\n\n"
-                          f"`Shortened URL:` {dogbin_final_url}\n\n"
-                          "`Original(non-shortened) URLs`\n"
+            reply_text = ("`Başarıyla yapıştırıldı!`\n\n"
+                          f"`Kısaltılmış URL:` {dogbin_final_url}\n\n"
+                          "`Orijinal (kısaltılmamış) URL`\n"
                           f"`Dogbin URL`: {DOGBIN_URL}v/{key}\n")
         else:
             reply_text = ("`Pasted successfully!`\n\n"
                           f"`Dogbin URL`: {dogbin_final_url}")
     else:
-        reply_text = ("`Failed to reach Dogbin`")
+        reply_text = ("`Dogbine ulaşılamadı`")
 
     await pstl.edit(reply_text)
     if BOTLOG:
         await pstl.client.send_message(
             BOTLOG_CHATID,
-            f"Paste query was executed successfully",
+            f"Dogbine metin yapıştırma başarıyla yürütüldü",
         )
 
 
 @register(outgoing=True, pattern="^.getpaste(?: |$)(.*)")
 async def get_dogbin_content(dog_url):
-    """ For .getpaste command, fetches the content of a dogbin URL. """
+    """ .getpaste komutu dogbin url içeriğini aktarır """
     textx = await dog_url.get_reply_message()
     message = dog_url.pattern_match.group(1)
-    await dog_url.edit("`Getting dogbin content...`")
+    await dog_url.edit("`Dogbin içeriği alınıyor...`")
 
     if textx:
         message = str(textx.message)
@@ -92,7 +94,7 @@ async def get_dogbin_content(dog_url):
     elif message.startswith("del.dog/"):
         message = message[len("del.dog/"):]
     else:
-        await dog_url.edit("`Is that even a dogbin url?`")
+        await dog_url.edit("`Bu bir dogbin URL'si mi?`")
         return
 
     resp = get(f'{DOGBIN_URL}raw/{message}')
@@ -101,31 +103,31 @@ async def get_dogbin_content(dog_url):
         resp.raise_for_status()
     except exceptions.HTTPError as HTTPErr:
         await dog_url.edit(
-            "Request returned an unsuccessful status code.\n\n" + str(HTTPErr))
+            "İstek başarısız bir durum kodu döndürdü.\n\n" + str(HTTPErr))
         return
     except exceptions.Timeout as TimeoutErr:
-        await dog_url.edit("Request timed out." + str(TimeoutErr))
+        await dog_url.edit("İstek zaman aşımına uğradı." + str(TimeoutErr))
         return
     except exceptions.TooManyRedirects as RedirectsErr:
         await dog_url.edit(
-            "Request exceeded the configured number of maximum redirections." +
+            "İstek, yapılandırılmış en fazla yönlendirme sayısını aştı." +
             str(RedirectsErr))
         return
 
-    reply_text = "`Fetched dogbin URL content successfully!`\n\n`Content:` " + resp.text
+    reply_text = "`Dogbin URL içeriği başarıyla getirildi!`\n\n`İçerik:` " + resp.text
 
     await dog_url.edit(reply_text)
     if BOTLOG:
         await dog_url.client.send_message(
             BOTLOG_CHATID,
-            "Get dogbin content query was executed successfully",
+            "Dogbin içerik aktarma başarıyla yürütüldü",
         )
 
 
 CMD_HELP.update({
     "dogbin":
-    ".paste <text/reply>\
-\nUsage: Create a paste or a shortened url using dogbin (https://del.dog/)\
+    ".paste <metin/yanıtlama>\
+\nKullanım: Dogbin kullanarak yapıştırılmış veya kısaltılmış url oluşturma (https://del.dog/)\
 \n\n.getpaste\
-\nUsage: Gets the content of a paste or shortened url from dogbin (https://del.dog/)"
+\nKullanım: Dogbin url içeriğini metne aktarır (https://del.dog/)"
 })

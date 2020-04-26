@@ -1,10 +1,11 @@
 # Copyright (C) 2019 The Raphielscape Company LLC.
+# Copyright (C) 2020 TeamDerUntergang.
 #
 # Licensed under the Raphielscape Public License, Version 1.c (the "License");
 # you may not use this file except in compliance with the License.
 #
-""" Userbot module containing commands related to the \
-    Information Superhighway (yes, Internet). """
+
+""" Internet ile alakalı bilgileri edinmek için kullanılan UserBot modülüdür. """
 
 from datetime import datetime
 
@@ -16,8 +17,8 @@ from userbot.events import register
 
 @register(outgoing=True, pattern="^.speed$")
 async def speedtst(spd):
-    """ For .speed command, use SpeedTest to check server speeds. """
-    await spd.edit("`Running speed test . . .`")
+    """ .speed komutu sunucu hızını tespit etmek için SpeedTest kullanır. """
+    await spd.edit("`Hız testi yapılıyor . . .`")
     test = Speedtest()
 
     test.get_best_server()
@@ -27,22 +28,22 @@ async def speedtst(spd):
     result = test.results.dict()
 
     await spd.edit("`"
-                   "Started at "
+                   "Başlama Tarihi: "
                    f"{result['timestamp']} \n\n"
-                   "Download "
+                   "İndirme Hızı: "
                    f"{speed_convert(result['download'])} \n"
-                   "Upload "
+                   "Yükleme Hızı: "
                    f"{speed_convert(result['upload'])} \n"
-                   "Ping "
+                   "Ping: "
                    f"{result['ping']} \n"
-                   "ISP "
+                   "İnternet Servis Sağlayıcısı: "
                    f"{result['client']['isp']}"
                    "`")
 
 
 def speed_convert(size):
     """
-    Hi human, you can't read bytes?
+    Merhaba Seden, baytları okuyamıyor musun?
     """
     power = 2**10
     zero = 0
@@ -55,16 +56,16 @@ def speed_convert(size):
 
 @register(outgoing=True, pattern="^.dc$")
 async def neardc(event):
-    """ For .dc command, get the nearest datacenter information. """
+    """ .dc komutu en yakın datacenter bilgisini verir. """
     result = await event.client(functions.help.GetNearestDcRequest())
-    await event.edit(f"Country : `{result.country}`\n"
-                     f"Nearest Datacenter : `{result.nearest_dc}`\n"
-                     f"This Datacenter : `{result.this_dc}`")
+    await event.edit(f"Şehir : `{result.country}`\n"
+                     f"En yakın datacenter : `{result.nearest_dc}`\n"
+                     f"Şu anki datacenter : `{result.this_dc}`")
 
 
 @register(outgoing=True, pattern="^.ping$")
 async def pingme(pong):
-    """ For .ping command, ping the userbot from any chat.  """
+    """ .ping komutu userbotun ping değerini herhangi bir sohbette gösterebilir.  """
     start = datetime.now()
     await pong.edit("`Pong!`")
     end = datetime.now()
@@ -74,10 +75,10 @@ async def pingme(pong):
 
 CMD_HELP.update(
     {"speed": ".speed\
-    \nUsage: Does a speedtest and shows the results."})
+    \nKullanım: Bir speedtest uygular ve sonucu gösterir."})
 CMD_HELP.update(
     {"dc": ".dc\
-    \nUsage: Finds the nearest datacenter from your server."})
+    \nKullanım: Sunucunuza en yakın datacenter'ı gösterir."})
 CMD_HELP.update(
     {"ping": ".ping\
-    \nUsage: Shows how long it takes to ping your bot."})
+    \nKullanım: Botun ping değerini gösterir."})

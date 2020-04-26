@@ -1,11 +1,13 @@
 # Copyright (C) 2019 The Raphielscape Company LLC.
+# Copyright (C) 2020 TeamDerUntergang.
 #
 # Licensed under the Raphielscape Public License, Version 1.c (the "License");
 # you may not use this file except in compliance with the License.
 #
 # The entire source code is OSSRPL except 'makeqr and getqr' which is MPL
 # License: MPL and OSSRPL
-""" Userbot module containing commands related to QR Codes. """
+
+""" QR kodları ile ilgili komutları içeren UserBot modülü. """
 
 import os
 import asyncio
@@ -22,21 +24,20 @@ from userbot.events import register
 
 @register(pattern=r"^.decode$", outgoing=True)
 async def parseqr(qr_e):
-    """ For .decode command, get QR Code/BarCode content from the replied photo. """
+    """ .decode komutu cevap verilen fotoğraftan QR kodu / Barkod içeriğini alır """
     downloaded_file_name = await qr_e.client.download_media(
         await qr_e.get_reply_message())
-    # parse the Official ZXing webpage to decode the QRCode
+    # QR kodunu çözmek için resmi ZXing web sayfasını ayrıştır
     command_to_exec = [
         "curl", "-X", "POST", "-F", "f=@" + downloaded_file_name + "",
         "https://zxing.org/w/decode"
     ]
     process = await asyncio.create_subprocess_exec(
         *command_to_exec,
-        # stdout must a pipe to be accessible as process.stdout
         stdout=asyncio.subprocess.PIPE,
         stderr=asyncio.subprocess.PIPE,
     )
-    # Wait for the subprocess to finish
+    # Alt işlemin bitmesini bekle
     stdout, stderr = await process.communicate()
     e_response = stderr.decode().strip()
     t_response = stdout.decode().strip()
@@ -44,7 +45,7 @@ async def parseqr(qr_e):
     if not t_response:
         logger.info(e_response)
         logger.info(t_response)
-        await qr_e.edit("Failed to decode.")
+        await qr_e.edit("decode başarısız oldu.")
         return
     soup = BeautifulSoup(t_response, "html.parser")
     qr_contents = soup.find_all("pre")[0].text
@@ -53,10 +54,10 @@ async def parseqr(qr_e):
 
 @register(pattern=r".barcode(?: |$)([\s\S]*)", outgoing=True)
 async def barcode(event):
-    """ For .barcode command, genrate a barcode containing the given content. """
-    await event.edit("`Processing..`")
+    """ .barcode komutu verilen içeriği içeren bir barkod oluşturur. """
+    await event.edit("`İşleniyor..`")
     input_str = event.pattern_match.group(1)
-    message = "SYNTAX: `.barcode <long text to include>`"
+    message = "SÖZDİZİMİ: `.barcode <eklenecek uzun metin>`"
     reply_msg_id = event.message.id
     if input_str:
         message = input_str
@@ -76,7 +77,7 @@ async def barcode(event):
         else:
             message = previous_message.message
     else:
-        event.edit("SYNTAX: `.barcode <long text to include>`")
+        event.edit("SÖZDİZİMİ: `.barcode <eklenecek uzun metin>`")
         return
 
     bar_code_type = "code128"
@@ -97,9 +98,9 @@ async def barcode(event):
 
 @register(pattern=r".makeqr(?: |$)([\s\S]*)", outgoing=True)
 async def make_qr(makeqr):
-    """ For .makeqr command, make a QR Code containing the given content. """
+    """ .makeqr komutu verilen içeriği içeren bir QR kodu yapar. """
     input_str = makeqr.pattern_match.group(1)
-    message = "SYNTAX: `.makeqr <long text to include>`"
+    message = "SÖZDİZİMİ: `.makeqr <eklenecek uzun metin>`"
     reply_msg_id = None
     if input_str:
         message = input_str
@@ -137,17 +138,17 @@ async def make_qr(makeqr):
 
 
 CMD_HELP.update({
-    'qr':
-    ".makeqr <content>\
-\nUsage: Make a QR Code from the given content.\
-\nExample: .makeqr www.google.com\
-\nNote: use .decode <reply to barcode/qrcode> to get decoded content."
+    'qrcode':
+    ".makeqr <içerik>\
+\nKullanım: Verilen içerikten bir QR kodu yapın.\
+\nÖrnek: .makeqr www.google.com\
+\nNot: çözülmüş içerik almak için .decode komutunu kullanın."
 })
 
 CMD_HELP.update({
     'barcode':
-    ".barcode <content>\
-\nUsage: Make a BarCode from the given content.\
-\nExample: .barcode www.google.com\
-\nNote: use .decode <reply to barcode/qrcode> to get decoded content."
+    ".barcode <içerik>\
+\nKullanım: Verilen içerikten bir barkod yapın.\
+\nÖrnek: .barcode www.google.com\
+\nNot: çözülmüş içerik almak için .decode komutunu kullanın."
 })

@@ -1,9 +1,11 @@
 # Copyright (C) 2019 The Raphielscape Company LLC.
+# Copyright (C) 2020 TeamDerUntergang.
 #
 # Licensed under the Raphielscape Public License, Version 1.c (the "License");
 # you may not use this file except in compliance with the License.
 #
-""" Userbot module which contains afk-related commands """
+
+""" AFK ile ilgili komutları içeren UserBot modülü """
 
 from random import choice, randint
 from asyncio import sleep
@@ -16,36 +18,35 @@ from userbot.events import register
 
 # ========================= CONSTANTS ============================
 AFKSTR = [
-    "I'm busy right now. Please talk in a bag and when I come back you can just give me the bag!",
-    "I'm away right now. If you need anything, leave a message after the beep:\n`beeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeep`!",
-    "You missed me, next time aim better.",
-    "I'll be back in a few minutes and if I'm not...,\nwait longer.",
-    "I'm not here right now, so I'm probably somewhere else.",
-    "Roses are red,\nViolets are blue,\nLeave me a message,\nAnd I'll get back to you.",
-    "Sometimes the best things in life are worth waiting for…\nI'll be right back.",
-    "I'll be right back,\nbut if I'm not right back,\nI'll be back later.",
-    "If you haven't figured it out already,\nI'm not here.",
-    "Hello, welcome to my away message, how may I ignore you today?",
-    "I'm away over 7 seas and 7 countries,\n7 waters and 7 continents,\n7 mountains and 7 hills,\n7 plains and 7 mounds,\n7 pools and 7 lakes,\n7 springs and 7 meadows,\n7 cities and 7 neighborhoods,\n7 blocks and 7 houses...\n\nWhere not even your messages can reach me!",
-    "I'm away from the keyboard at the moment, but if you'll scream loud enough at your screen, I might just hear you.",
-    "I went that way\n---->",
-    "I went this way\n<----",
-    "Please leave a message and make me feel even more important than I already am.",
-    "I am not here so stop writing to me,\nor else you will find yourself with a screen full of your own messages.",
-    "If I were here,\nI'd tell you where I am.\n\nBut I'm not,\nso ask me when I return...",
-    "I am away!\nI don't know when I'll be back!\nHopefully a few minutes from now!",
-    "I'm not available right now so please leave your name, number, and address and I will stalk you later.",
-    "Sorry, I'm not here right now.\nFeel free to talk to my userbot as long as you like.\nI'll get back to you later.",
-    "I bet you were expecting an away message!",
-    "Life is so short, there are so many things to do...\nI'm away doing one of them..",
-    "I am not here right now...\nbut if I was...\n\nwouldn't that be awesome?",
+    "Şu an acele işim var, daha sonra mesaj atsan olmaz mı? Zaten yine geleceğim.",
+    "Aradığınız kişi şu anda telefona cevap veremiyor. Sinyal sesinden sonra kendi tarifeniz üzerinden mesajınızı bırakabilirsiniz. Mesaj ücreti 49 kuruştur. \n`biiiiiiiiiiiiiiiiiiiiiiiiiiiiip`!",
+    "Birkaç dakika içinde geleceğim. Fakat gelmezsem...\ndaha fazla bekle.",
+    "Şu an burada değilim, muhtemelen başka bir yerdeyim.",
+    "Güller kırmızı\nMenekşeler mavi\nBana bir mesaj bırak\nVe sana döneceğim.",
+    "Bazen hayattaki en iyi şeyler beklemeye değer…\nHemen dönerim.",
+    "Hemen dönerim,\nama eğer geri dönmezsem,\ndaha sonra dönerim.",
+    "Henüz anlamadıysan,\nburada değilim.",
+    "Merhaba, uzak mesajıma hoş geldiniz, bugün sizi nasıl görmezden gelebilirim?",
+    "7 deniz ve 7 ülkeden uzaktayım,\n7 su ve 7 kıta,\n7 dağ ve 7 tepe,\n7 ovala ve 7 höyük,\n7 havuz ve 7 göl,\n7 bahar ve 7 çayır,\n7 şehir ve 7 mahalle,\n7 blok ve 7 ev...\n\nMesajların bile bana ulaşamayacağı bir yer!",
+    "Şu anda klavyeden uzaktayım, ama ekranınızda yeterince yüksek sesle çığlık atarsanız, sizi duyabilirim.",
+    "Şu yönde ilerliyorum\n---->",
+    "Şu yönde ilerliyorum\n<----",
+    "Lütfen mesaj bırakın ve beni zaten olduğumdan daha önemli hissettirin.",
+    "Sahibim burada değil, bu yüzden bana yazmayı bırak.",
+    "Burada olsaydım,\nSana nerede olduğumu söylerdim.\n\nAma ben değilim,\ngeri döndüğümde bana sor....",
+    "Uzaklardayım!\nNe zaman dönerim bilmiyorum !\nUmarım birkaç dakika sonra!",
+    "Sahibim şuan da müsait değil. Adınızı, numarınızı ve adresinizi verirseniz ona iletibilirm ve böylelikle geri döndüğü zaman.",
+    "Üzgünüm, sahibim burada değil.\nO gelene kadar benimle konuşabilirsiniz.\nSahibim size sonra döner.",
+    "Bahse girerim bir mesaj bekliyordun!",
+    "Hayat çok kısa, yapacak çok şey var...\nOnlardan birini yapıyorum...",
+    "Şu an burada değilim....\nama öyleysem ...\n\nbu harika olmaz mıydı?",
 ]
 # =================================================================
 
 
 @register(incoming=True, disable_edited=True)
 async def mention_afk(mention):
-    """ This function takes care of notifying the people who mention you that you are AFK."""
+    """ Bu fonksiyon biri sizi etiketlediğinde sizin AFK olduğunuzu bildirmeye yarar."""
     global COUNT_MSG
     global USERS
     global ISAFK
@@ -53,8 +54,8 @@ async def mention_afk(mention):
         if ISAFK:
             if mention.sender_id not in USERS:
                 if AFKREASON:
-                    await mention.reply(f"My Boss AFK right now.\
-                        \nReason: `{AFKREASON}`")
+                    await mention.reply(f"Sahibim halen AFK.\
+                        \nSebep: `{AFKREASON}`")
                 else:
                     await mention.reply(str(choice(AFKSTR)))
                 USERS.update({mention.sender_id: 1})
@@ -62,8 +63,8 @@ async def mention_afk(mention):
             elif mention.sender_id in USERS:
                 if USERS[mention.sender_id] % randint(2, 4) == 0:
                     if AFKREASON:
-                        await mention.reply(f"My Boss still AFK.\
-                            \nReason: `{AFKREASON}`")
+                        await mention.reply(f"Sahibim halen AFK.\
+                            \nSebep: `{AFKREASON}`")
                     else:
                         await mention.reply(str(choice(AFKSTR)))
                     USERS[mention.sender_id] = USERS[mention.sender_id] + 1
@@ -75,7 +76,7 @@ async def mention_afk(mention):
 
 @register(incoming=True, disable_errors=True)
 async def afk_on_pm(sender):
-    """ Function which informs people that you are AFK in PM """
+    """ Siz afk iken PM atanları afk olduğunuza dair bildirmeye yarayan fonksiyondur. """
     global ISAFK
     global USERS
     global COUNT_MSG
@@ -92,8 +93,8 @@ async def afk_on_pm(sender):
         if apprv and ISAFK:
             if sender.sender_id not in USERS:
                 if AFKREASON:
-                    await sender.reply(f"My Boss AFK right now.\
-                    \nReason: `{AFKREASON}`")
+                    await sender.reply(f"Sahibim şu an AFK.\
+                    \nSebep: `{AFKREASON}`")
                 else:
                     await sender.reply(str(choice(AFKSTR)))
                 USERS.update({sender.sender_id: 1})
@@ -101,8 +102,8 @@ async def afk_on_pm(sender):
             elif apprv and sender.sender_id in USERS:
                 if USERS[sender.sender_id] % randint(2, 4) == 0:
                     if AFKREASON:
-                        await sender.reply(f"My Boss still AFK.\
-                        \nReason: `{AFKREASON}`")
+                        await sender.reply(f"Sahibim halen AFK.\
+                        \nSebep: `{AFKREASON}`")
                     else:
                         await sender.reply(str(choice(AFKSTR)))
                     USERS[sender.sender_id] = USERS[sender.sender_id] + 1
@@ -114,39 +115,39 @@ async def afk_on_pm(sender):
 
 @register(outgoing=True, pattern="^.afk(?: |$)(.*)", disable_errors=True)
 async def set_afk(afk_e):
-    """ For .afk command, allows you to inform people that you are afk when they message you """
+    """ .afk komutu siz afk iken insanları afk olduğunuza dair bilgilendirmeye yarar. """
     message = afk_e.text
     string = afk_e.pattern_match.group(1)
     global ISAFK
     global AFKREASON
     if string:
         AFKREASON = string
-        await afk_e.edit(f"AFK AF!\
-        \nReason: `{string}`")
+        await afk_e.edit(f"Artık AFK'yım.\
+        \nSebep: `{string}`")
     else:
-        await afk_e.edit("AFK AF!")
+        await afk_e.edit("Artık AFK'yım.")
     if BOTLOG:
-        await afk_e.client.send_message(BOTLOG_CHATID, "#AFK\nYou went AFK!")
+        await afk_e.client.send_message(BOTLOG_CHATID, "#AFK\nAFK oldunuz.")
     ISAFK = True
     raise StopPropagation
 
 
 @register(outgoing=True)
 async def type_afk_is_not_true(notafk):
-    """ This sets your status as not afk automatically when you write something while being afk """
+    """ Bu kısım bir yere bir şey yazdığınızda sizi AFK modundan çıkarmaya yarar. """
     global ISAFK
     global COUNT_MSG
     global USERS
     global AFKREASON
     if ISAFK:
         ISAFK = False
-        await notafk.respond("I'm no longer AFK.")
+        await notafk.respond("Artık AFK değilim.")
         await sleep(2)
         if BOTLOG:
             await notafk.client.send_message(
                 BOTLOG_CHATID,
-                "You've recieved " + str(COUNT_MSG) + " messages from " +
-                str(len(USERS)) + " chats while you were away",
+                "Siz AFK iken " + str(len(USERS)) + " kişi size " +
+                str(COUNT_MSG) + " mesaj gönderdi.",
             )
             for i in USERS:
                 name = await notafk.client.get_entity(i)
@@ -154,7 +155,7 @@ async def type_afk_is_not_true(notafk):
                 await notafk.client.send_message(
                     BOTLOG_CHATID,
                     "[" + name0 + "](tg://user?id=" + str(i) + ")" +
-                    " sent you " + "`" + str(USERS[i]) + " messages`",
+                    " size " + "`" + str(USERS[i]) + " mesaj gönderdi`",
                 )
         COUNT_MSG = 0
         USERS = {}
@@ -163,8 +164,8 @@ async def type_afk_is_not_true(notafk):
 
 CMD_HELP.update({
     "afk":
-    ".afk [Optional Reason]\
-\nUsage: Sets you as afk.\nReplies to anyone who tags/PM's \
-you telling them that you are AFK(reason).\n\nSwitches off AFK when you type back anything, anywhere.\
+    ".afk [İsteğe bağlı sebep]\
+\nKullanım: AFK olduğunuzu belirtir.\nKim size pm atarsa ya da sizi etiketlerse \
+sizin AFK olduğunuzu ve belirlediğiniz sebebi gösterir.\n\nHerhangi bir yere mesaj yazdığınızda AFK modu kapanır.\
 "
 })

@@ -1,10 +1,12 @@
 # Copyright (C) 2019 The Raphielscape Company LLC.
+# Copyright (C) 2020 TeamDerUntergang.
 #
 # Licensed under the Raphielscape Public License, Version 1.c (the "License");
 # you may not use this file except in compliance with the License.
 #
-""" Userbot module for managing events.
- One of the main components of the userbot. """
+
+""" Olayları yönetmek için UserBot modülü.
+ UserBot'un ana bileşenlerinden biri. """
 
 import sys
 from asyncio import create_subprocess_shell as asyncsubshell
@@ -19,7 +21,7 @@ from userbot import bot, BOTLOG_CHATID, LOGSPAMMER
 
 
 def register(**args):
-    """ Register a new event. """
+    """ Yeni bir etkinlik kaydedin. """
     pattern = args.get('pattern', None)
     disable_edited = args.get('disable_edited', False)
     ignore_unsafe = args.get('ignore_unsafe', False)
@@ -68,58 +70,51 @@ def register(**args):
                 return
              
             if groups_only and not check.is_group:
-                await check.respond("`I don't think this is a group.`")
+                await check.respond("`Bunun bir grup olduğunu sanmıyorum.`")
                 return
 
             try:
                 await func(check)
-
-            # Thanks to @kandnub for this HACK.
-            # Raise StopPropagation to Raise StopPropagation
-            # This needed for AFK to working properly
+                
 
             except events.StopPropagation:
                 raise events.StopPropagation
-            # This is a gay exception and must be passed out. So that it doesnt spam chats
             except KeyboardInterrupt:
                 pass
             except BaseException:
 
-                # Check if we have to disable it.
-                # If not silence the log spam on the console,
-                # with a dumb except.
 
                 if not disable_errors:
                     date = strftime("%Y-%m-%d %H:%M:%S", gmtime())
 
-                    text = "**USERBOT ERROR REPORT**\n"
-                    link = "[Seden Support](https://t.me/SedenUserBotSupport)"
-                    text += "If you want to, you can report it"
-                    text += f"- just forward this message to {link}.\n"
-                    text += "Nothing is logged except the fact of error and date\n"
+                    text = "**USERBOT HATA RAPORU**\n"
+                    link = "[Seden Destek Grubu](https://t.me/SedenUserBotSupport)"
+                    text += "İsterseniz, bunu rapor edebilirsiniz"
+                    text += f"- sadece bu mesajı buraya iletin {link}.\n"
+                    text += "Hata ve Tarih dışında hiçbir şey kaydedilmez\n"
 
-                    ftext = "========== DISCLAIMER =========="
-                    ftext += "\nThis file uploaded ONLY here,"
-                    ftext += "\nwe logged only fact of error and date,"
-                    ftext += "\nwe respect your privacy,"
-                    ftext += "\nyou may not report this error if you've"
-                    ftext += "\nany confidential data here, no one will see your data\n"
+                    ftext = "========== UYARI =========="
+                    ftext += "\nBu dosya sadece burada yüklendi,"
+                    ftext += "\nsadece hata ve tarih kısmını kaydettik,"
+                    ftext += "\ngizliliğinize saygı duyuyoruz,"
+                    ftext += "\nburada herhangi bir gizli veri varsa"
+                    ftext += "\nbu hata raporu olmayabilir, kimse verilerinize ulaşamaz.\n"
                     ftext += "================================\n\n"
-                    ftext += "--------BEGIN USERBOT TRACEBACK LOG--------\n"
-                    ftext += "\nDate: " + date
-                    ftext += "\nChat ID: " + str(check.chat_id)
-                    ftext += "\nSender ID: " + str(check.sender_id)
-                    ftext += "\n\nEvent Trigger:\n"
+                    ftext += "--------USERBOT HATA GUNLUGU--------\n"
+                    ftext += "\nTarih: " + date
+                    ftext += "\nGrup ID: " + str(check.chat_id)
+                    ftext += "\nGönderen kişinin ID: " + str(check.sender_id)
+                    ftext += "\n\nOlay Tetikleyici:\n"
                     ftext += str(check.text)
-                    ftext += "\n\nTraceback info:\n"
+                    ftext += "\n\nGeri izleme bilgisi:\n"
                     ftext += str(format_exc())
-                    ftext += "\n\nError text:\n"
+                    ftext += "\n\nHata metni:\n"
                     ftext += str(sys.exc_info()[1])
-                    ftext += "\n\n--------END USERBOT TRACEBACK LOG--------"
+                    ftext += "\n\n--------USERBOT HATA GUNLUGU BITIS--------"
 
                     command = "git log --pretty=format:\"%an: %s\" -10"
 
-                    ftext += "\n\n\nLast 10 commits:\n"
+                    ftext += "\n\n\nSon 10 commit:\n"
 
                     process = await asyncsubshell(command,
                                                   stdout=asyncsub.PIPE,
@@ -135,8 +130,8 @@ def register(**args):
                     file.close()
 
                     if LOGSPAMMER:
-                        await check.client.respond("`Sorry, my userbot has crashed.\
-                        \nThe error logs are stored in the userbot's log chat.`")
+                        await check.client.respond("`Üzgünüm, UserBot'um çöktü.\
+                        \nHata günlükleri UserBot günlük grubunda saklanır.`")
 
                     await check.client.send_file(send_to,
                                                  "error.log",

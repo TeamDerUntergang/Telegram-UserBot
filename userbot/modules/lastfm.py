@@ -1,4 +1,5 @@
 # Copyright (C) 2019 The Raphielscape Company LLC.
+# Copyright (C) 2020 TeamDerUntergang.
 #
 # Licensed under the Raphielscape Public License, Version 1.c (the "License");
 # you may not use this file except in compliance with the License.
@@ -21,14 +22,14 @@ from userbot import CMD_HELP, BOTLOG, BOTLOG_CHATID, DEFAULT_BIO, BIO_PREFIX, la
 from userbot.events import register
 
 # =================== CONSTANT ===================
-LFM_BIO_ENABLED = "```last.fm current music to bio is now enabled.```"
-LFM_BIO_DISABLED = "```last.fm current music to bio is now disabled. Bio reverted to default.```"
-LFM_BIO_RUNNING = "```last.fm current music to bio is already running.```"
-LFM_BIO_ERR = "```No option specified.```"
-LFM_LOG_ENABLED = "```last.fm logging to bot log is now enabled.```"
-LFM_LOG_DISABLED = "```last.fm logging to bot log is now disabled.```"
-LFM_LOG_ERR = "```No option specified.```"
-ERROR_MSG = "```last.fm module halted, got an unexpected error.```"
+LFM_BIO_ENABLED = "```last.fm'de oynatılan müziği biyografiye ekleme aktif.```"
+LFM_BIO_DISABLED = "```last.fm'de oynatılan müziği biyografiye ekleme devre dışı. Biyografi varsayılana çevrildi.```"
+LFM_BIO_RUNNING = "```last.fm'de oynatılan müziği biyografiye ekleme halihazırda aktif.```"
+LFM_BIO_ERR = "```Bir seçenek belirtilmedi.```"
+LFM_LOG_ENABLED = "```last.fm bot logları şu an aktif.```"
+LFM_LOG_DISABLED = "```last.fm bot logları devre dışı bırakıldı.```"
+LFM_LOG_ERR = "```Bir seçenek belirtilmedi.```"
+ERROR_MSG = "```last.fm modulü beklenmedik bir hatadan dolayı durduruldu.```"
 
 ARTIST = 0
 SONG = 0
@@ -47,8 +48,8 @@ LastLog = False
 
 @register(outgoing=True, pattern="^.lastfm$")
 async def last_fm(lastFM):
-    """ For .lastfm command, fetch scrobble data from last.fm. """
-    await lastFM.edit("Processing...")
+    """ .lastfm komutu last.fm'den verileri çeker. """
+    await lastFM.edit("İşleniyor...")
     preview = None
     playing = User(LASTFM_USERNAME, lastfm).get_now_playing()
     username = f"https://www.last.fm/user/{LASTFM_USERNAME}"
@@ -64,14 +65,14 @@ async def last_fm(lastFM):
         rectrack = sub("^", "https://www.youtube.com/results?search_query=",
                        rectrack)
         if image:
-            output = f"[‎]({image})[{LASTFM_USERNAME}]({username}) __is now listening to:__\n\n• [{playing}]({rectrack})\n`{tags}`"
+            output = f"[‎]({image})[{LASTFM_USERNAME}]({username}) __şu an şunu dinliyor:__\n\n• [{playing}]({rectrack})\n`{tags}`"
             preview = True
         else:
-            output = f"[{LASTFM_USERNAME}]({username}) __is now listening to:__\n\n• [{playing}]({rectrack})\n`{tags}`"
+            output = f"[{LASTFM_USERNAME}]({username}) __şu an şunu dinliyor:__\n\n• [{playing}]({rectrack})\n`{tags}`"
     else:
         recent = User(LASTFM_USERNAME, lastfm).get_recent_tracks(limit=3)
         playing = User(LASTFM_USERNAME, lastfm).get_now_playing()
-        output = f"[{LASTFM_USERNAME}]({username}) __was last listening to:__\n\n"
+        output = f"[{LASTFM_USERNAME}]({username}) __en son şunu dinledi:__\n\n"
         for i, track in enumerate(recent):
             print(i)
             printable = await artist_and_song(track)
@@ -141,7 +142,7 @@ async def get_curr_track(lfmbio):
                     if BOTLOG and LastLog:
                         await bot.send_message(
                             BOTLOG_CHATID,
-                            f"Attempted to change bio to\n{lfmbio}")
+                            f"Biyografi şuna çevrildi: \n{lfmbio}")
                     await bot(UpdateProfileRequest(about=lfmbio))
                 except AboutTooLongError:
                     short_bio = f"🎧: {SONG}"
@@ -152,7 +153,7 @@ async def get_curr_track(lfmbio):
                     await bot(UpdateProfileRequest(about=DEFAULT_BIO))
                     if BOTLOG and LastLog:
                         await bot.send_message(
-                            BOTLOG_CHATID, f"Reset bio back to\n{DEFAULT_BIO}")
+                            BOTLOG_CHATID, f"Biyografi geri şuna çevrildi: \n{DEFAULT_BIO}")
         except AttributeError:
             try:
                 if user_info.about != DEFAULT_BIO:
@@ -160,19 +161,19 @@ async def get_curr_track(lfmbio):
                     await bot(UpdateProfileRequest(about=DEFAULT_BIO))
                     if BOTLOG and LastLog:
                         await bot.send_message(
-                            BOTLOG_CHATID, f"Reset bio back to\n{DEFAULT_BIO}")
+                            BOTLOG_CHATID, f"Biyografi geri şuna çevrildi \n{DEFAULT_BIO}")
             except FloodWaitError as err:
                 if BOTLOG and LastLog:
                     await bot.send_message(BOTLOG_CHATID,
-                                           f"Error changing bio:\n{err}")
+                                           f"Biyografi değiştirilirken hata oluştu :\n{err}")
         except FloodWaitError as err:
             if BOTLOG and LastLog:
                 await bot.send_message(BOTLOG_CHATID,
-                                       f"Error changing bio:\n{err}")
+                                       f"Biyografi değiştirilirken hata oluştu :\n{err}")
         except WSError as err:
             if BOTLOG and LastLog:
                 await bot.send_message(BOTLOG_CHATID,
-                                       f"Error changing bio:\n{err}")
+                                       f"Biyografi değiştirilirken hata oluştu: \n{err}")
         await sleep(2)
     RUNNING = False
 
@@ -219,9 +220,9 @@ async def lastlog(lstlog):
 CMD_HELP.update({
     'lastfm':
     ".lastfm\
-    \nUsage: Shows currently scrobbling track or most recent scrobbles if nothing is playing.\
+    \nKullanım: Şu anlık oynatılan parça ya da en son oynatılan parça gösterilir.\
     \n\nlastbio: .lastbio <on/off>\
-    \nUsage: Enables/Disables last.fm current playing to bio.\
+    \nKullanım: last.fm'deki şu an oynatılan parça gösterimi etkinleştirilir/devre dışı bırakılır.\
     \n\nlastlog: .lastlog <on/off>\
-    \nUsage: Enable/Disable last.fm bio logging in the bot-log group."
+    \nKullanım: last.fm biyografi loglamasını etkinleştirir/devre dışı bırakır."
 })

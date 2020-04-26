@@ -1,9 +1,11 @@
 # Copyright (C) 2019 The Raphielscape Company LLC.
+# Copyright (C) 2020 TeamDerUntergang.
 #
 # Licensed under the Raphielscape Public License, Version 1.c (the "License");
 # you may not use this file except in compliance with the License.
 #
-""" Userbot module for filter commands """
+
+""" Filtre komutlarını içeren UserBot modülüdür. """
 
 from asyncio import sleep
 from re import fullmatch, IGNORECASE, escape
@@ -13,13 +15,13 @@ from userbot.events import register
 
 @register(incoming=True, disable_edited=True, disable_errors=True)
 async def filter_incoming_handler(handler):
-    """ Checks if the incoming message contains handler of a filter """
+    """ Gelen mesajın filtre tetikleyicisi içerip içermediğini kontrol eder """
     try:
         if not (await handler.get_sender()).bot:
             try:
                 from userbot.modules.sql_helper.filter_sql import get_filters
             except AttributeError:
-                await handler.edit("`Running on Non-SQL mode!`")
+                await handler.edit("`Bot Non-SQL modunda çalışıyor!!`")
                 return
             name = handler.raw_text
             filters = get_filters(handler.chat_id)
@@ -39,11 +41,11 @@ async def filter_incoming_handler(handler):
 
 @register(outgoing=True, pattern="^.filter (\w*)")
 async def add_new_filter(new_handler):
-    """ For .filter command, allows adding new filters in a chat """
+    """ .filter komutu bir sohbete yeni filtreler eklemeye izin verir """
     try:
         from userbot.modules.sql_helper.filter_sql import add_filter
     except AttributeError:
-        await new_handler.edit("`Running on Non-SQL mode!`")
+        await new_handler.edit("`Bot Non-SQL modunda çalışıyor!!`")
         return
     keyword = new_handler.pattern_match.group(1)
     string = new_handler.text.partition(keyword)[2]
@@ -53,9 +55,9 @@ async def add_new_filter(new_handler):
         if BOTLOG_CHATID:
             await new_handler.client.send_message(
                 BOTLOG_CHATID, f"#FILTER\
-            \nCHAT ID: {new_handler.chat_id}\
-            \nTRIGGER: {keyword}\
-            \n\nThe following message is saved as the filter's reply data for the chat, please do NOT delete it !!"
+            \nGrup ID: {new_handler.chat_id}\
+            \nFiltre: {keyword}\
+            \n\nBu mesaj filtrenin cevaplanması için kaydedildi, lütfen bu mesajı silmeyin!"
             )
             msg_o = await new_handler.client.forward_messages(
                 entity=BOTLOG_CHATID,
@@ -65,45 +67,45 @@ async def add_new_filter(new_handler):
             msg_id = msg_o.id
         else:
             await new_handler.edit(
-                "`Saving media as reply to the filter requires the BOTLOG_CHATID to be set.`"
+                "`Bir medyanın filtreye karşılık olarak kaydedilebilmesi için BOTLOG_CHATID değerinin ayarlanması gerekli.`"
             )
             return
     elif new_handler.reply_to_msg_id and not string:
         rep_msg = await new_handler.get_reply_message()
         string = rep_msg.text
-    success = "`Filter` **{}** `{} successfully`"
+    success = " **{}** `filtresi {}`"
     if add_filter(str(new_handler.chat_id), keyword, string, msg_id) is True:
-        await new_handler.edit(success.format(keyword, 'added'))
+        await new_handler.edit(success.format(keyword, 'eklendi'))
     else:
-        await new_handler.edit(success.format(keyword, 'updated'))
+        await new_handler.edit(success.format(keyword, 'güncellendi'))
 
 
 @register(outgoing=True, pattern="^.stop (\w*)")
 async def remove_a_filter(r_handler):
-    """ For .stop command, allows you to remove a filter from a chat. """
+    """ .stop komutu bir filtreyi durdurmanızı sağlar. """
     try:
         from userbot.modules.sql_helper.filter_sql import remove_filter
     except AttributeError:
-        await r_handler.edit("`Running on Non-SQL mode!`")
+        await r_handler.edit("`Bot Non-SQL modunda çalışıyor!!`")
         return
     filt = r_handler.pattern_match.group(1)
     if not remove_filter(r_handler.chat_id, filt):
-        await r_handler.edit("`Filter` **{}** `doesn't exist.`".format(filt))
+        await r_handler.edit(" **{}** `filtresi mevcut değil.`".format(filt))
     else:
         await r_handler.edit(
-            "`Filter` **{}** `was deleted successfully`".format(filt))
+            "**{}** `filtresi başarıyla silindi`".format(filt))
 
 
 @register(outgoing=True, pattern="^.rmbotfilters (.*)")
 async def kick_marie_filter(event):
-    """ For .rmfilters command, allows you to kick all \
-        Marie(or her clones) filters from a chat. """
+    """ .rmfilters komutu Marie'de (ya da onun tabanındaki botlarda) \
+        kayıtlı olan notları silmeye yarar. """
     cmd = event.text[0]
     bot_type = event.pattern_match.group(1).lower()
     if bot_type not in ["marie", "rose"]:
-        await event.edit("`That bot is not yet supported!`")
+        await event.edit("`Bu bot henüz desteklenmiyor.`")
         return
-    await event.edit("```Will be kicking away all Filters!```")
+    await event.edit("```Tüm filtreler temizleniyor...```")
     await sleep(3)
     resp = await event.get_reply_message()
     filters = resp.text.split("-")[1:]
@@ -115,25 +117,25 @@ async def kick_marie_filter(event):
             await event.reply("/stop %s" % (i.strip()))
         await sleep(0.3)
     await event.respond(
-        "```Successfully purged bots filters yaay!```\n Gimme cookies!")
+        "```Botlardaki filtreler başarıyla temizlendi.```")
     if BOTLOG:
         await event.client.send_message(
-            BOTLOG_CHATID, "I cleaned all filters at " + str(event.chat_id))
+            BOTLOG_CHATID, "Şu sohbetteki tüm filtreleri temizledim: " + str(event.chat_id))
 
 
 @register(outgoing=True, pattern="^.filters$")
 async def filters_active(event):
-    """ For .filters command, lists all of the active filters in a chat. """
+    """ .filters komutu bir sohbetteki tüm aktif filtreleri gösterir. """
     try:
         from userbot.modules.sql_helper.filter_sql import get_filters
     except AttributeError:
-        await event.edit("`Running on Non-SQL mode!`")
+        await event.edit("`Bot Non-SQL modunda çalışıyor!!`")
         return
-    transact = "`There are no filters in this chat.`"
+    transact = "`Bu sohbette hiç filtre yok.`"
     filters = get_filters(event.chat_id)
     for filt in filters:
-        if transact == "`There are no filters in this chat.`":
-            transact = "Active filters in this chat:\n"
+        if transact == "`Bu sohbette hiç filtre yok.`":
+            transact = "Sohbetteki filtreler:\n"
             transact += "`{}`\n".format(filt.keyword)
         else:
             transact += "`{}`\n".format(filt.keyword)
@@ -144,13 +146,13 @@ async def filters_active(event):
 CMD_HELP.update({
     "filter":
     ".filters\
-    \nUsage: Lists all active userbot filters in a chat.\
-    \n\n.filter <keyword> <reply text> or reply to a message with .filter <keyword>\
-    \nUsage: Saves the replied message as a reply to the 'keyword'.\
-    \nThe bot will reply to the message whenever 'keyword' is mentioned.\
-    \nWorks with everything from files to stickers.\
-    \n\n.stop <filter>\
-    \nUsage: Stops the specified filter.\
+    \nKullanım: Bir sohbetteki tüm userbot filtrelerini listeler.\
+    \n\n.filter <filtrelenecek kelime> <cevaplanacak metin> ya da bir mesajı .filter <filtrelenecek kelime>\
+    \nKullanım: 'filtrelenecek kelime' olarak istenilen şeyi kaydeder.\
+    \nBot her 'filtrelenecek kelime' yi algıladığında o mesaja cevap verecektir.\
+    \nDosyalardan çıkartmalara her türlü şeyle çalışır.\
+    \n\n.stop <filtre>\
+    \nKullanım: Seçilen filtreyi durdurur.\
     \n\n.rmbotfilters <marie/rose>\
-    \nUsage: Removes all filters of admin bots (Currently supported: Marie, Rose and their clones.) in the chat."
+    \nKullanım: Grup yönetimi botlarındaki tüm filtreleri temizler. (Şu anlık Rose, Marie ve Marie klonları destekleniyor.)"
 })

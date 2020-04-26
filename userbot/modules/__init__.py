@@ -1,9 +1,11 @@
 # Copyright (C) 2019 The Raphielscape Company LLC.
+# Copyright (C) 2020 TeamDerUntergang.
 #
 # Licensed under the Raphielscape Public License, Version 1.c (the "License");
 # you may not use this file except in compliance with the License.
 #
-""" Init file which loads all of the modules """
+
+""" Tüm modülleri yükleyen init dosyası """
 from userbot import LOGS
 
 
@@ -20,5 +22,5 @@ def __list_all_modules():
 
 
 ALL_MODULES = sorted(__list_all_modules())
-LOGS.info("Modules to load: %s", str(ALL_MODULES))
+LOGS.info("Yüklenecek modüller: %s", str(ALL_MODULES))
 __all__ = ALL_MODULES + ["ALL_MODULES"]

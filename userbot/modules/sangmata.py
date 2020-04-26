@@ -4,6 +4,8 @@
 # Licensed under the Raphielscape Public License, Version 1.c (the "License");
 # you may not use this file except in compliance with the License.
 
+# @NaytSeyd tarafından portlanmıştır.
+
 
 import datetime
 from telethon import events
@@ -18,16 +20,16 @@ async def _(event):
     if event.fwd_from:
         return 
     if not event.reply_to_msg_id:
-       await event.edit("`Reply to any user message.`")
+       await event.edit("`Herhangi bir kullanıcı mesajına cevap verin.`")
        return
     reply_message = await event.get_reply_message() 
     if not reply_message.text:
-       await event.edit("`Reply to text message`")
+       await event.edit("`Mesaja cevap verin.`")
        return
     chat = "@SangMataInfo_bot"
     sender = reply_message.sender
     if reply_message.sender.bot:
-       await event.edit("`Reply to actual users message.`")
+       await event.edit("`Botlara cevap veremezsiniz.`")
        return
     await event.edit("`Processing`")
     async with bot.conversation(chat, exclusive=False) as conv:
@@ -36,15 +38,15 @@ async def _(event):
               msg = await reply_message.forward_to(chat)
               response = await conv.get_response(message=msg, timeout=5)
           except YouBlockedUserError: 
-              await event.edit("`Please unblock @SangMataInfo_bot and try again`")
+              await event.edit("`Lütfen @SangMataInfo engelini kaldırın ve tekrar deneyin`")
               return
           except Exception as e:
               print(e.__class__)
 
           if not response:
-              await event.edit("`I can't get any response from bot!`")
+              await event.edit("`Botdan cevap alamadım!`")
           elif response.text.startswith("Forward"):
-             await event.edit("`Can you kindly disable your forward privacy settings for good?`")
+             await event.edit("`Gizlilik ayarları yüzenden alıntı yapamadım`")
           else: 
              await event.delete()
              await response.forward_to(event.chat_id)
@@ -56,5 +58,5 @@ async def _(event):
 CMD_HELP.update({
         "sangmata": 
         ".sangmata \
-          \nUsage: View user history.\n"
+          \nKullanım: Kullanıcı geçmişini görüntüleyin.\n"
     })

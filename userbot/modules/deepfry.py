@@ -5,8 +5,9 @@
 # you may not use this file except in compliance with the License.
 #
 
-# Original source for the deepfrying code (used under the following license): https://github.com/Ovyerus/deeppyer
+# Deepfry modülü kaynak kodu: https://github.com/Ovyerus/deeppyer
 
+# @NaytSeyd tarafından portlanmıştır.
 
 import io
 from random import randint, uniform
@@ -33,20 +34,20 @@ async def deepfryer(event):
         data = await check_media(reply_message)
 
         if isinstance(data, bool):
-            await event.edit("`I can't deep fry that!`")
+            await event.edit("`Bunu deepfry yapamam!`")
             return
     else:
-        await event.edit("`Reply to an image or sticker to deep fry it!`")
+        await event.edit("`Deepfry yapmam için bir resme veya çıkartmaya cevap verin!`")
         return
 
-    # download last photo (highres) as byte array
-    await event.edit("`Downloading media…`")
+    # Fotoğrafı (yüksek çözünürlük) bayt dizisi olarak indir
+    await event.edit("`Medya indiriliyor...`")
     image = io.BytesIO()
     await event.client.download_media(data, image)
     image = Image.open(image)
 
-    # fry the image
-    await event.edit("`Deep frying media…`")
+    # Resime uygula
+    await event.edit("`Medyaya deepfry uygulanıyor...`")
     for _ in range(frycount):
         image = await deepfry(image)
 
@@ -66,7 +67,7 @@ async def deepfry(img: Image) -> Image:
 
     img = img.copy().convert("RGB")
 
-    # Crush image to hell and back
+    # Resim formatı ayarla
     img = img.convert("RGB")
     width, height = img.width, img.height
     img = img.resize((int(width ** uniform(0.8, 0.9)), int(height ** uniform(0.8, 0.9))), resample=Image.LANCZOS)
@@ -75,14 +76,14 @@ async def deepfry(img: Image) -> Image:
     img = img.resize((width, height), resample=Image.BICUBIC)
     img = ImageOps.posterize(img, randint(3, 7))
 
-    # Generate colour overlay
+    # Renk yerleşimi oluştur
     overlay = img.split()[0]
     overlay = ImageEnhance.Contrast(overlay).enhance(uniform(1.0, 2.0))
     overlay = ImageEnhance.Brightness(overlay).enhance(uniform(1.0, 2.0))
 
     overlay = ImageOps.colorize(overlay, colours[0], colours[1])
 
-    # Overlay red and yellow onto main image and sharpen the hell out of it
+    # Kırmızı ve sarıyı ana görüntüye yerleştir ve keskinleştir
     img = Image.blend(img, overlay, uniform(0.1, 0.4))
     img = ImageEnhance.Sharpness(img).enhance(randint(5, 300))
 
@@ -111,6 +112,6 @@ async def check_media(reply_message):
 
 CMD_HELP.update({
     "deepfry":
-    ".deepfry [number]\
-    \n Usage: Reply to an image or sticker to deepfry with value, more value more krispy."
+    ".deepfry [numara 1-5]\
+    \nKullanım: Belirlenen görüntüye deepfry efekti uygular."
 })

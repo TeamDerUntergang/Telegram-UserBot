@@ -1,9 +1,11 @@
 # Copyright (C) 2019 The Raphielscape Company LLC.
+# Copyright (C) 2020 TeamDerUntergang.
 #
 # Licensed under the Raphielscape Public License, Version 1.c (the "License");
 # you may not use this file except in compliance with the License.
 #
-""" Userbot module for keeping control who PM you. """
+
+""" Kimin size özel mesaj gönderebileceğini kontrol altına almanızı sağlayan UserBot modülüdür. """
 
 from telethon.tl.functions.contacts import BlockRequest, UnblockRequest
 from telethon.tl.functions.messages import ReportSpamRequest
@@ -15,17 +17,17 @@ from userbot import (COUNT_PM, CMD_HELP, BOTLOG, BOTLOG_CHATID,
 from userbot.events import register
 
 # ========================= CONSTANTS ============================
-UNAPPROVED_MSG = ("`Bleep blop! This is a bot. Don't fret.\n\n`"
-                  "`Seden hasn't approved you to PM.`"
-                  "`Please wait for Seden to look in, he mostly approves PMs.\n\n`"
-                  "`As far as I know, he doesn't usually approve retards though.`")
+UNAPPROVED_MSG = ("`Hey! Bu bir bot. Endişelenme.\n\n`"
+                  "`Sahibim sana PM atma izni vermedi. `"
+                  "`Lütfen sahibimin aktif olmasını bekleyin, o genellikle PM'leri onaylar.\n\n`"
+                  "`Bildiğim kadarıyla o kafayı yemiş insanlara PM izni vermiyor.`")
 # =================================================================
 
 
 @register(incoming=True, disable_edited=True, disable_errors=True)
 async def permitpm(event):
-    """ Prohibits people from PMing you without approval. \
-        Will block retarded nibbas automatically. """
+    """ İzniniz olmadan size PM gönderenleri yasaklamak içindir. \
+        Yazmaya devam eden kullanıcıları engeller. """
     if PM_AUTO_BAN:
         self_user = await event.client.get_me()
         if event.is_private and event.chat_id != 777000 and event.chat_id != self_user.id and not (
@@ -38,14 +40,13 @@ async def permitpm(event):
             apprv = is_approved(event.chat_id)
             notifsoff = gvarstatus("NOTIF_OFF")
 
-            # This part basically is a sanity check
-            # If the message that sent before is Unapproved Message
-            # then stop sending it again to prevent FloodHit
+            # Bu bölüm basitçe akıl sağlığı kontrolüdür.
+            # Eğer mesaj daha önceden onaylanmamış olarak gönderildiyse
+            # flood yapmayı önlemek için unapprove mesajı göndermeyi durdurur.
             if not apprv and event.text != UNAPPROVED_MSG:
                 if event.chat_id in LASTMSG:
                     prevmsg = LASTMSG[event.chat_id]
-                    # If the message doesn't same as previous one
-                    # Send the Unapproved Message again
+                    # Eğer önceden gönderilmiş mesaj farklıysa unapprove mesajı tekrardan gönderilir.
                     if event.text != prevmsg:
                         async for message in event.client.iter_messages(
                                 event.chat_id,
@@ -67,8 +68,8 @@ async def permitpm(event):
 
                 if COUNT_PM[event.chat_id] > 4:
                     await event.respond(
-                        "`You were spamming my Mastor's PM, which I didn't like.`\n"
-                        "`You have been BLOCKED and reported as SPAM, until further notice.`"
+                        "`Sen benim sahibimin PM'ini spamlıyorsun, bu benim hoşuma gitmiyor.`\n"
+                        "`Şu an ENGELLENDIN ve SPAM olarak bildirildin, ileride değişiklik olmadığı sürece..`"
                     )
 
                     try:
@@ -78,9 +79,9 @@ async def permitpm(event):
                         if BOTLOG:
                             await event.client.send_message(
                                 BOTLOG_CHATID,
-                                "Count PM is seemingly going retard, plis restart bot!",
+                                "PM sayacı kafayı yemiş gibi, botu lütfen yeniden başlatın.",
                             )
-                        LOGS.info("CountPM wen't rarted boi")
+                        LOGS.info("PM sayacı kafayı yemiş gibi, botu lütfen yeniden başlatın.")
                         return
 
                     await event.client(BlockRequest(event.chat_id))
@@ -93,13 +94,13 @@ async def permitpm(event):
                             BOTLOG_CHATID,
                             "[" + name0 + "](tg://user?id=" +
                             str(event.chat_id) + ")" +
-                            " was just another retarded nibba",
+                            " kişisi sadece bir hayal kırıklığı idi. PM'ni meşgul ettiği için engellendi.",
                         )
 
 
 @register(disable_edited=True, outgoing=True, disable_errors=True)
 async def auto_accept(event):
-    """ Will approve automatically if you texted them first. """
+    """ İlk mesajı atan sizseniz otomatik olarak onaylanır. """
     if not PM_AUTO_BAN:
         return
     self_user = await event.client.get_me()
@@ -127,42 +128,42 @@ async def auto_accept(event):
                 if is_approved(event.chat_id) and BOTLOG:
                     await event.client.send_message(
                         BOTLOG_CHATID,
-                        "#AUTO-APPROVED\n" + "User: " +
+                        "#OTOMATIK-ONAYLANDI\n" + "Kullanıcı: " +
                         f"[{chat.first_name}](tg://user?id={chat.id})",
                     )
 
 
 @register(outgoing=True, pattern="^.notifoff$")
 async def notifoff(noff_event):
-    """ For .notifoff command, stop getting notifications from unapproved PMs. """
+    """ .notifoff komutu onaylanmamış kişilerden gelen PM lerden bildirim almamanızı sağlar. """
     try:
         from userbot.modules.sql_helper.globals import addgvar
     except AttributeError:
-        await noff_event.edit("`Running on Non-SQL mode!`")
+        await noff_event.edit("`Bot Non-SQL modunda çalışıyor!!`")
         return
     addgvar("NOTIF_OFF", True)
-    await noff_event.edit("`Notifications from unapproved PM's are silenced!`")
+    await noff_event.edit("`PM izni olmayan kullanıcıların bildirimleri sessize alındı!`")
 
 
 @register(outgoing=True, pattern="^.notifon$")
 async def notifon(non_event):
-    """ For .notifoff command, get notifications from unapproved PMs. """
+    """ .notifon komutu onaylanmamış kişilerden gelen PM lerden bildirim almanızı sağlar. """
     try:
         from userbot.modules.sql_helper.globals import delgvar
     except AttributeError:
-        await non_event.edit("`Running on Non-SQL mode!`")
+        await non_event.edit("`Bot Non-SQL modunda çalışıyor!!`")
         return
     delgvar("NOTIF_OFF")
-    await non_event.edit("`Notifications from unapproved PM's unmuted!`")
+    await non_event.edit("`PM izni olmayan kullanıcıarın bildirim göndermesine izin verildi!`")
 
 
 @register(outgoing=True, pattern="^.approve$")
 async def approvepm(apprvpm):
-    """ For .approve command, give someone the permissions to PM you. """
+    """ .approve komutu herhangi birine PM atabilme izni verir. """
     try:
         from userbot.modules.sql_helper.pm_permit_sql import approve
     except AttributeError:
-        await apprvpm.edit("`Running on Non-SQL mode!`")
+        await apprvpm.edit("`Bot Non-SQL modunda çalışıyor!!`")
         return
 
     if apprvpm.reply_to_msg_id:
@@ -180,10 +181,10 @@ async def approvepm(apprvpm):
     try:
         approve(uid)
     except IntegrityError:
-        await apprvpm.edit("`User may already be approved.`")
+        await apprvpm.edit("`Kullanıcı halihazırda PM gönderebiliyor olmalıdır.`")
         return
 
-    await apprvpm.edit(f"[{name0}](tg://user?id={uid}) `approved to PM!`")
+    await apprvpm.edit(f"[{name0}](tg://user?id={uid}) `kişisi PM gönderebilir!`")
 
     async for message in apprvpm.client.iter_messages(apprvpm.chat_id,
                                                       from_user='me',
@@ -193,7 +194,7 @@ async def approvepm(apprvpm):
     if BOTLOG:
         await apprvpm.client.send_message(
             BOTLOG_CHATID,
-            "#APPROVED\n" + "User: " + f"[{name0}](tg://user?id={uid})",
+            "#ONAYLANDI\n" + "Kullanıcı: " + f"[{name0}](tg://user?id={uid})",
         )
 
 
@@ -202,7 +203,7 @@ async def disapprovepm(disapprvpm):
     try:
         from userbot.modules.sql_helper.pm_permit_sql import dissprove
     except BaseException:
-        await disapprvpm.edit("`Running on Non-SQL mode!`")
+        await disapprvpm.edit("`Bot Non-SQL modunda çalışıyor!!`")
         return
 
     if disapprvpm.reply_to_msg_id:
@@ -217,31 +218,31 @@ async def disapprovepm(disapprvpm):
         name0 = str(aname.first_name)
 
     await disapprvpm.edit(
-        f"[{name0}](tg://user?id={disapprvpm.chat_id}) `Disaproved to PM!`")
+        f"[{name0}](tg://user?id={disapprvpm.chat_id}) `kişisinin PM atma izni kaldırıldı.`")
 
     if BOTLOG:
         await disapprvpm.client.send_message(
             BOTLOG_CHATID,
             f"[{name0}](tg://user?id={disapprvpm.chat_id})"
-            " was disapproved to PM you.",
+            " kişisinin PM atma izni kaldırıldı.",
         )
 
 
 @register(outgoing=True, pattern="^.block$")
 async def blockpm(block):
-    """ For .block command, block people from PMing you! """
+    """ .block komutu insanları engellemenizi sağlar. """
     if block.reply_to_msg_id:
         reply = await block.get_reply_message()
         replied_user = await block.client.get_entity(reply.from_id)
         aname = replied_user.id
         name0 = str(replied_user.first_name)
         await block.client(BlockRequest(replied_user.id))
-        await block.edit("`You've been blocked!`")
+        await block.edit("`Engellendin!`")
         uid = replied_user.id
     else:
         await block.client(BlockRequest(block.chat_id))
         aname = await block.client.get_entity(block.chat_id)
-        await block.edit("`You've been blocked!`")
+        await block.edit("`Engellendin!`")
         name0 = str(aname.first_name)
         uid = block.chat_id
 
@@ -254,25 +255,25 @@ async def blockpm(block):
     if BOTLOG:
         await block.client.send_message(
             BOTLOG_CHATID,
-            "#BLOCKED\n" + "User: " + f"[{name0}](tg://user?id={uid})",
+            "#ENGELLENDI\n" + "Kullanıcı: " + f"[{name0}](tg://user?id={uid})",
         )
 
 
 @register(outgoing=True, pattern="^.unblock$")
 async def unblockpm(unblock):
-    """ For .unblock command, let people PMing you again! """
+    """ .unblock komutu insanların size yeniden PM atabilmelerini sağlar. """
     if unblock.reply_to_msg_id:
         reply = await unblock.get_reply_message()
         replied_user = await unblock.client.get_entity(reply.from_id)
         name0 = str(replied_user.first_name)
         await unblock.client(UnblockRequest(replied_user.id))
-        await unblock.edit("`You have been unblocked.`")
+        await unblock.edit("`Engelin kaldırıldı.`")
 
     if BOTLOG:
         await unblock.client.send_message(
             BOTLOG_CHATID,
             f"[{name0}](tg://user?id={replied_user.id})"
-            " was unblocc'd!.",
+            " kişisinin engeli kaldırıldı.",
         )
 
 
@@ -280,15 +281,15 @@ CMD_HELP.update({
     "pmpermit":
     "\
 .approve\
-\nUsage: Approves the mentioned/replied person to PM.\
+\nKullanım: Yanıt verilen kullanıcıya PM atma izni verilir.\
 \n\n.disapprove\
-\nUsage: Disapproves the mentioned/replied person to PM.\
+\nKullanım: Yanıt verilen kullanıcının PM onayını kaldırır.\
 \n\n.block\
-\nUsage: Blocks the person.\
+\nKullanım: Bir kullanıcıyı engeller.1\
 \n\n.unblock\
-\nUsage: Unblocks the person so they can PM you.\
+\nKullanımı: Engellenmiş kullanıcının engelini kaldırır.\
 \n\n.notifoff\
-\nUsage: Clears/Disables any notifications of unapproved PMs.\
+\nKullanım: Onaylanmamış özel mesajların bildirimlerini temizler ya da devre dışı bırakır.\
 \n\n.notifon\
-\nUsage: Allows notifications for unapproved PMs."
+\nKullanım: Onaylanmamış özel mesajların bildirim göndermesine izin verir."
 })

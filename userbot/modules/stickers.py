@@ -1,9 +1,11 @@
 # Copyright (C) 2019 The Raphielscape Company LLC.
+# Copyright (C) 2020 TeamDerUntergang.
 #
 # Licensed under the Raphielscape Public License, Version 1.c (the "License");
 # you may not use this file except in compliance with the License.
 #
-""" Userbot module for kanging stickers or making new ones. Thanks @rupansh"""
+
+""" Çıkartma oluşturmak ya da çalmak için yapılmış UserBot modülüdür. Teşekkürler @rupansh """
 
 import io
 import math
@@ -18,23 +20,23 @@ from telethon.tl.functions.messages import GetStickerSetRequest
 from telethon.tl.types import InputStickerSetID
 from telethon.tl.types import DocumentAttributeSticker
 
-KANGING_STR = [
-    "Using Witchery to kang this sticker...",
-    "Plagiarising hehe...",
-    "Inviting this sticker over to my pack...",
-    "Kanging this sticker...",
-    "Hey that's a nice sticker!\nMind if I kang?!..",
-    "hehe me stel ur stikér\nhehe.",
-    "Ay look over there (☉｡☉)!→\nWhile I kang this...",
-    "Roses are red violets are blue, kanging this sticker so my pacc looks cool",
-    "Imprisoning this sticker...",
-    "Mr.Steal Your Sticker is stealing this sticker... ",
+DIZCILIK_STR = [
+    "Çıkartmayı dızlıyorum...",
+    "Yaşasın dızcılık...",
+    "Bu çıkartmayı kendi paketime davet ediyorum...",
+    "Bunu dızlamam lazım...",
+    "Hey bu güzel bir çıkartma!\nHemen dızlıyorum..",
+    "Çıkartmanı dızlıyorum\nhahaha.",
+    "Hey şuraya bak. (☉｡☉)!→\nBen bunu dızlarken...",
+    "Güller kırmızı menekşeler mavi, bu çıkartmayı paketime dızlayarak havalı olacağım...",
+    "Çıkartma hapsediliyor...",
+    "Bay dızcı bu çıkartmayı dızlıyor... ",
 ]
 
 
-@register(outgoing=True, pattern="^.kang")
-async def kang(args):
-    """ For .kang command, kangs stickers or creates new ones. """
+@register(outgoing=True, pattern="^.dızla")
+async def dizla(args):
+    """ .dızla komutu çıkartmaları başka paketten alır ya da yeni bir çıkartma oluşturur. """
     user = await bot.get_me()
     if not user.username:
         user.username = user.first_name
@@ -46,11 +48,11 @@ async def kang(args):
 
     if message and message.media:
         if isinstance(message.media, MessageMediaPhoto):
-            await args.edit(f"`{random.choice(KANGING_STR)}`")
+            await args.edit(f"`{random.choice(DIZCILIK_STR)}`")
             photo = io.BytesIO()
             photo = await bot.download_media(message.photo, photo)
         elif "image" in message.media.document.mime_type.split('/'):
-            await args.edit(f"`{random.choice(KANGING_STR)}`")
+            await args.edit(f"`{random.choice(DIZCILIK_STR)}`")
             photo = io.BytesIO()
             await bot.download_file(message.media.document, photo)
             if (DocumentAttributeFilename(file_name='sticker.webp') in
@@ -58,7 +60,7 @@ async def kang(args):
                 emoji = message.media.document.attributes[1].alt
                 emojibypass = True
         elif "tgsticker" in message.media.document.mime_type:
-            await args.edit(f"`{random.choice(KANGING_STR)}`")
+            await args.edit(f"`{random.choice(DIZCILIK_STR)}`")
             await bot.download_file(message.media.document,
                                     'AnimatedSticker.tgs')
 
@@ -71,10 +73,10 @@ async def kang(args):
             is_anim = True
             photo = 1
         else:
-            await args.edit("`Unsupported File!`")
+            await args.edit("`Desteklenmeyen dosya!`")
             return
     else:
-        await args.edit("`I can't kang that...`")
+        await args.edit("`Bunu dızlayamam...`")
         return
 
     if photo:
@@ -83,16 +85,14 @@ async def kang(args):
             emoji = "🤔"
         pack = 1
         if len(splat) == 3:
-            pack = splat[2]  # User sent both
+            pack = splat[2]  # Kullanıcı ikisini de gönderebilir
             emoji = splat[1]
         elif len(splat) == 2:
             if splat[1].isnumeric():
-                # User wants to push into different pack, but is okay with
-                # thonk as emote.
+                # Kullanıcı başka pakete eklemek istiyor.
                 pack = int(splat[1])
             else:
-                # User sent just custom emote, wants to push to default
-                # pack
+                # Kullanıcı sadece özel emoji istedi, varsayılan pakete eklemek istiyor.
                 emoji = splat[1]
 
         packname = f"a{user.id}_by_{user.username}_{pack}"
@@ -106,7 +106,7 @@ async def kang(args):
             image.save(file, "PNG")
         else:
             packname += "_anim"
-            packnick += " (Animated)"
+            packnick += " (Animasyonlu)"
             cmd = '/newanimated'
 
         response = urllib.request.urlopen(
@@ -117,7 +117,7 @@ async def kang(args):
             async with bot.conversation('Stickers') as conv:
                 await conv.send_message('/addsticker')
                 await conv.get_response()
-                # Ensure user doesn't get spamming notifications
+                # Kullanıcının sürekli bildirim almamasını sağlar.
                 await bot.send_read_acknowledge(conv.chat_id)
                 await conv.send_message(packname)
                 x = await conv.get_response()
@@ -125,18 +125,18 @@ async def kang(args):
                     pack += 1
                     packname = f"a{user.id}_by_{user.username}_{pack}"
                     packnick = f"@{user.username}'s UserBot pack {pack}"
-                    await args.edit("`Switching to Pack " + str(pack) +
-                                    " due to insufficient space`")
+                    await args.edit("`Yetersiz paket alanından dolayı " + str(pack) +
+                                    " numaralı pakete geçiliyor`")
                     await conv.send_message(packname)
                     x = await conv.get_response()
-                    if x.text == "Invalid pack selected.":
+                    if x.text == "Geçersiz paket seçildi.":
                         await conv.send_message(cmd)
                         await conv.get_response()
-                        # Ensure user doesn't get spamming notifications
+                        # Kullanıcının sürekli bildirim almamasını sağlar.
                         await bot.send_read_acknowledge(conv.chat_id)
                         await conv.send_message(packnick)
                         await conv.get_response()
-                        # Ensure user doesn't get spamming notifications
+                        # Kullanıcının sürekli bildirim almamasını sağlar.
                         await bot.send_read_acknowledge(conv.chat_id)
                         if is_anim:
                             await conv.send_file('AnimatedSticker.tgs')
@@ -146,29 +146,29 @@ async def kang(args):
                             await conv.send_file(file, force_document=True)
                         await conv.get_response()
                         await conv.send_message(emoji)
-                        # Ensure user doesn't get spamming notifications
+                        # Kullanıcının sürekli bildirim almamasını sağlar.
                         await bot.send_read_acknowledge(conv.chat_id)
                         await conv.get_response()
                         await conv.send_message("/publish")
                         if is_anim:
                             await conv.get_response()
                             await conv.send_message(f"<{packnick}>")
-                        # Ensure user doesn't get spamming notifications
+                        # Kullanıcının sürekli bildirim almamasını sağlar.
                         await conv.get_response()
                         await bot.send_read_acknowledge(conv.chat_id)
                         await conv.send_message("/skip")
-                        # Ensure user doesn't get spamming notifications
+                        # Kullanıcının sürekli bildirim almamasını sağlar.
                         await bot.send_read_acknowledge(conv.chat_id)
                         await conv.get_response()
                         await conv.send_message(packname)
-                        # Ensure user doesn't get spamming notifications
+                        # Kullanıcının sürekli bildirim almamasını sağlar.
                         await bot.send_read_acknowledge(conv.chat_id)
                         await conv.get_response()
-                        # Ensure user doesn't get spamming notifications
+                        # Kullanıcının sürekli bildirim almamasını sağlar.
                         await bot.send_read_acknowledge(conv.chat_id)
-                        await args.edit(f"`Sticker added in a Different Pack !\
-                            \nThis Pack is Newly created!\
-                            \nYour pack can be found [here](t.me/addstickers/{packname})",
+                        await args.edit(f"`Çıkartma başka bir pakete eklendi.\
+                            \nBu paket yeni oluşturuldu.\
+                            \nYeni paket [burada](t.me/addstickers/{packname}) bulunabilir.",
                                         parse_mode='md')
                         return
                 if is_anim:
@@ -180,27 +180,27 @@ async def kang(args):
                 rsp = await conv.get_response()
                 if "Sorry, the file type is invalid." in rsp.text:
                     await args.edit(
-                        "`Failed to add sticker, use` @Stickers `bot to add the sticker manually.`"
+                        "`Çıkartma ekleme başarısız, ` @Stickers `botu ile elle eklemeyi deneyin.`"
                     )
                     return
                 await conv.send_message(emoji)
-                # Ensure user doesn't get spamming notifications
+                # Kullanıcının sürekli bildirim almamasını sağlar.
                 await bot.send_read_acknowledge(conv.chat_id)
                 await conv.get_response()
                 await conv.send_message('/done')
                 await conv.get_response()
-                # Ensure user doesn't get spamming notifications
+                # Kullanıcının sürekli bildirim almamasını sağlar.
                 await bot.send_read_acknowledge(conv.chat_id)
         else:
-            await args.edit("`Brewing a new Pack...`")
+            await args.edit("`Yeni paket oluşturuluyor...`")
             async with bot.conversation('Stickers') as conv:
                 await conv.send_message(cmd)
                 await conv.get_response()
-                # Ensure user doesn't get spamming notifications
+                # Kullanıcının sürekli bildirim almamasını sağlar.
                 await bot.send_read_acknowledge(conv.chat_id)
                 await conv.send_message(packnick)
                 await conv.get_response()
-                # Ensure user doesn't get spamming notifications
+                # Kullanıcının sürekli bildirim almamasını sağlar.
                 await bot.send_read_acknowledge(conv.chat_id)
                 if is_anim:
                     await conv.send_file('AnimatedSticker.tgs')
@@ -211,38 +211,38 @@ async def kang(args):
                 rsp = await conv.get_response()
                 if "Sorry, the file type is invalid." in rsp.text:
                     await args.edit(
-                        "`Failed to add sticker, use` @Stickers `bot to add the sticker manually.`"
+                        "`Çıkartma ekleme başarısız, ` @Stickers `botu ile elle eklemeyi deneyin.`"
                     )
                     return
                 await conv.send_message(emoji)
-                # Ensure user doesn't get spamming notifications
+                # Kullanıcının sürekli bildirim almamasını sağlar.
                 await bot.send_read_acknowledge(conv.chat_id)
                 await conv.get_response()
                 await conv.send_message("/publish")
                 if is_anim:
                     await conv.get_response()
                     await conv.send_message(f"<{packnick}>")
-                # Ensure user doesn't get spamming notifications
+                # Kullanıcının sürekli bildirim almamasını sağlar.
                 await conv.get_response()
                 await bot.send_read_acknowledge(conv.chat_id)
                 await conv.send_message("/skip")
-                # Ensure user doesn't get spamming notifications
+                # Kullanıcının sürekli bildirim almamasını sağlar.
                 await bot.send_read_acknowledge(conv.chat_id)
                 await conv.get_response()
                 await conv.send_message(packname)
-                # Ensure user doesn't get spamming notifications
+                # Kullanıcının sürekli bildirim almamasını sağlar.
                 await bot.send_read_acknowledge(conv.chat_id)
                 await conv.get_response()
-                # Ensure user doesn't get spamming notifications
+                # Kullanıcının sürekli bildirim almamasını sağlar.
                 await bot.send_read_acknowledge(conv.chat_id)
 
-        await args.edit(f"`Sticker kanged successfully!`\
-            \nPack can be found [here](t.me/addstickers/{packname})",
+        await args.edit(f"`Çıkartma başarıyla pakete eklendi.`\
+            \nPaket [şurada](t.me/addstickers/{packname}) bulunabilir.",
                         parse_mode='md')
 
 
 async def resize_photo(photo):
-    """ Resize the given photo to 512x512 """
+    """ Fotoğrafı 512x512 boyutuna getirir. """
     image = Image.open(photo)
     maxsize = (512, 512)
     if (image.width and image.height) < 512:
@@ -266,27 +266,27 @@ async def resize_photo(photo):
     return image
 
 
-@register(outgoing=True, pattern="^.packinfo$")
-async def get_pack_info(event):
+@register(outgoing=True, pattern="^.dızbilgisi$")
+async def dizbilgisi(event):
     if not event.is_reply:
-        await event.edit("`I can't fetch info from nothing, can I ?!`")
+        await event.edit("`Hiçlikten bir bilgi çekemem, sence yapabilir miyim?!`")
         return
 
     rep_msg = await event.get_reply_message()
     if not rep_msg.document:
-        await event.edit("`Reply to a sticker to get the pack details`")
+        await event.edit("`Paket detaylarını görmek için bir çıkartmayı yanıtlayın`")
         return
 
     try:
         stickerset_attr = rep_msg.document.attributes[1]
         await event.edit(
-            "`Fetching details of the sticker pack, please wait..`")
+            "`Bu paketten detaylar alınıyor, lütfen bekleyin..`")
     except BaseException:
-        await event.edit("`This is not a sticker. Reply to a sticker.`")
+        await event.edit("`Bu bir çıkartma değil. Bir çıkartmayı yanıtlayın.`")
         return
 
     if not isinstance(stickerset_attr, DocumentAttributeSticker):
-        await event.edit("`This is not a sticker. Reply to a sticker.`")
+        await event.edit("`Bu bir çıkartma değil. Bir çıkartmayı yanıtlayın.`")
         return
 
     get_stickerset = await bot(
@@ -299,26 +299,26 @@ async def get_pack_info(event):
         if document_sticker.emoticon not in pack_emojis:
             pack_emojis.append(document_sticker.emoticon)
 
-    OUTPUT = f"**Sticker Title:** `{get_stickerset.set.title}\n`" \
-        f"**Sticker Short Name:** `{get_stickerset.set.short_name}`\n" \
-        f"**Official:** `{get_stickerset.set.official}`\n" \
-        f"**Archived:** `{get_stickerset.set.archived}`\n" \
-        f"**Stickers In Pack:** `{len(get_stickerset.packs)}`\n" \
-        f"**Emojis In Pack:**\n{' '.join(pack_emojis)}"
+    OUTPUT = f"**Sticker başlığı:** `{get_stickerset.set.title}\n`" \
+        f"**Sticker kısa adı:** `{get_stickerset.set.short_name}`\n" \
+        f"**Resmi mi:** `{get_stickerset.set.official}`\n" \
+        f"**Arşivlenmiş mi:** `{get_stickerset.set.archived}`\n" \
+        f"**Paketteki çıkartma sayısı:** `{len(get_stickerset.packs)}`\n" \
+        f"**Paketteki emoji sayısı:**\n{' '.join(pack_emojis)}"
 
     await event.edit(OUTPUT)
 
 
 CMD_HELP.update({
     "stickers":
-    ".kang\
-\nUsage: Reply .kang to a sticker or an image to kang it to your userbot pack.\
-\n\n.kang [emoji('s)]\
-\nUsage: Works just like .kang but uses the emoji('s) you picked.\
-\n\n.kang [number]\
-\nUsage: Kang's the sticker/image to the specified pack but uses 🤔 as emoji.\
-\n\n.kang [emoji('s)] [number]\
-\nUsage: Kang's the sticker/image to the specified pack and uses the emoji('s) you picked.\
-\n\n.packinfo\
-\nUsage: Gets info about the sticker pack."
+    ".dızla\
+\nKullanım: .dızla ile bir çıkartmaya ya da resme yanıtlayarak kendi çıkartma paketinize çıkartma olarak ekleyebilirsiniz.\
+\n\n.dızla [emoji(ler)]\
+\nKullanım: .dızla gibi çalışır fakat istediğiniz emojiyi çıkartmanın emojisi olarak belirtir.\
+\n\n.dızla [numara]\
+\nKullanım: Çıkartmayı ya da resmi belirtilen pakete ekler fakat emoji olarak şu kullanılır: 🤔 \
+\n\n.dızla [emoji(ler)] [numara]\
+\nKullanım: Çıkartmayı ya da resmi belirtilen pakete ekler ve belirttiğiniz emoji çıkartmanın emojisi olarak kullanılır.\
+\n\n.dızbilgisi\
+\nKullanım: Çıkartma paketi hakkında bilgi verir."
 })

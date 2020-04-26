@@ -1,4 +1,5 @@
 # Copyright (C) 2019 The Raphielscape Company LLC.
+# Copyright (C) 2020 TeamDerUntergang.
 #
 # Licensed under the Raphielscape Public License, Version 1.c (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,8 +19,8 @@ from userbot import GOOGLE_CHROME_BIN, CHROME_DRIVER, CMD_HELP
 
 @register(pattern=r".ss (.*)", outgoing=True)
 async def capture(url):
-    """ For .ss command, capture a website's screenshot and send the photo. """
-    await url.edit("`Processing ...`")
+    """ .ss komutu, belirttiğin herhangi bir siteden ekran görüntüsü alır ve sohbete gönderir. """
+    await url.edit("`İşleniyor...`")
     chrome_options = Options()
     chrome_options.add_argument("--headless")
     chrome_options.add_argument("--test-type")
@@ -35,7 +36,7 @@ async def capture(url):
     if link_match:
         link = link_match.group()
     else:
-        await url.edit("`I need a valid link to take screenshots from.`")
+        await url.edit("`Ekran görüntüsü alabilmem için geçerli bir bağlantı vermelisin.`")
         return
     driver.get(link)
     height = driver.execute_script(
@@ -46,20 +47,20 @@ async def capture(url):
     )
     driver.set_window_size(width + 125, height + 125)
     wait_for = height / 1000
-    await url.edit(f"`Generating screenshot of the page...`\
-    \n`Height of page = {height}px`\
-    \n`Width of page = {width}px`\
-    \n`Waiting ({int(wait_for)}s) for the page to load.`")
+    await url.edit(f"`Sayfanın ekran görüntüsü oluşturuluyor...`\
+    \n`Sayfanın yüksekliği: {height} piksel`\
+    \n`Sayfanın genişliği: {width} piksel`\
+    \n`Sayfanın yüklenmesi için {int(wait_for)} saniye beklendi.`")
     await sleep(int(wait_for))
     im_png = driver.get_screenshot_as_png()
-    # saves screenshot of entire page
+    # Sayfanın ekran görüntüsü kaydedilir.
     driver.close()
     message_id = url.message.id
     if url.reply_to_msg_id:
         message_id = url.reply_to_msg_id
     with io.BytesIO(im_png) as out_file:
-        out_file.name = "screencapture.png"
-        await url.edit("`Uploading screenshot as file..`")
+        out_file.name = "ekran_goruntusu.png"
+        await url.edit("`Ekran görüntüsü karşıya yükleniyor...`")
         await url.client.send_file(url.chat_id,
                                    out_file,
                                    caption=input_str,
@@ -70,6 +71,6 @@ async def capture(url):
 CMD_HELP.update({
     "ss":
     ".ss <url>\
-    \nUsage: Takes a screenshot of a website and sends the screenshot.\
-    \nExample of a valid URL : `https://www.google.com`"
+    \nKullanım: Belirtilen web sitesinden bir ekran görüntüsü alır ve gönderir.\
+    \nGeçerli bir site bağlantısı örneği: `https://devotag.com`"
 })

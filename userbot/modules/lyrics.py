@@ -1,4 +1,5 @@
 # Copyright (C) 2019 The Raphielscape Company LLC.
+# Copyright (C) 2020 TeamDerUntergang.
 #
 # Licensed under the Raphielscape Public License, Version 1.c (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,13 +18,13 @@ async def lyrics(lyric):
     if r"-" in lyric.text:
         pass
     else:
-        await lyric.edit("`Error: please use '-' as divider for <artist> and <song>`\n"
-                         "eg: `Nicki Minaj - Super Bass`")
+        await lyric.edit("`Hata: lütfen <sanatçı> ve <şarkı> için bölücü olarak '-' kullanın`\n"
+                         "Örnek: `Stabil - Reenkarne`")
         return
 
     if GENIUS is None:
         await lyric.edit(
-            "`Provide genius access token to config.py or Heroku Var first kthxbye!`")
+            "`Lütfen Genius tokeni ayarlayınız. Teşekkürler!`")
     else:
         genius = lyricsgenius.Genius(GENIUS)
         try:
@@ -31,14 +32,14 @@ async def lyrics(lyric):
             artist = args[0].strip(' ')
             song = args[1].strip(' ')
         except Exception:
-            await lyric.edit("`LMAO please provide artist and song names`")
+            await lyric.edit("`Lütfen sanatçı ve şarkı ismini veriniz`")
             return
 
     if len(args) < 1:
-        await lyric.edit("`Please provide artist and song names`")
+        await lyric.edit("`Lütfen sanatçı ve şarkı ismini veriniz`")
         return
 
-    await lyric.edit(f"`Searching lyrics for {artist} - {song}...`")
+    await lyric.edit(f"`{artist} - {song} için şarkı sözleri aranıyor...`")
 
     try:
         songs = genius.search_song(song, artist)
@@ -46,12 +47,12 @@ async def lyrics(lyric):
         songs = None
 
     if songs is None:
-        await lyric.edit(f"Song **{artist} - {song}** not found!")
+        await lyric.edit(f"Şarkı **{artist} - {song}** bulunamadı!")
         return
     if len(songs.lyrics) > 4096:
-        await lyric.edit("`Lyrics is too big, view the file to see it.`")
+        await lyric.edit("`Şarkı sözleri çok uzun, görmek için dosyayı görüntüleyin.`")
         with open("lyrics.txt", "w+") as f:
-            f.write(f"Search query: \n{artist} - {song}\n\n{songs.lyrics}")
+            f.write(f"Arama sorgusu: \n{artist} - {song}\n\n{songs.lyrics}")
         await lyric.client.send_file(
             lyric.chat_id,
             "lyrics.txt",
@@ -59,42 +60,12 @@ async def lyrics(lyric):
             )
         os.remove("lyrics.txt")
     else:
-        await lyric.edit(f"**Search query**: \n`{artist} - {song}`\n\n```{songs.lyrics}```")
+        await lyric.edit(f"**Arama sorgusu**: \n`{artist} - {song}`\n\n```{songs.lyrics}```")
     return
-
-
-@register(outgoing=True, pattern="^.iff$")
-async def pressf(f):
-    """Pays respects"""
-    args = f.text.split()
-    arg = (f.text.split(' ', 1))[1] if len(args) > 1 else None
-    if len(args) == 1:
-        r = random.randint(0, 3)
-        LOGS.info(r)
-        if r == 0:
-            await f.edit("┏━━━┓\n┃┏━━┛\n┃┗━━┓\n┃┏━━┛\n┃┃\n┗┛")
-        elif r == 1:
-            await f.edit("╭━━━╮\n┃╭━━╯\n┃╰━━╮\n┃╭━━╯\n┃┃\n╰╯")
-        else:
-            arg = "F"
-    if arg is not None:
-        out = ""
-        F_LENGTHS = [5, 1, 1, 4, 1, 1, 1]
-        for line in F_LENGTHS:
-            c = max(round(line / len(arg)), 1)
-            out += (arg * c) + "\n"
-        await f.edit("`" + out + "`")
 
 
 CMD_HELP.update({
     "lyrics":
-    "**Usage:** .`lyrics <artist name> - <song name>`\n"
-    "__note__: **-** is neccessary when searching the lyrics to divided artist and song \n"
-"Genius lyrics plugin \n"
- "get this value from https://genius.com/developers \n"
-
-"Add:-  GENIUS_API_TOKEN and token value in heroku app settings \n"
-  "   & GENIUS and token value in heroku app settings \n"
-
-"Lyrics Plugin Syntax: .lyrics <aritst name - song nane>"
+    "**Kullanım:** .`lyrics <sanatçı adı> - <şarkı ismi>`\n"
+    "__not__: **-** ayracı önemli!"
 })

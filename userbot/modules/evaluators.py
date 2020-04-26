@@ -1,9 +1,11 @@
 # Copyright (C) 2019 The Raphielscape Company LLC.
+# Copyright (C) 2020 TeamDerUntergang.
 #
 # Licensed under the Raphielscape Public License, Version 1.c (the "License");
 # you may not use this file except in compliance with the License.
 #
-""" Userbot module for executing code and terminal commands from Telegram. """
+
+""" Telegram'dan kod ve terminal komutlarını yürütmek için UserBot modülü. """
 
 import asyncio
 from getpass import getuser
@@ -15,19 +17,19 @@ from userbot.events import register
 
 @register(outgoing=True, pattern="^.eval(?: |$)(.*)")
 async def evaluate(query):
-    """ For .eval command, evaluates the given Python expression. """
+    """ .eval komutu verilen Python ifadesini değerlendirir. """
     if query.is_channel and not query.is_group:
-        await query.edit("`Eval isn't permitted on channels`")
+        await query.edit("`Eval komutlarına kanallarda izin verilmiyor`")
         return
 
     if query.pattern_match.group(1):
         expression = query.pattern_match.group(1)
     else:
-        await query.edit("``` Give an expression to evaluate. ```")
+        await query.edit("``` Değerlendirmek için bir ifade verin. ```")
         return
 
     if expression in ("userbot.session", "config.env"):
-        await query.edit("`That's a dangerous operation! Not Permitted!`")
+        await query.edit("`Bu tehlikeli bir operasyon! İzin verilemedi!`")
         return
 
     try:
@@ -42,47 +44,47 @@ async def evaluate(query):
                         query.chat_id,
                         "output.txt",
                         reply_to=query.id,
-                        caption="`Output too large, sending as file`",
+                        caption="`Çıktı çok büyük, dosya olarak gönderiliyor`",
                     )
                     remove("output.txt")
                     return
-                await query.edit("**Query: **\n`"
+                await query.edit("**Sorgu: **\n`"
                                  f"{expression}"
-                                 "`\n**Result: **\n`"
+                                 "`\n**Sonuç: **\n`"
                                  f"{evaluation}"
                                  "`")
         else:
-            await query.edit("**Query: **\n`"
+            await query.edit("**Sorgu: **\n`"
                              f"{expression}"
-                             "`\n**Result: **\n`No Result Returned/False`")
+                             "`\n**Sonuç: **\n`Sonuç döndürülemedi / Yanlış`")
     except Exception as err:
-        await query.edit("**Query: **\n`"
+        await query.edit("**Sorgu: **\n`"
                          f"{expression}"
-                         "`\n**Exception: **\n"
+                         "`\n**İstisna: **\n"
                          f"`{err}`")
 
     if BOTLOG:
         await query.client.send_message(
             BOTLOG_CHATID,
-            f"Eval query {expression} was executed successfully")
+            f"Eval sorgusu {expression} başarıyla yürütüldü")
 
 
 @register(outgoing=True, pattern=r"^.exec(?: |$)([\s\S]*)")
 async def run(run_q):
-    """ For .exec command, which executes the dynamically created program """
+    """ .exec komutu dinamik olarak oluşturulan programı yürütür """
     code = run_q.pattern_match.group(1)
 
     if run_q.is_channel and not run_q.is_group:
-        await run_q.edit("`Exec isn't permitted on channels!`")
+        await run_q.edit("`Exec komutlarına kanallarda izin verilmiyor`")
         return
 
     if not code:
-        await run_q.edit("``` At least a variable is required to \
-execute. Use .help exec for an example.```")
+        await run_q.edit("``` Yürütmek için en az bir değişken gereklidir \
+.seden exec kullanarak örnek alabilirsiniz.```")
         return
 
     if code in ("userbot.session", "config.env"):
-        await run_q.edit("`That's a dangerous operation! Not Permitted!`")
+        await run_q.edit("`Bu tehlikeli bir operasyon! İzin verilemedi!`")
         return
 
     if len(code.splitlines()) <= 5:
@@ -112,48 +114,48 @@ execute. Use .help exec for an example.```")
                 run_q.chat_id,
                 "output.txt",
                 reply_to=run_q.id,
-                caption="`Output too large, sending as file`",
+                caption="`Çıktı çok büyük, dosya olarak gönderiliyor`",
             )
             remove("output.txt")
             return
-        await run_q.edit("**Query: **\n`"
+        await run_q.edit("**Sorgu: **\n`"
                          f"{codepre}"
-                         "`\n**Result: **\n`"
+                         "`\n**Sonuç: **\n`"
                          f"{result}"
                          "`")
     else:
-        await run_q.edit("**Query: **\n`"
+        await run_q.edit("**Sorgu: **\n`"
                          f"{codepre}"
-                         "`\n**Result: **\n`No Result Returned/False`")
+                         "`\n**Sonuç: **\n`Sonuç döndürülemedi / Yanlış`")
 
     if BOTLOG:
         await run_q.client.send_message(
             BOTLOG_CHATID,
-            "Exec query " + codepre + " was executed successfully")
+            "Exec sorgusu " + codepre + " başarıyla yürütüldü")
 
 
 @register(outgoing=True, pattern="^.term(?: |$)(.*)")
 async def terminal_runner(term):
-    """ For .term command, runs bash commands and scripts on your server. """
+    """ .term komutu sunucunuzda bash komutlarını ve komut dosyalarını çalıştırır. """
     curruser = getuser()
     command = term.pattern_match.group(1)
     try:
         from os import geteuid
         uid = geteuid()
     except ImportError:
-        uid = "This ain't it chief!"
+        uid = "Bu değil şef!"
 
     if term.is_channel and not term.is_group:
-        await term.edit("`Term commands aren't permitted on channels!`")
+        await term.edit("`Term komutlarına kanallarda izin verilmiyor`")
         return
 
     if not command:
-        await term.edit("``` Give a command or use .help term for \
-            an example.```")
+        await term.edit("``` Yardım almak için .seden term yazarak \
+            örneğe bakabilirsin.```")
         return
 
     if command in ("userbot.session", "config.env"):
-        await term.edit("`That's a dangerous operation! Not Permitted!`")
+        await term.edit("`Bu tehlikeli bir operasyon! İzin verilemedi!`")
         return
 
     process = await asyncio.create_subprocess_shell(
@@ -172,7 +174,7 @@ async def terminal_runner(term):
             term.chat_id,
             "output.txt",
             reply_to=term.id,
-            caption="`Output too large, sending as file`",
+            caption="`Çıktı çok büyük, dosya olarak gönderiliyor`",
         )
         remove("output.txt")
         return
@@ -185,12 +187,12 @@ async def terminal_runner(term):
     if BOTLOG:
         await term.client.send_message(
             BOTLOG_CHATID,
-            "Terminal Command " + command + " was executed sucessfully",
+            "Terminal Komutu " + command + " başarıyla yürütüldü",
         )
 
 
-CMD_HELP.update({"eval": ".eval 2 + 3\nUsage: Evalute mini-expressions."})
+CMD_HELP.update({"eval": ".eval 2 + 3\nKullanım: Mini ifadeleri değerlendirin."})
 CMD_HELP.update(
-    {"exec": ".exec print('hello')\nUsage: Execute small python scripts."})
+    {"exec": ".exec print('merhaba')\nKullanım: Küçük python komutları yürütün."})
 CMD_HELP.update(
-    {"term": ".term ls\nUsage: Run bash commands and scripts on your server."})
+    {"term": ".term ls\nKullanım: Sunucunuzda bash komutlarını ve komut dosyalarını çalıştırın."})

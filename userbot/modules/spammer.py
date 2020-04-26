@@ -1,4 +1,5 @@
 # Copyright (C) 2019 The Raphielscape Company LLC.
+# Copyright (C) 2020 TeamDerUntergang.
 #
 # Licensed under the Raphielscape Public License, Version 1.c (the "License");
 # you may not use this file except in compliance with the License.
@@ -6,6 +7,7 @@
 
 import asyncio
 import time
+import threading
 from asyncio import wait, sleep
 
 from userbot import BOTLOG, BOTLOG_CHATID, CMD_HELP
@@ -13,7 +15,9 @@ from userbot.events import register
 
 @register(outgoing=True, pattern="^.tspam")
 async def tmeme(e):
-    tspam = str(e.text[7:])
+    message = e.text
+    messageSplit = message.split(" ", 1)
+    tspam = str(messageSplit[1])
     message = tspam.replace(" ", "")
     for letter in message:
         await e.respond(letter)
@@ -22,30 +26,32 @@ async def tmeme(e):
             await e.client.send_message(
                 BOTLOG_CHATID,
                 "#TSPAM \n\n"
-                "TSpam was executed successfully"
+                "TSpam başarıyla gerçemleştirildi"
                 )
 
 @register(outgoing=True, pattern="^.spam")
 async def spammer(e):
     if not e.text[0].isalpha() and e.text[0] not in ("/", "#", "@", "!"):
         message = e.text
-        counter = int(message[6:8])
-        spam_message = str(e.text[8:])
+        messageSplit = message.split(" ", 2)
+        counter = int(messageSplit[1])
+        spam_message = str(messageSplit[2])
         await asyncio.wait([e.respond(spam_message) for i in range(counter)])
         await e.delete()
         if BOTLOG:
             await e.client.send_message(
                 BOTLOG_CHATID,
                 "#SPAM \n\n"
-                "Spam was executed successfully"
+                "Spam başarıyla gerçemleştirildi"
                 )
                                
 @register(outgoing=True, pattern="^.bigspam")
 async def bigspam(e):
     if not e.text[0].isalpha() and e.text[0] not in ("/", "#", "@", "!"):
         message = e.text
-        counter = int(message[9:13])
-        spam_message = str(e.text[13:])
+        messageSplit = message.split(" ", 2)
+        counter = int(messageSplit[1])
+        spam_message = str(messageSplit[2])
         for i in range(1, counter):
             await e.respond(spam_message)
         await e.delete()
@@ -53,7 +59,7 @@ async def bigspam(e):
             await e.client.send_message(
                 BOTLOG_CHATID,
                 "#BIGSPAM \n\n"
-                "Bigspam was executed successfully"
+                "Bigspam başarıyla gerçemleştirildi"
                 )
         
         
@@ -71,39 +77,43 @@ async def tiny_pic_spam(e):
             await e.client.send_message(
                 BOTLOG_CHATID,
                 "#PICSPAM \n\n"
-                "PicSpam was executed successfully"
+                "PicSpam başarıyla gerçemleştirildi"
                 )
 
 
 @register(outgoing=True, pattern="^.delayspam")
-async def spammer(e):
+async def delayspammer(e):
+    # Teşekkürler @ReversedPosix
     if not e.text[0].isalpha() and e.text[0] not in ("/", "#", "@", "!"):
         message = e.text
-        spamDelay = float(message[11:15])
-        counter = int(message[15:19])
-        spam_message = str(e.text[19:])
+        messageSplit= message.split(" ", 3)
+        spam_delay = float(messageSplit[1])
+        counter = int(messageSplit[2])
+        spam_message = str(messageSplit[3])
         from userbot.events import register
+        await e.delete()
+        delaySpamEvent = threading.Event()
         for i in range(1, counter):
             await e.respond(spam_message)
-            time.sleep(spamDelay)
-        await e.delete()
+            delaySpamEvent.wait(spam_delay)
         if BOTLOG:
             await e.client.send_message(
                 BOTLOG_CHATID,
                 "#DelaySPAM \n\n"
-                "DelaySpam was executed successfully"
+                "DelaySpam başarıyla gerçemleştirildi"
                 )
                                
 CMD_HELP.update({
-    "spammer": ".tspam <text>\
-\nUsage: Spam the text letter by letter.\
-\n\n.spam <count> <text>\
-\nUsage: Your regular spammer stuff :P\
-\n\n.bigspam <count> <text>\
-\nUsage: .spam on steroids !!\
-\n\n.picspam <count> <link>\
-\nUsage: As if text spam was not enough !!\
-\n\n.delayspam <delay> <count> <text>\
-\nUsage: .bigspam but slower.\
-\n\n\nNOTE : I am not responsible for Telegram guys snapping their fingers and killing your account !!"
+    "spammer": ".tspam <metin>\
+\nKullanım: Verilen mesajı tek tek göndererek spam yapar\
+\n\n.spam <miktar> <metin>\
+\nKullanım: Verilen miktarda spam gönderir\
+\n\n.bigspam <miktar> <metin>\
+\nKullanım: .spam komutunun büyük hali\
+\n\n.picspam <miktar> <link>\
+\nKullanım: Verilen miktarda resimli spam gönderir\
+\n\n.delayspam <gecikme> <miktar> <metin>\
+\nKullanım: Verilen miktar ve verilen gecikme ile gecikmeli spam yapar\
+\n\n\nNOT : Sorumluluk size aittir!!"
 })
+

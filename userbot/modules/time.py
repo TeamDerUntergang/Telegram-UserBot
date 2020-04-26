@@ -1,10 +1,11 @@
 # Copyright (C) 2019 The Raphielscape Company LLC.
+# Copyright (C) 2020 TeamDerUntergang.
 #
 # Licensed under the Raphielscape Public License, Version 1.c (the "License");
 # you may not use this file except in compliance with the License.
 #
-""" Userbot module for getting the date
-    and time of any country or the userbot server.  """
+
+""" Bir konumun ya da UserBot sunucusunun tarih/saatini gösterebilecek modüldür. """
 
 from datetime import datetime as dt
 
@@ -17,7 +18,7 @@ from userbot.events import register
 
 
 async def get_tz(con):
-    """ Get time zone of the given country. """
+    """ Seçilen bölgenin saat dilimini elde etmek içindir. """
     if "(Uk)" in con:
         con = con.replace("Uk", "UK")
     if "(Us)" in con:
@@ -43,10 +44,10 @@ async def get_tz(con):
 
 @register(outgoing=True, pattern="^.time(?: |$)(.*)(?<![0-9])(?: |$)([0-9]+)?")
 async def time_func(tdata):
-    """ For .time command, return the time of
-        1. The country passed as an argument,
-        2. The default userbot country(set it by using .settime),
-        3. The server where the userbot runs.
+    """ .time komutu şu şekilde kullanılabilir
+        1- Bölge belirtilerek.
+        2. Varsayılan userbot bölgesi (.settime komutuyla ayarlanabilir)
+        3. UserBot'un barındığı sunucunun tarihi.
     """
     con = tdata.pattern_match.group(1).title()
     tz_num = tdata.pattern_match.group(2)
@@ -65,11 +66,11 @@ async def time_func(tdata):
         tz_num = TZ_NUMBER
         timezones = await get_tz(COUNTRY)
     else:
-        await tdata.edit(f"`It's`  **{dt.now().strftime(t_form)}**  `here.`")
+        await tdata.edit(f"Burada saat  **{dt.now().strftime(t_form)}** ")
         return
 
     if not timezones:
-        await tdata.edit("`Invaild country.`")
+        await tdata.edit("`Geçersiz ülke.`")
         return
 
     if len(timezones) == 1:
@@ -79,14 +80,13 @@ async def time_func(tdata):
             tz_num = int(tz_num)
             time_zone = timezones[tz_num - 1]
         else:
-            return_str = f"`{c_name} has multiple timezones:`\n\n"
+            return_str = f"`{c_name} ülkesi birden fazla saat dilimine sahip:`\n\n"
 
             for i, item in enumerate(timezones):
                 return_str += f"`{i+1}. {item}`\n"
 
-            return_str += "\n`Choose one by typing the number "
-            return_str += "in the command.`\n"
-            return_str += f"`Example: .time {c_name} 2`"
+            return_str += "\n`Şunlardan birini numara belirterek seçin."
+            return_str += f"`Örnek: .time {c_name} 2`"
 
             await tdata.edit(return_str)
             return
@@ -95,21 +95,21 @@ async def time_func(tdata):
 
     if c_name != COUNTRY:
         await tdata.edit(
-            f"`It's`  **{dtnow}**  `in {c_name}({time_zone} timezone).`")
+            f"{c_name} ülkesinde saat  **{dtnow}**  ({time_zone} saat diliminde).")
         return
 
     elif COUNTRY:
-        await tdata.edit(f"`It's`  **{dtnow}**  `here, in {COUNTRY}"
-                         f"({time_zone} timezone).`")
+        await tdata.edit(f"{COUNTRY} ülkesinde saat **{dtnow}**  "
+                         f"({time_zone} saat diliminde).")
         return
 
 
 @register(outgoing=True, pattern="^.date(?: |$)(.*)(?<![0-9])(?: |$)([0-9]+)?")
 async def date_func(dat):
-    """ For .date command, return the date of
-        1. The country passed as an argument,
-        2. The default userbot country(set it by using .settime),
-        3. The server where the userbot runs.
+    """ .date komutu şu şekilde kullanılabilir
+        1- Bölge belirtilerek.
+        2. Varsayılan userbot bölgesi (.settime komutuyla ayarlanabilir)
+        3. UserBot'un barındığı sunucunun tarihi.
     """
     con = dat.pattern_match.group(1).title()
     tz_num = dat.pattern_match.group(2)
@@ -128,11 +128,11 @@ async def date_func(dat):
         tz_num = TZ_NUMBER
         timezones = await get_tz(COUNTRY)
     else:
-        await dat.edit(f"`It's`  **{dt.now().strftime(d_form)}**  `here.`")
+        await dat.edit(f"Burada tarih: **{dt.now().strftime(d_form)}** ")
         return
 
     if not timezones:
-        await dat.edit("`Invaild country.`")
+        await dat.edit("`Geçersiz ülke`")
         return
 
     if len(timezones) == 1:
@@ -142,14 +142,13 @@ async def date_func(dat):
             tz_num = int(tz_num)
             time_zone = timezones[tz_num - 1]
         else:
-            return_str = f"`{c_name} has multiple timezones:`\n"
+            return_str = f"`{c_name} ülkesi birden fazla saat dilimine sahip:`\n"
 
             for i, item in enumerate(timezones):
                 return_str += f"`{i+1}. {item}`\n"
 
-            return_str += "\n`Choose one by typing the number "
-            return_str += "in the command.`\n"
-            return_str += f"Example: .date {c_name} 2"
+            return_str += "\n`Şunlardan birini numara belirterek seçin"
+            return_str += f"Örnek: .date {c_name} 2"
 
             await dat.edit(return_str)
             return
@@ -158,26 +157,26 @@ async def date_func(dat):
 
     if c_name != COUNTRY:
         await dat.edit(
-            f"`It's`  **{dtnow}**  `in {c_name}({time_zone} timezone).`")
+            f"{c_name} ülkesinde tarih  **{dtnow}**  ({time_zone} saat diliminde).`")
         return
 
     elif COUNTRY:
-        await dat.edit(f"`It's`  **{dtnow}**  `here, in {COUNTRY}"
-                       f"({time_zone} timezone).`")
+        await dat.edit(f"{COUNTRY} ülkesinde tarih **{dtnow}**"
+                       f"({time_zone} saat diliminde).")
         return
 
 
 CMD_HELP.update({
     "time":
-    ".time <country name/code> <timezone number>"
-    "\nUsage: Get the time of a country. If a country has "
-    "multiple timezones, it will list all of them "
-    "and let you select one."
+    ".time <ülke ismi/kodu> <saat dilimi numarası>"
+    "\nKullanım: Bir ülkenin saatini gösterir. Eğer bir ülke "
+    "birden fazla saat dilimine sahipse, tümü birden gösterilir "
+    "ve seçim sana bırakılır."
 })
 CMD_HELP.update({
     "date":
-    ".date <country name/code> <timezone number>"
-    "\nUsage: Get the date of a country. If a country has "
-    "multiple timezones, it will list all of them "
-    "and let you select one."
+    ".date <ülke ismi/kodu> <saat dilimi numarası>"
+    "\nKullanım: Bir ülkenin tarihini gösterir. Eğer bir ülke"
+    "birden fazla saat dilimine sahipse, tümü birden gösterilir."
+    "ve seçim sana bırakılır."
 })

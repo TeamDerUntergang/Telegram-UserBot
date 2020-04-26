@@ -1,9 +1,11 @@
 # Copyright (C) 2019 The Raphielscape Company LLC.
+# Copyright (C) 2020 TeamDerUntergang.
 #
 # Licensed under the Raphielscape Public License, Version 1.c (the "License");
 # you may not use this file except in compliance with the License.
 #
-""" Userbot module containing hash and encode/decode commands. """
+
+""" Hash ve encode/decode çözme komutlarını içeren UserBot modülü. """
 
 from subprocess import PIPE
 from subprocess import run as runapp
@@ -14,7 +16,7 @@ from userbot.events import register
 
 @register(outgoing=True, pattern="^.hash (.*)")
 async def gethash(hash_q):
-    """ For .hash command, find the md5, sha1, sha256, sha512 of the string. """
+    """ .hash komutu md5, sha1, sha256, sha512 dizelerini bulur. """
     hashtxt_ = hash_q.pattern_match.group(1)
     hashtxt = open("hashdis.txt", "w+")
     hashtxt.write(hashtxt_)
@@ -38,7 +40,7 @@ async def gethash(hash_q):
             hash_q.chat_id,
             "hashes.txt",
             reply_to=hash_q.id,
-            caption="`It's too big, sending a text file instead. `")
+            caption="`Çok büyük, bunun yerine bir metin dosyası gönderiliyor. `")
         runapp(["rm", "hashes.txt"], stdout=PIPE)
     else:
         await hash_q.reply(ans)
@@ -46,7 +48,7 @@ async def gethash(hash_q):
 
 @register(outgoing=True, pattern="^.base64 (en|de) (.*)")
 async def endecrypt(query):
-    """ For .base64 command, find the base64 encoding of the given string. """
+    """ .base64 komutu verilen dizenin base64 kodlamasını bulur. """
     if query.pattern_match.group(1) == "en":
         lething = str(
             pybase64.b64encode(bytes(query.pattern_match.group(2),
@@ -59,9 +61,9 @@ async def endecrypt(query):
         await query.reply("Decoded: `" + lething[:-1] + "`")
 
 
-CMD_HELP.update({"base64": "Find the base64 encoding of the given string"})
+CMD_HELP.update({"base64": "Verilen dizenin base64 kodlamasını bulun"})
 
 CMD_HELP.update({
     "hash":
-    "Find the md5, sha1, sha256, sha512 of the string when written into a txt file."
+    "Bir txt dosyası yazıldığında md5, sha1, sha256, sha512 dizelerini bulun."
 })

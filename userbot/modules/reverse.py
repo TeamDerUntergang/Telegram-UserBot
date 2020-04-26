@@ -1,11 +1,13 @@
 # Copyright (C) 2019 The Raphielscape Company LLC.
+# Copyright (C) 2020 TeamDerUntergang.
 #
-# Thanks to @kandnub, for this awesome module !!
+# Teşekkürler @kandnub
 #
 # Licensed under the Raphielscape Public License, Version 1.c (the "License");
 # you may not use this file except in compliance with the License.
 #
-""" Userbot module for reverse searching stickers and images on Google """
+
+""" Google'da görsel aramak için kullanılabilen UserBot modülü """
 
 import io
 import os
@@ -27,7 +29,7 @@ opener.addheaders = [('User-agent', useragent)]
 
 @register(outgoing=True, pattern=r"^.reverse(?: |$)(\d*)")
 async def okgoogle(img):
-    """ For .reverse command, Google search images and stickers. """
+    """ .reverse komutu Google'da görsel araması yapar """
     if os.path.isfile("okgoogle.png"):
         os.remove("okgoogle.png")
 
@@ -36,15 +38,15 @@ async def okgoogle(img):
         photo = io.BytesIO()
         await bot.download_media(message, photo)
     else:
-        await img.edit("`Reply to photo or sticker nigger.`")
+        await img.edit("`Lütfen bir fotoğrafa veya çıkartmaya yanıt verin.`")
         return
 
     if photo:
-        await img.edit("`Processing...`")
+        await img.edit("`İşleniyor...`")
         try:
             image = Image.open(photo)
         except OSError:
-            await img.edit('`Unsupported sexuality, most likely.`')
+            await img.edit('`Desteklenmeyen tür`')
             return
         name = "okgoogle.png"
         image.save(name, "PNG")
@@ -61,10 +63,10 @@ async def okgoogle(img):
         fetchUrl = response.headers['Location']
 
         if response != 400:
-            await img.edit("`Image successfully uploaded to Google. Maybe.`"
-                           "\n`Parsing source now. Maybe.`")
+            await img.edit("`Görüntü başarıyla Google'a yüklendi.`"
+                           "\n`Şimdi kaynak ayrıştırılıyor.`")
         else:
-            await img.edit("`Google told me to fuck off.`")
+            await img.edit("`Google siktirip gitmemi söyledi.`")
             return
 
         os.remove(name)
@@ -74,9 +76,9 @@ async def okgoogle(img):
         imgspage = match['similar_images']
 
         if guess and imgspage:
-            await img.edit(f"[{guess}]({fetchUrl})\n\n`Looking for images...`")
+            await img.edit(f"[{guess}]({fetchUrl})\n\n`Resim arıyorum...`")
         else:
-            await img.edit("`Couldn't find anything for your uglyass.`")
+            await img.edit("`Çirkin kıçın için bir şey bulamadım.`")
             return
 
         if img.pattern_match.group(1):
@@ -97,11 +99,11 @@ async def okgoogle(img):
         except TypeError:
             pass
         await img.edit(
-            f"[{guess}]({fetchUrl})\n\n[Visually similar images]({imgspage})")
+            f"[{guess}]({fetchUrl})\n\n[Benzer görüntüler]({imgspage})")
 
 
 async def ParseSauce(googleurl):
-    """Parse/Scrape the HTML code for the info we want."""
+    """ İstediğiniz bilgi için HTML kodunu ayrıştırın / kazıyın. """
 
     source = opener.open(googleurl).read()
     soup = BeautifulSoup(source, 'html.parser')
@@ -146,5 +148,5 @@ async def scam(results, lim):
 CMD_HELP.update({
     'reverse':
     '.reverse\
-        \nUsage: Reply to a pic/sticker to revers-search it on Google Images !!'
+        \nKullanım: Fotoğraf veya çıkartmaya yanıt vererek görüntüyü Google üzerniden arayabilirsiniz'
 })

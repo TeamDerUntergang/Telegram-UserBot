@@ -1,3 +1,9 @@
+# Copyright (C) 2019 The Raphielscape Company LLC.
+# Copyright (C) 2020 TeamDerUntergang.
+#
+# Licensed under the Raphielscape Public License, Version 1.c (the "License");
+# you may not use this file except in compliance with the License.
+
 import aiohttp
 from userbot.events import register
 from userbot import CMD_HELP
@@ -11,7 +17,7 @@ async def github(event):
         async with session.get(URL) as request:
             if request.status == 404:
                 await event.reply("`" + event.pattern_match.group(1) +
-                                  " not found`")
+                                  " bulunamadı`")
                 return
 
             result = await request.json()
@@ -22,12 +28,12 @@ async def github(event):
             bio = result.get("bio", None)
             created_at = result.get("created_at", "Not Found")
 
-            REPLY = f"GitHub Info for `{event.pattern_match.group(1)}`\
-            \nUsername: `{name}`\
-            \nBio: `{bio}`\
+            REPLY = f"`{event.pattern_match.group(1)} adlı kullanıcının GitHub bilgileri:`\
+            \nİsim: `{name}`\
+            \nBiyografi: `{bio}`\
             \nURL: {url}\
-            \nCompany: `{company}`\
-            \nCreated at: `{created_at}`"
+            \nŞirket: `{company}`\
+            \nHesap oluşturulma tarihi: `{created_at}`"
 
             if not result.get("repos_url", None):
                 await event.edit(REPLY)
@@ -40,7 +46,7 @@ async def github(event):
 
                 result = await request.json()
 
-                REPLY += "\nRepos:\n"
+                REPLY += "\nRepolar:\n"
 
                 for nr in range(len(result)):
                     REPLY += f"[{result[nr].get('name', None)}]({result[nr].get('html_url', None)})\n"
@@ -48,4 +54,8 @@ async def github(event):
                 await event.edit(REPLY)
 
 
-CMD_HELP.update({"git": "Like .whois but for GitHub usernames."})
+CMD_HELP.update({
+        "git": 
+        ".git \
+          \nKullanım: Hedeflenen kişinin GitHub bilgilerini gösterir.\n"
+    })

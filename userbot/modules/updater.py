@@ -1,10 +1,12 @@
 # Copyright (C) 2019 The Raphielscape Company LLC.
+# Copyright (C) 2020 TeamDerUntergang.
 #
 # Licensed under the Raphielscape Public License, Version 1.c (the "License");
 # you may not use this file except in compliance with the License.
 #
+
 """
-This module updates the userbot based on Upstream revision
+Bu modül commit sayısına bağlı olarak botu günceller.
 """
 
 from os import remove, execle, path, makedirs, getenv, environ
@@ -45,29 +47,29 @@ async def update_requirements():
 
 @register(outgoing=True, pattern="^\.update(?: |$)(.*)")
 async def upstream(ups):
-    "For .update command, check if the bot is up to date, update if specified"
-    await ups.edit("`Checking for updates, please wait....`")
+    ".update komutu ile botunun güncel olup olmadığını denetleyebilirsin."
+    await ups.edit("`Güncellemeler denetleniyor...`")
     conf = ups.pattern_match.group(1)
     off_repo = UPSTREAM_REPO_URL
     force_update = False
 
     try:
-        txt = "`Oops.. Updater cannot continue due to "
-        txt += "some problems occured`\n\n**LOGTRACE:**\n"
+        txt = "`Güncelleme başarısız oldu!"
+        txt += "Bazı sorunlarla karşılaştık.`\n\n**LOG:**\n"
         repo = Repo()
     except NoSuchPathError as error:
-        await ups.edit(f'{txt}\n`directory {error} is not found`')
+        await ups.edit(f'{txt}\n`{error} klasörü bulunamadı.`')
         repo.__del__()
         return
     except GitCommandError as error:
-        await ups.edit(f'{txt}\n`Early failure! {error}`')
+        await ups.edit(f'{txt}\n`Git hatası! {error}`')
         repo.__del__()
         return
     except InvalidGitRepositoryError as error:
         if conf != "now":
             await ups.edit(
-                f"`Unfortunately, the directory {error} does not seem to be a git repository.\
-            \nBut we can fix that by force updating the userbot using .update now.`"
+                f"`{error} klasörü bir git reposu gibi görünmüyor.\
+            \nFakat bu sorunu .update now komutuyla botu zorla güncelleyerek çözebilirsin.`"
             )
             return
         repo = Repo.init()
@@ -81,10 +83,10 @@ async def upstream(ups):
     ac_br = repo.active_branch.name
     if ac_br != 'seden':
         await ups.edit(
-            f'**[UPDATER]:**` Looks like you are using your own custom branch ({ac_br}). '
-            'in that case, Updater is unable to identify '
-            'which branch is to be merged. '
-            'please checkout to any official branch`')
+            f'**[Güncelleyici]:**` Galiba seden botunu modifiye ettin ve kendi branşını kullanıyorsun: ({ac_br}). '
+            'Bu durum güncelleyicinin kafasını karıştırıyor,'
+            'Güncelleme nereden çekilecek?'
+            'Lütfen seden botunu resmi repodan kullan.`')
         repo.__del__()
         return
 
@@ -100,34 +102,34 @@ async def upstream(ups):
 
     if not changelog and not force_update:
         await ups.edit(
-            f'\n`Your BOT is`  **up-to-date**  `with`  **{ac_br}**\n')
+            f'\n`Botun`  **tamamen güncel!**  `Branş:`  **{ac_br}**\n')
         repo.__del__()
         return
 
     if conf != "now" and not force_update:
-        changelog_str = f'**New UPDATE available for [{ac_br}]:\n\nCHANGELOG:**\n`{changelog}`'
+        changelog_str = f'**{ac_br} için yeni güncelleme mevcut!\n\nDeğişiklikler:**\n`{changelog}`'
         if len(changelog_str) > 4096:
-            await ups.edit("`Changelog is too big, view the file to see it.`")
-            file = open("output.txt", "w+")
+            await ups.edit("`Değişiklik listesi çok büyük, dosya olarak görüntülemelisin.`")
+            file = open("degisiklikler.txt", "w+")
             file.write(changelog_str)
             file.close()
             await ups.client.send_file(
                 ups.chat_id,
-                "output.txt",
+                "degisiklikler.txt",
                 reply_to=ups.id,
             )
-            remove("output.txt")
+            remove("degisiklikler.txt")
         else:
             await ups.edit(changelog_str)
-        await ups.respond('`do \".update now\" to update`')
+        await ups.respond('`Güncellemeyi yapmak için \".update now\" komutunu kullan.`')
         return
 
     if force_update:
         await ups.edit(
-            '`Force-Syncing to latest stable userbot code, please wait...`')
+            '`Güncel stabil userbot kodu zorla eşitleniyor...`')
     else:
-        await ups.edit('`Updating userbot, please wait....`')
-    # We're in a Heroku Dyno, handle it's memez.
+        await ups.edit('`Bot güncelleştiriliyor...`')
+    # Bot bir Heroku dynosunda çalışıyor, bu da bazı sıkıntıları beraberinde getiriyor.
     if HEROKU_APIKEY is not None:
         import heroku3
         heroku = heroku3.from_key(HEROKU_APIKEY)
@@ -135,7 +137,7 @@ async def upstream(ups):
         heroku_applications = heroku.apps()
         if not HEROKU_APPNAME:
             await ups.edit(
-                '`[HEROKU MEMEZ] Please set up the HEROKU_APPNAME variable to be able to update userbot.`'
+                '`[HEROKU MEMEZ] Güncelleyiciyi kullanabilmek için HEROKU_APPNAME değişkenini tanımlamalısın.`'
             )
             repo.__del__()
             return
@@ -145,12 +147,12 @@ async def upstream(ups):
                 break
         if heroku_app is None:
             await ups.edit(
-                f'{txt}\n`Invalid Heroku credentials for updating userbot dyno.`'
+                f'{txt}\n`Heroku değişkenleri yanlış veya eksik tanımlanmış.`'
             )
             repo.__del__()
             return
         await ups.edit('`[HEROKU MEMEZ]\
-                        \nUserbot dyno build in progress, please wait for it to complete.`'
+                        \nUserBot Heroku dynosuna aktarılıyor, lütfen bekle...`'
                        )
         ups_rem.fetch(ac_br)
         repo.git.reset("--hard", "FETCH_HEAD")
@@ -164,21 +166,21 @@ async def upstream(ups):
         try:
             remote.push(refspec="HEAD:refs/heads/seden", force=True)
         except GitCommandError as error:
-            await ups.edit(f'{txt}\n`Here is the error log:\n{error}`')
+            await ups.edit(f'{txt}\n`Karşılaşılan hatalar burada:\n{error}`')
             repo.__del__()
             return
-        await ups.edit('`Successfully Updated!\n'
-                       'Restarting, please wait...`')
+        await ups.edit('`Güncelleme başarıyla tamamlandı!\n'
+                       'Yeniden başlatılıyor...`')
     else:
-        # Classic Updater, pretty straightforward.
+        # Klasik güncelleyici, oldukça basit.
         try:
             ups_rem.pull(ac_br)
         except GitCommandError:
             repo.git.reset("--hard", "FETCH_HEAD")
         reqs_upgrade = await update_requirements()
-        await ups.edit('`Successfully Updated!\n'
-                       'Bot is restarting... Wait for a second!`')
-        # Spin a new instance of bot
+        await ups.edit('`Güncelleme başarıyla tamamlandı!\n'
+                       'Yeniden başlatılıyor...`')
+        # Bot için Heroku üzerinde yeni bir instance oluşturalım.
         args = [sys.executable, "-m", "userbot"]
         execle(sys.executable, *args, environ)
         return
@@ -187,7 +189,7 @@ async def upstream(ups):
 CMD_HELP.update({
     'update':
     ".update\
-\nUsage: Checks if the main userbot repository has any updates and shows a changelog if so.\
+\nKullanım: Botunuza siz kurduktan sonra herhangi bir güncelleme gelip gelmediğini kontrol eder.\
 \n\n.update now\
-\nUsage: Updates your userbot, if there are any updates in the main userbot repository."
+\nKullanım: Botunuzu günceller."
 })

@@ -1,10 +1,11 @@
 # Copyright (C) 2019 The Raphielscape Company LLC.
+# Copyright (C) 2020 TeamDerUntergang.
 #
 # Licensed under the Raphielscape Public License, Version 1.c (the "License");
 # you may not use this file except in compliance with the License.
 #
-# You can find misc modules, which dont fit in anything xD
-""" Userbot module for other small commands. """
+
+""" Birkaç küçük komutu içeren UserBot modülü. """
 
 from random import randint
 from asyncio import sleep
@@ -20,69 +21,69 @@ from userbot.events import register
 
 @register(outgoing=True, pattern="^.random")
 async def randomise(items):
-    """ For .random command, get a random item from the list of items. """
+    """ .random komutu, eşya listesinden rastgele bir eşya seçer. """
     itemo = (items.text[8:]).split()
     if len(itemo) < 2:
         await items.edit(
-            "`2 or more items are required! Check .help random for more info.`"
+            "`2 veya daha fazla eşya gerekli. Daha fazla bilgi için .seden random komutunu gir.`"
         )
         return
     index = randint(1, len(itemo) - 1)
-    await items.edit("**Query: **\n`" + items.text[8:] + "`\n**Output: **\n`" +
+    await items.edit("**Sorgu: **\n`" + items.text[8:] + "`\n**Çıktı: **\n`" +
                      itemo[index] + "`")
 
 
 @register(outgoing=True, pattern="^.sleep( [0-9]+)?$")
 async def sleepybot(time):
-    """ For .sleep command, let the userbot snooze for a few second. """
+    """ .sleep komutu Seden'in birkaç saniye uyumasına olanak sağlar. """
     message = time.text
     if " " not in time.pattern_match.group(1):
-        await time.reply("Syntax: `.sleep [seconds]`")
+        await time.reply("Kullanım Şekli: `.sleep [saniye]`")
     else:
         counter = int(time.pattern_match.group(1))
-        await time.edit("`I am sulking and snoozing....`")
+        await time.edit("`Horlayarak uyuyorum...`")
         await sleep(2)
         if BOTLOG:
             await time.client.send_message(
                 BOTLOG_CHATID,
-                "You put the bot to sleep for " + str(counter) + " seconds",
+                "Botu" + str(counter) + "saniye uykuya bıraktın.",
             )
         await sleep(counter)
-        await time.edit("`OK, I'm awake now.`")
+        await time.edit("`Günaydın!`")
 
 
 @register(outgoing=True, pattern="^.shutdown$")
 async def killdabot(event):
-    """ For .shutdown command, shut the bot down."""
-    await event.edit("`Goodbye *Windows XP shutdown sound*....`")
+    """ .shutdown komutu botu kapatır. """
+    await event.edit("`Görüşürüz... *Windows XP kapanma sesi*`")
     if BOTLOG:
         await event.client.send_message(BOTLOG_CHATID, "#SHUTDOWN \n"
-                                        "Bot shut down")
+                                        "Bot kapatıldı.")
     await bot.disconnect()
 
 
 @register(outgoing=True, pattern="^.restart$")
 async def killdabot(event):
-    await event.edit("`BRB... *PornHub intro*`")
+    await event.edit("`Bot yeniden başlatılıyor...`")
     if BOTLOG:
         await event.client.send_message(BOTLOG_CHATID, "#RESTART \n"
-                                        "Bot Restarted")
+                                        "Bot yeniden başlatıldı.")
     await bot.disconnect()
-    # Spin a new instance of bot
     execl(sys.executable, sys.executable, *sys.argv)
-    # Shut the existing one down
     exit()
 
 
 @register(outgoing=True, pattern="^.support$")
 async def bot_support(wannahelp):
-    """ For .support command, just returns the group link. """
-    await wannahelp.edit("[Support Group](http://t.me/SedenUserBotSupport)")
+    """ .support komutu destek grubumuzu verir. """
+    await wannahelp.edit("[Buradan](http://t.me/SedenUserBotSupport) destek grubumuza ulaşabilirsiniz.")
 
 
 @register(outgoing=True, pattern="^.creator$")
 async def creator(e):
-    await e.edit("This bot maintained by [CcC NaytSeyd CcC](https://t.me/NightShade) and [Sedenogen](https://t.me/CiyanogenOneTeams)")
+    await e.edit("Bu bot \n"
+    "[NaytSeyd](https://t.me/NightShade) tarafından geliştirilip \n"
+    "[Sedenogen](https://t.me/CiyanogenOneTeams) tarafından sevgi ile düzenlenmiştir.")
 
 
 @register(outgoing=True, pattern="^.readme$")
@@ -107,7 +108,7 @@ async def repeat(rep):
 
 @register(outgoing=True, pattern="^.repo$")
 async def repo_is_here(wannasee):
-    """ For .repo command, just returns the repo URL. """
+    """ .repo komutunun tek yaptığı şey GitHub repomuzun bağlantısını vermek. """
     await wannasee.edit("[Seden Repo](https://github.com/TeamDerUntergang/Telegram-UserBot)")
 
 
@@ -125,67 +126,67 @@ async def raw(event):
     with io.BytesIO(str.encode(the_real_message)) as out_file:
         out_file.name = "raw_message_data.txt"
         await event.edit(
-            "`Check the userbot log for the decoded message data !!`")
+            "`Çözülmüş mesaj için userbot loglarını kontrol et!`")
         await event.client.send_file(
             BOTLOG_CHATID,
             out_file,
             force_document=True,
             allow_cache=False,
             reply_to=reply_to_id,
-            caption="`Here's the decoded message data !!`")
+            caption="`Çözülen mesaj`")
 
 
 CMD_HELP.update({
     'random':
-    '.random <item1> <item2> ... <itemN>\
-\nUsage: Get a random item from the list of items.'
+    '.random <eşya1> <eşya2> ... <eşyaN>\
+\nKullanım: Eşya listesinden rastgele bir eşya seçer'
 })
 
 CMD_HELP.update({
     'sleep':
-    '.sleep <seconds>\
-\nUsage: Userbots get tired too. Let yours snooze for a few seconds.'
+    '.sleep <saniye>\
+\nKullanım: Seden de bir insan, o da yoruluyor. Ara sıra biraz uyumasına izin ver.'
 })
 
 CMD_HELP.update({
     "shutdown":
     ".shutdown\
-\nUsage: Sometimes you need to shut down your bot. Sometimes you just hope to\
-hear Windows XP shutdown sound... but you don't."
+\nKullanım: Bazen canın botunu kapatmak ister. Gerçekten o nostaljik\
+Windows XP kapanış sesini duyabileceğini zannedersin..."
 })
 
 CMD_HELP.update(
     {'support': ".support\
-\nUsage: If you need help, use this command."
+\nKullanım: Yardıma ihtiyacın olursa bu komutu kullan."
 })
 
 CMD_HELP.update({
     'repo':
     '.repo\
-\nUsage: Seden UserBot repo'
+\nKullanım: Seden UserBot GitHub reposu'
 })
 
 CMD_HELP.update({
     "readme":
     ".readme\
-\nUsage: Seden UserBot readme plox !!"
+\nKullanım: Seden botunun GitHub'daki README.md dosyasına giden bir bağlantı."
 })
 
 CMD_HELP.update(
     {"creator": ".creator\
-\nUsage: Who created this Seden userbot !!"})
+\nKullanım: Bu güzel botu kimlerin oluşturduğunu öğren :-)"})
 
 CMD_HELP.update({
     "repeat":
-    ".repeat <no.> <text>\
-\nUsage: Repeats the text for a number of times. Don't confuse this with spam tho."
+    ".repeat <sayı> <metin>\
+\nKullanım: Bir metni belli bir sayıda tekrar eder. Spam komutu ile karıştırma!"
 })
 
 CMD_HELP.update({"restart": ".restart\
-\nUsage: Restarts the bot !!"})
+\nKullanım: Botu yeniden başlatır."})
 
 CMD_HELP.update({
     "raw":
     ".raw\
-\nUsage: Get detailed JSON-like formatted data about replied message."
+\nKullanım: Kullanılan mesaj hakkında JSON'a benzer bir şekilde detaylı bilgiler verir."
 })

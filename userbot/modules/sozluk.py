@@ -52,7 +52,7 @@ async def tdk(event):
             # print(x)
         await event.edit(x)
     except KeyError:
-        await event.edit(KeyError)
+        await event.edit("`Kelime bulunamadı`")
 
 CMD_HELP.update({
     "sozluk":

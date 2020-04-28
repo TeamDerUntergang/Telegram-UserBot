@@ -159,7 +159,7 @@
       "required": false
     },
     "LYDIA_API_KEY": {
-      "description": "Bu modülün çalışması için CoffeeHouse API'sine ihtiyacı var. https://telegram.dog/IntellivoidDev'e katılın ve #activateapi gönderin ve talimatları izleyin.",
+      "description": "Bu modülün çalışması için CoffeeHouse API'sine ihtiyacı var. 'https://coffeehouse.intellivoid.info/dashboard' Buradan alabilirsiniz.",
       "required": false
     },
     "WEATHER_DEFCITY": {

@@ -33,7 +33,7 @@
       "required": true
     },
     "HEROKU_APIKEY": {
-      "description": "Heroku API Key, 'https://dashboard.heroku.com/account' adresinden alın",
+      "description": "Heroku API Key, 'https://dashboard.heroku.com/account' adresinden alın.",
       "value": ""
     },
     "HEROKU_APPNAME": {
@@ -66,7 +66,7 @@
       "required": false
     },
     "OPEN_WEATHER_MAP_APPID": {
-      "description": "https://api.openweathermap.org/data/2.5/weather adresinden kendi APPID'inizi (API key) edinin",
+      "description": "https://api.openweathermap.org/data/2.5/weather adresinden kendi APPID'inizi (API key) edinin.",
       "required": false
     },
     "BOTLOG": {
@@ -74,12 +74,16 @@
       "value": "False"
     },
     "GENIUS_API_TOKEN": {
-      "description": "Genius API Key, 'https://genius.com/developers' adresinden alın",
+      "description": "Genius API Key, 'https://genius.com/developers' adresinden alın.",
       "required": false
     },
     "GENIUS": {
       "description": "Buraya aldığınız Genius API Token'i yazın.",
       "required": false
+    },
+    "AUTO_PP": {
+      "description": "Autopp modülünün çalışması için gerekli olan değişkendir. Çalışması için kullanacağınız resmin direk adresini girmeniz gerekiyor.",
+      "required": false      
     },
     "BOTLOG_CHATID": {
       "description": "Günlük grubunun ChatID'si. BOTLOG= False ve / veya LOGSPAMMER= False ise '0' olarak ayarlayın.",
@@ -98,15 +102,15 @@
       "required": false
     },
     "OCR_SPACE_API_KEY": {
-      "description": ".ocr komutu için OCR API Key. https://ocr.space/ocrapi adresinden alın",
+      "description": ".ocr komutu için OCR API Key. https://ocr.space/ocrapi adresinden alın.",
       "required": false
     },
     "REM_BG_API_KEY": {
-      "description": ".rbg komutu için API Key. https://www.remove.bg/api adresinden alın",
+      "description": ".rbg komutu için API Key. https://www.remove.bg/api adresinden alın.",
       "required": false
     },
     "ANTI_SPAMBOT": {
-      "description": "Katıldıktan sonra gruplardan spambotları tekmeliyor. [Tekmelemek için yönetici yetkileri gerektirir.]",
+      "description": "Katıldıktan sonra gruplardan spambotları tekmeliyor. [Tekmelemek için yönetici yetkileri gerektirir]",
       "value": "False"
     },
     "ANTI_SPAMBOT_SHOUT": {

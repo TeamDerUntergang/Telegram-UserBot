@@ -6,7 +6,6 @@
 
 # @NaytSeyd tarafından portlanmıştır.
 
-
 import datetime
 from telethon import events
 from telethon.errors.rpcerrorlist import YouBlockedUserError
@@ -53,9 +52,8 @@ async def _(event):
           await bot.send_read_acknowledge(chat, max_id=(response.id+3))
           await conv.cancel_all()
 
-
 CMD_HELP.update({
-        "sangmata": 
-        ".sangmata \
-          \nKullanım: Kullanıcı geçmişini görüntüleyin.\n"
-    })
+    "sangmata": 
+    ".sangmata \
+    \n**Kullanım**: Kullanıcı geçmişini görüntüleyin.\n"
+})

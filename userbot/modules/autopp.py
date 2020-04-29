@@ -30,10 +30,10 @@ async def autopic(event):
 
     FONT_FILE_TO_USE = await get_font_file(event.client, "@FontDunyasi")
 
-    downloaded_file_name = "./userbot/original_pic.png"
+    downloaded_file_name = "./userbot/eskipp.png"
     downloader = SmartDL(AUTO_PP, downloaded_file_name, progress_bar=True)
     downloader.start(blocking=False)
-    photo = "photo_pfp.png"
+    photo = "yenipp.png"
     while not downloader.isFinished():
         continue
 
@@ -61,7 +61,6 @@ async def autopic(event):
         except:
             return
 
-
 async def get_font_file(client, channel_id):
     # Önce yazı tipi mesajlarını al
     font_file_message_s = await client.get_messages(
@@ -77,10 +76,10 @@ async def get_font_file(client, channel_id):
     # Dosya yolunu indir ve geri dön
     return await client.download_media(font_file_message)
 
-
 CMD_HELP.update({
     "autopp": 
     ".autopp \
     \n**Kullanım**: Bu komut belirlediğiniz fotoğrafı profil resmi yapar \
-    \nve bir saat ekler. Bu saat her dakika değişir."
+    \nve bir saat ekler. Bu saat her dakika değişir. \
+    \n**NOT*: Küçük bir ihtimal bile olsa ban yeme riskiniz var. Bu yüzden dikkatli kullanın."
 })

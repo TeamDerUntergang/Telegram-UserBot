@@ -53,7 +53,7 @@ async def _(event):
           await conv.cancel_all()
 
 CMD_HELP.update({
-        "quotly": 
-        ".q \
-          \nKullanım: Metninizi çıkartmaya dönüştürün.\n"
-    })
+    "quotly": 
+    ".q \
+    \n**Kullanım**: Metninizi çıkartmaya dönüştürün.\n"
+})

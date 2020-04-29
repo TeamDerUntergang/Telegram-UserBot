@@ -30,7 +30,7 @@ async def sticklet(event):
         return
 
     # Komutu düzenle
-    await event.edit("`Resme dönüştürülüyor ...`")
+    await event.edit("`Resme dönüştürülüyor...`")
 
     # https://docs.python.org/3/library/textwrap.html#textwrap.wrap
     sticktext = textwrap.wrap(sticktext, width=10)
@@ -92,9 +92,8 @@ async def get_font_file(client, channel_id):
     # Dosya yolunu indir ve geri dön
     return await client.download_media(font_file_message)
 
-
 CMD_HELP.update({
-        "rgb": 
-        ".rgb \
-          \nKullanım: Metninizi RGB çıkartmaya dönüştürün.\n"
-    })
+    "rgb": 
+    ".rgb \
+    \n**Kullanım**: Metninizi RGB çıkartmaya dönüştürün.\n"
+})

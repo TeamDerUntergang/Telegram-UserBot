@@ -334,7 +334,6 @@ ECEM_STRINGS = [
     "Yemin ederim daha fazla sevenini görmedim jdjdkdkdkd",
 ]
 
-
 @register(outgoing=True, pattern="^.ecem$")
 async def ecem(e):
     """ Ecem'in sözlüğü """
@@ -344,5 +343,5 @@ async def ecem(e):
 CMD_HELP.update({
     "ecem":
     ".ecem veya .ecem ile birinin metnine cevap verin.\
-    \nKullanım: Ecem'den alıntılar."
+    \n**Kullanım**: Ecem'den alıntılar."
 })

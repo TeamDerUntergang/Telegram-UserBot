@@ -102,7 +102,7 @@ async def upstream(ups):
 
     if not changelog and not force_update:
         await ups.edit(
-            f'\n`Botun`  **tamamen güncel!**  `Branş:`  **{ac_br}**\n')
+            f'\n`Botun` **tamamen güncel!** `Branch:` **{ac_br}**\n')
         repo.__del__()
         return
 
@@ -184,7 +184,6 @@ async def upstream(ups):
         args = [sys.executable, "-m", "userbot"]
         execle(sys.executable, *args, environ)
         return
-
 
 CMD_HELP.update({
     'update':

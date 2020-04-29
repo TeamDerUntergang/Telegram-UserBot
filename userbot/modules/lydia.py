@@ -47,10 +47,9 @@ async def repcf(event):
         reply = await event.get_reply_message()
         msg = reply.text
         text_rep = session.think_thought(msg)
-        await event.edit("**Hey dostum**: {0}".format(text_rep))
+        await event.edit("**Lydia diyor ki**: {0}".format(text_rep))
     except Exception as e:
         await event.edit(str(e))
-
 
 @register(outgoing=True, pattern="^.addcf$")
 async def addcf(event):
@@ -70,7 +69,6 @@ async def addcf(event):
     else:
         await event.edit("Lydia AI'yı etkinleştirmek için bir kullanıcıyı yanıtlayın")
 
-
 @register(outgoing=True, pattern="^.remcf$")
 async def remcf(event):
     if event.fwd_from:
@@ -81,7 +79,7 @@ async def remcf(event):
     reply_msg = await event.get_reply_message()
     try:
         del ACC_LYDIA[event.chat_id & reply_msg.from_id]
-        await event.edit("Lydia, {} kullanıcısi için {} sohbetinde başarıyla devre dışı bırakıldı!".format(str(reply_msg.from_id), str(event.chat_id)))
+        await event.edit("Lydia, {} kullanıcısı için {} sohbetinde başarıyla devre dışı bırakıldı!".format(str(reply_msg.from_id), str(event.chat_id)))
     except Exception:
         await event.edit("Bu kullanıcıda Lydia aktif değil.")
 
@@ -101,7 +99,6 @@ async def user(event):
             await event.reply(text_rep)
     except (KeyError, TypeError):
         return
-
 
 CMD_HELP.update({
     "lydia":

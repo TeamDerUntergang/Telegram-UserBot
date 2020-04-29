@@ -19,7 +19,6 @@ from userbot import CMD_HELP, bot
 from userbot.events import register
 from userbot.modules.admin import get_user_from_event
 
-
 @register(outgoing=True, pattern="^.tagall$")
 async def _(event):
     if event.fwd_from:
@@ -33,7 +32,6 @@ async def _(event):
             leng += 1
     await event.reply(mentions)
     await event.delete()
-
 
 @register(outgoing=True, pattern="^.admin")
 async def _(event):
@@ -51,10 +49,9 @@ async def _(event):
         await event.reply(mentions)
     await event.delete()
 
-
 CMD_HELP.update({
     "tagall":
     ".tagall\
-    \nKullanım: Bu komutu kullandığınızda sohbet içerisinde ki herkesi etiketler.\n\n.admin \
-    \nKullanım: Bu komutu kullandığınızda sohbet içerisinde ki yöneticileri etiketler."
+    \n**Kullanım**: Bu komutu kullandığınızda sohbet içerisinde ki herkesi etiketler.\n\n.admin \
+    \n**Kullanım**: Bu komutu kullandığınızda sohbet içerisinde ki yöneticileri etiketler."
 })

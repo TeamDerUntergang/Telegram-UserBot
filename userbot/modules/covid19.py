@@ -7,32 +7,42 @@
 
 # @NaytSeyd tarafından portlanmıştır.
 
-from covid import Covid
 from userbot import CMD_HELP, bot
 from userbot.events import register
+from urllib3 import PoolManager
+from json import loads as jsloads
 
 
-@register(outgoing=True, pattern="^.covid (.*)")
+@register(outgoing=True, pattern="^.covid$")
 async def covid(event):
-    covid = Covid()
-    data = covid.get_data()
-    country = event.pattern_match.group(1)
-    country_data = get_country_data(country, data)
-    output_text = "" 
-    for name, value in country_data.items():
-        output_text += "`{}`: `{}`\n".format(str(name), str(value))
-    await event.edit("**{} Ülkesi için Covid 19 İstatistikleri**:\n\n{}".format(country.capitalize(), output_text))
+    try:
+        url = 'http://67.158.54.51/corona.php'
+        http = PoolManager()
+        request = http.request('GET', url)
+        result = jsloads(request.data.decode('utf-8'))
+        http.clear()
+    except:
+        await event.edit("`Bir hata oluştu.`")
+        return
 
-def get_country_data(country, world):
-    for country_data in world:
-        if country_data["country"].lower() == country.lower():
-            return country_data
-    return {"Bu ülke hakkında henüz bilgi yok!"}
-    
-    
+    sonuclar = ("** Koronavirüs Verileri **\n" +
+                "\n**Dünya geneli**\n" +
+                f"**🌎 Vaka:** `{result['tum']}`\n" +
+                f"**🌎 Ölüm:** `{result['tumolum']}`\n" +
+                f"**🌎 İyileşen:** `{result['tumk']}`\n" +
+                "\n**Türkiye**\n" +
+                f"**🇹🇷 Vaka (toplam):** `{result['trtum']}`\n" +
+                f"**🇹🇷 Vaka (bugün):** `{result['trbtum']}`\n" +
+                f"**🇹🇷 Vaka (aktif):** `{result['tra']}`\n" +
+                f"**🇹🇷 Ölüm (toplam):** `{result['trolum']}`\n" +
+                f"**🇹🇷 Ölüm (bugün):** `{result['trbolum']}`\n" +
+                f"**🇹🇷 İyileşen:** `{result['trk']}`")
+
+    await event.edit(sonuclar)
+
+
 CMD_HELP.update({
-        "covid19": 
-        ".covid <ülkeismi> \
-        \n**Kullanım**: Belirtilen ülke için Covid 19 İstatistikleri. \
-        \n**Örnek: .covid Turkey**"
-    })
+    "covid19":
+        ".covid \
+        \n**Kullanım**: Hem Dünya geneli hem de Türkiye için güncel Covid 19 istatistikleri."
+})

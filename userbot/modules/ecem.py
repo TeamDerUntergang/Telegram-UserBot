@@ -7,18 +7,9 @@
 # Sedenogen tarafından sevgi ile hazırlanmıştır.
 # NaytSeyd tarafından güçlendirilmiştir.
 
-from asyncio import sleep
-from random import choice, getrandbits, randint
-from re import sub
-import time
-
-from collections import deque
-
-import requests
-
+from random import choice
 from userbot import CMD_HELP
 from userbot.events import register
-from userbot.modules.admin import get_user_from_event
 
 # ================= CONSTANT =================
 ECEM_STRINGS = [
@@ -122,7 +113,7 @@ ECEM_STRINGS = [
     "Yine, yeni, yeniden ♥️",
     "Buraya sığdıramayacağım milyon tane iyi anımız var, hep de olsun.",
     "İyi ki doğdun kız kardeşim, seni çok seviyorum ♥️",
-    "Best gün ilan ediyorum ♥️", 
+    "Best gün ilan ediyorum ♥️",
     "Beraber uyuyoruz ama yine de sen bilirsin sjskskksksks️",
     "Özledik be️",
     "Ula :(",
@@ -348,8 +339,8 @@ ECEM_STRINGS = [
 async def ecem(e):
     """ Ecem'in sözlüğü """
     await e.edit(choice(ECEM_STRINGS))
-    
-    
+
+
 CMD_HELP.update({
     "ecem":
     ".ecem veya .ecem ile birinin metnine cevap verin.\

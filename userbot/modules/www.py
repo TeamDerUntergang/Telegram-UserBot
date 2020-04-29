@@ -18,13 +18,12 @@ from userbot.events import register
 @register(outgoing=True, pattern="^.speed$")
 async def speedtst(spd):
     """ .speed komutu sunucu hızını tespit etmek için SpeedTest kullanır. """
-    await spd.edit("`Hız testi yapılıyor . . .`")
+    await spd.edit("`Hız testi yapılıyor ...`")
     test = Speedtest()
 
     test.get_best_server()
     test.download()
     test.upload()
-    test.results.share()
     result = test.results.dict()
 
     await spd.edit("`"

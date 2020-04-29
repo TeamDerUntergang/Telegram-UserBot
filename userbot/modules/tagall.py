@@ -19,14 +19,18 @@ from userbot import CMD_HELP, bot
 from userbot.events import register
 from userbot.modules.admin import get_user_from_event
 
+
 @register(outgoing=True, pattern="^.tagall$")
 async def _(event):
     if event.fwd_from:
         return
-    mentions = "@tagall"
+    mentions = "@tag"
     chat = await event.get_input_chat()
-    async for x in bot.iter_participants(chat, 100):
-        mentions += f"[\u2063](tg://user?id={x.id})"
+    leng = 0
+    async for x in bot.iter_participants(chat):
+        if leng < 4092:
+            mentions += f"[\u2063](tg://user?id={x.id})"
+            leng += 1
     await event.reply(mentions)
     await event.delete()
 

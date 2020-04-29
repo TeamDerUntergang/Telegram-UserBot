@@ -81,7 +81,8 @@ async def permitpm(event):
                                 BOTLOG_CHATID,
                                 "PM sayacı kafayı yemiş gibi, botu lütfen yeniden başlatın.",
                             )
-                        LOGS.info("PM sayacı kafayı yemiş gibi, botu lütfen yeniden başlatın.")
+                        LOGS.info(
+                            "PM sayacı kafayı yemiş gibi, botu lütfen yeniden başlatın.")
                         return
 
                     await event.client(BlockRequest(event.chat_id))
@@ -150,7 +151,7 @@ async def notifon(non_event):
     """ .notifon komutu onaylanmamış kişilerden gelen PM lerden bildirim almanızı sağlar. """
     try:
         from userbot.modules.sql_helper.globals import delgvar
-    except AttributeError:
+    except:
         await non_event.edit("`Bot Non-SQL modunda çalışıyor!!`")
         return
     delgvar("NOTIF_OFF")
@@ -162,7 +163,7 @@ async def approvepm(apprvpm):
     """ .approve komutu herhangi birine PM atabilme izni verir. """
     try:
         from userbot.modules.sql_helper.pm_permit_sql import approve
-    except AttributeError:
+    except:
         await apprvpm.edit("`Bot Non-SQL modunda çalışıyor!!`")
         return
 
@@ -202,7 +203,7 @@ async def approvepm(apprvpm):
 async def disapprovepm(disapprvpm):
     try:
         from userbot.modules.sql_helper.pm_permit_sql import dissprove
-    except BaseException:
+    except:
         await disapprvpm.edit("`Bot Non-SQL modunda çalışıyor!!`")
         return
 
@@ -249,7 +250,7 @@ async def blockpm(block):
     try:
         from userbot.modules.sql_helper.pm_permit_sql import dissprove
         dissprove(uid)
-    except AttributeError:
+    except:
         pass
 
     if BOTLOG:

@@ -73,7 +73,7 @@ async def torrent_download(event):
 
 
 @register(outgoing=True, pattern="^.aurl(?: |$)(.*)")
-async def magnet_download(event):
+async def amagnet_download(event):
     uri = [event.pattern_match.group(1)]
     try:  # URL'yi kuyruğa ekler.
         download = aria2.add_uris(uri, options=None, position=None)
@@ -91,6 +91,7 @@ async def magnet_download(event):
 
 @register(outgoing=True, pattern="^.aclear(?: |$)(.*)")
 async def remove_all(event):
+    await event.edit("`Devam eden indirmeler temizleniyor... `")
     try:
         removed = aria2.remove_all(force=True)
         aria2.purge_all()
@@ -98,27 +99,21 @@ async def remove_all(event):
         pass
     if not removed:  # Eğer API False olarak dönerse sistem vasıtasıyla kaldırılmaya çalışılır.
         system("aria2p remove-all")
-    await event.edit("`Devam eden indirmeler temizleniyor... `")
-    await sleep(2.5)
     await event.edit("`Tüm indirilenler başarıyla temizlendi.`")
-    await sleep(2.5)
 
 
 @register(outgoing=True, pattern="^.apause(?: |$)(.*)")
 async def pause_all(event):
     # Tüm devam eden indirmeleri duraklatır.
-    paused = aria2.pause_all(force=True)
     await event.edit("`İndirmeler duraklatılıyor...`")
-    await sleep(2.5)
+    aria2.pause_all(force=True)
     await event.edit("`Devam eden indirmeler başarıyla durduruldu.`")
-    await sleep(2.5)
 
 
 @register(outgoing=True, pattern="^.aresume(?: |$)(.*)")
 async def resume_all(event):
-    resumed = aria2.resume_all()
     await event.edit("`İndirmeler devam ettiriliyor...`")
-    await sleep(1)
+    aria2.resume_all()
     await event.edit("`İndirmeler devam ettirildi.`")
     await sleep(2.5)
     await event.delete()

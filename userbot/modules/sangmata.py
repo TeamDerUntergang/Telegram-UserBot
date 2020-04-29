@@ -31,14 +31,14 @@ async def _(event):
     if reply_message.sender.bot:
        await event.edit("`Botlara cevap veremezsiniz.`")
        return
-    await event.edit("`Processing`")
+    await event.edit("`İşleniyor...`")
     async with bot.conversation(chat, exclusive=False) as conv:
           response = None
           try:
               msg = await reply_message.forward_to(chat)
               response = await conv.get_response(message=msg, timeout=5)
           except YouBlockedUserError: 
-              await event.edit("`Lütfen @SangMataInfo engelini kaldırın ve tekrar deneyin`")
+              await event.edit(f"`Lütfen {chat} engelini kaldırın ve tekrar deneyin`")
               return
           except Exception as e:
               print(e.__class__)
@@ -48,8 +48,7 @@ async def _(event):
           elif response.text.startswith("Forward"):
              await event.edit("`Gizlilik ayarları yüzenden alıntı yapamadım`")
           else: 
-             await event.delete()
-             await response.forward_to(event.chat_id)
+             await event.edit(response.text)
           sleep(1)
           await bot.send_read_acknowledge(chat, max_id=(response.id+3))
           await conv.cancel_all()

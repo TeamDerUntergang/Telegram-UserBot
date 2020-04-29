@@ -36,7 +36,6 @@ async def randomise(items):
 @register(outgoing=True, pattern="^.sleep( [0-9]+)?$")
 async def sleepybot(time):
     """ .sleep komutu Seden'in birkaç saniye uyumasına olanak sağlar. """
-    message = time.text
     if " " not in time.pattern_match.group(1):
         await time.reply("Kullanım Şekli: `.sleep [saniye]`")
     else:
@@ -53,24 +52,31 @@ async def sleepybot(time):
 
 
 @register(outgoing=True, pattern="^.shutdown$")
-async def killdabot(event):
+async def shutdown(event):
     """ .shutdown komutu botu kapatır. """
     await event.edit("`Görüşürüz... *Windows XP kapanma sesi*`")
     if BOTLOG:
         await event.client.send_message(BOTLOG_CHATID, "#SHUTDOWN \n"
                                         "Bot kapatıldı.")
-    await bot.disconnect()
+    try:
+        await bot.disconnect()
+    except:
+        pass
 
 
 @register(outgoing=True, pattern="^.restart$")
-async def killdabot(event):
+async def restart(event):
     await event.edit("`Bot yeniden başlatılıyor...`")
     if BOTLOG:
         await event.client.send_message(BOTLOG_CHATID, "#RESTART \n"
                                         "Bot yeniden başlatıldı.")
-    await bot.disconnect()
+
+    try:
+        await bot.disconnect()
+    except:
+        pass
+
     execl(sys.executable, sys.executable, *sys.argv)
-    exit()
 
 
 @register(outgoing=True, pattern="^.support$")
@@ -82,14 +88,14 @@ async def bot_support(wannahelp):
 @register(outgoing=True, pattern="^.creator$")
 async def creator(e):
     await e.edit("Bu bot \n"
-    "[NaytSeyd](https://t.me/NightShade) tarafından geliştirilip \n"
-    "[Sedenogen](https://t.me/CiyanogenOneTeams) tarafından sevgi ile düzenlenmiştir.")
+                 "[NaytSeyd](https://t.me/NightShade) tarafından geliştirilip \n"
+                 "[Sedenogen](https://t.me/CiyanogenOneTeams) tarafından sevgi ile düzenlenmiştir.")
 
 
 @register(outgoing=True, pattern="^.readme$")
 async def reedme(e):
     await e.edit("[Seden README.md](https://github.com/TeamDerUntergang/Telegram-UserBot/blob/seden/README.md)")
-    
+
 
 # Copyright (c) Gegham Zakaryan | 2019
 @register(outgoing=True, pattern="^.repeat (.*)")
@@ -158,7 +164,7 @@ Windows XP kapanış sesini duyabileceğini zannedersin..."
 CMD_HELP.update(
     {'support': ".support\
 \nKullanım: Yardıma ihtiyacın olursa bu komutu kullan."
-})
+     })
 
 CMD_HELP.update({
     'repo':

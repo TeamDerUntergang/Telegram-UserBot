@@ -10,6 +10,7 @@ from asyncio import sleep
 from random import choice, getrandbits, randint
 from re import sub
 import time
+import asyncio
 
 from collections import deque
 
@@ -635,6 +636,55 @@ async def Oof(e):
         await e.edit(t)
 
 
+@register(outgoing=True, pattern="^skrrt$")
+async def oof(e):
+    t = "skrrt"
+    for j in range(16):
+        t = t[:-1] + "rt"
+        await e.edit(t)
+        
+
+@register(outgoing=True, pattern="^Skrrt$")
+async def oof(e):
+    t = "Skrrt"
+    for j in range(16):
+        t = t[:-1] + "rt"
+        await e.edit(t)
+
+
+@register(outgoing=True, pattern="^\.(.*)")
+async def _(event):
+    if event.fwd_from:
+        return
+    animation_interval = 0.1
+    animation_ttl = range(0, 101)
+    input_str = event.pattern_match.group(1)
+    if input_str == "fuk":
+        await event.edit(input_str)
+        animation_chars = [
+            "🍆       🍑️",
+            "🍆     🍑️",
+            "🍆  🍑️",
+            "🍆🍑️💦"
+        ]
+        for i in animation_ttl:
+            await asyncio.sleep(animation_interval)
+            await event.edit(animation_chars[i % 4])
+
+
+@register(outgoing=True, pattern="^.kalp (.*)")
+async def _(event):
+    if event.fwd_from:
+        return
+    input_str = event.pattern_match.group(1)
+    deq = deque(list("️❤️🧡💛💚💙💜🖤"))
+    for _ in range(32):
+        await asyncio.sleep(0.1)
+        await event.edit("".join(deq))
+        deq.rotate(1)
+    await event.edit("❤️🧡💛" + input_str + "💚💙💜🖤")
+
+
 @register(outgoing=True, pattern="^.10iq$")
 async def iqless(e):
     await e.edit(
@@ -855,6 +905,12 @@ CMD_HELP.update({
 \nKullanım: Kaos duygusunu çağırın.\
 \n\noof\
 \nKullanım: ooooof\
+\n\nskrrt\
+\nKullanım: skrrrrt\
+\n\n.fuk\
+\nKullanım: ¯\_(ツ)_/¯\
+\n\n.kalp\
+\nKullanım: Sevginizi gösterin.\
 \n\n.fp\
 \nKullanım: Utanmak  🤦‍♂\
 \n\n.moon\
@@ -888,5 +944,6 @@ CMD_HELP.update({
 \n\n.scam <eylem> <süre>\
 \n[Mevcut eylemler: (typing, contact, game, location, voice, round, video, photo, document, cancel)]\
 \nKullanım: Create fake chat actions, for fun. (Varsayılan eylem: typing)\
-\n\n\nBunlardan bazıları için teşekkürler 🅱️ottom🅱️ext🅱️ot (@NotAMemeBot)."
+\n\n\nBunlardan bazıları için teşekkürler 🅱️ottom🅱️ext🅱️ot (@NotAMemeBot).\
+\n\nUyarlamalar için teşekkürler @NaytSeyd"
 })

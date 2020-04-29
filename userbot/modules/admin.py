@@ -146,7 +146,7 @@ async def promote(promt):
 
     # Telethon BadRequestError hatası verirse
     # yönetici yapma yetkimiz yoktur
-    except BadRequestError:
+    except:
         await promt.edit(NO_PERM)
         return
 
@@ -194,7 +194,7 @@ async def demote(dmod):
 
     # Telethon BadRequestError hatası verirse
     # gerekli yetkimiz yoktur
-    except BadRequestError:
+    except:
         await dmod.edit(NO_PERM)
         return
     await dmod.edit("`Yetki başarıyla düşürüldü!`")
@@ -225,7 +225,6 @@ async def ban(bon):
     else:
         return
 
-
     # Eğer kullanıcı sudo ise
     if user.id in BRAIN_CHECKER:
         await bon.edit(
@@ -233,14 +232,13 @@ async def ban(bon):
         )
         return
 
-
     # Hedefi yasaklayacağınızı duyurun
     await bon.edit("`Düşman vuruldu!`")
 
     try:
         await bon.client(EditBannedRequest(bon.chat_id, user.id,
                                            BANNED_RIGHTS))
-    except BadRequestError:
+    except:
         await bon.edit(NO_PERM)
         return
     # Spamcılar için
@@ -248,7 +246,7 @@ async def ban(bon):
         reply = await bon.get_reply_message()
         if reply:
             await reply.delete()
-    except BadRequestError:
+    except:
         await bon.edit(
             "`Mesaj atma hakkım yok! Ama yine de kullanıcı yasaklandı!`")
         return
@@ -298,7 +296,7 @@ async def nothanos(unbon):
                 BOTLOG_CHATID, "#UNBAN\n"
                 f"KULLANICI: [{user.first_name}](tg://user?id={user.id})\n"
                 f"GRUP: {unbon.chat.title}(`{unbon.chat_id}`)")
-    except UserIdInvalidError:
+    except:
         await unbon.edit("`Sanırım bu kişi yasaklama mantığım ile uyuşmuyor`")
 
 
@@ -310,7 +308,7 @@ async def spider(spdr):
     # Fonksiyonun SQL modu altında çalışıp çalışmadığını kontrol et
     try:
         from userbot.modules.sql_helper.spam_mute_sql import mute
-    except AttributeError:
+    except:
         await spdr.edit(NO_SQL)
         return
 
@@ -330,12 +328,11 @@ async def spider(spdr):
     else:
         return
 
-
     # Eğer kullanıcı sudo ise
     if user.id in BRAIN_CHECKER:
         await spdr.edit(
             "`Mute Hatası! Seden Yetkilisini susturamam.`"
-    	)
+        )
         return
 
     self_user = await spdr.client.get_me()
@@ -354,20 +351,26 @@ async def spider(spdr):
             await spdr.client(
                 EditBannedRequest(spdr.chat_id, user.id, MUTE_RIGHTS))
 
-            # Fonksiyonun yapıldığını duyurun
-            if reason:
-                await spdr.edit(f"`Kullanıcı sessize alındı !!`\nNedeni: {reason}")
-            else:
-                await spdr.edit("`Kullanıcı sessize alındı !!`")
-
-            # Susturma işlemini günlüğe belirtelim
-            if BOTLOG:
-                await spdr.client.send_message(
-                    BOTLOG_CHATID, "#MUTE\n"
-                    f"KULLANICI: [{user.first_name}](tg://user?id={user.id})\n"
-                    f"GRUP: {spdr.chat.title}(`{spdr.chat_id}`)")
-        except UserIdInvalidError:
+            await mutmsg(spdr, user, reason)
+        except UserAdminInvalidError:
+            await mutmsg(spdr, user, reason)
+        except:
             return await spdr.edit("`Sanırım bu kişi sessize alma mantığım ile uyuşmuyor`")
+
+
+async def mutmsg(spdr, user, reason):
+    # Fonksiyonun yapıldığını duyurun
+    if reason:
+        await spdr.edit(f"`Kullanıcı sessize alındı !!`\nNedeni: {reason}")
+    else:
+        await spdr.edit("`Kullanıcı sessize alındı !!`")
+
+    # Susturma işlemini günlüğe belirtelim
+    if BOTLOG:
+        await spdr.client.send_message(
+            BOTLOG_CHATID, "#MUTE\n"
+            f"KULLANICI: [{user.first_name}](tg://user?id={user.id})\n"
+            f"GRUP: {spdr.chat.title}(`{spdr.chat_id}`)")
 
 
 @register(outgoing=True, pattern="^.unmute(?: |$)(.*)")
@@ -386,7 +389,7 @@ async def unmoot(unmot):
     # Fonksiyonun SQL modu altında çalışıp çalışmadığını kontrol et
     try:
         from userbot.modules.sql_helper.spam_mute_sql import unmute
-    except AttributeError:
+    except:
         await unmot.edit(NO_SQL)
         return
 
@@ -405,8 +408,10 @@ async def unmoot(unmot):
         try:
             await unmot.client(
                 EditBannedRequest(unmot.chat_id, user.id, UNBAN_RIGHTS))
-            await unmot.edit("```Kullanıcı tekrardan konuşabilir!```")
-        except UserIdInvalidError:
+            await unmot.edit("`Kullanıcı tekrardan konuşabilir!`")
+        except UserAdminInvalidError:
+            await unmot.edit("`Kullanıcı tekrardan konuşabilir!`")
+        except:
             await unmot.edit("`Sanırım bu kişi sessizden çıkarma mantığım ile uyuşmuyor`")
             return
 
@@ -423,7 +428,7 @@ async def muter(moot):
     try:
         from userbot.modules.sql_helper.spam_mute_sql import is_muted
         from userbot.modules.sql_helper.gmute_sql import is_gmuted
-    except AttributeError:
+    except:
         return
     muted = is_muted(moot.chat_id)
     gmuted = is_gmuted(moot.sender_id)
@@ -441,8 +446,11 @@ async def muter(moot):
         for i in muted:
             if str(i.sender) == str(moot.sender_id):
                 await moot.delete()
-                await moot.client(
-                    EditBannedRequest(moot.chat_id, moot.sender_id, rights))
+                try:
+                    await moot.client(
+                        EditBannedRequest(moot.chat_id, moot.sender_id, rights))
+                except:
+                    pass
     for i in gmuted:
         if i.sender == str(moot.sender_id):
             await moot.delete()
@@ -464,7 +472,7 @@ async def ungmoot(un_gmute):
     # Fonksiyonun SQL modu altında çalışıp çalışmadığını kontrol et
     try:
         from userbot.modules.sql_helper.gmute_sql import ungmute
-    except AttributeError:
+    except:
         await un_gmute.edit(NO_SQL)
         return
 
@@ -506,7 +514,7 @@ async def gspider(gspdr):
     # Fonksiyonun SQL modu altında çalışıp çalışmadığını kontrol et
     try:
         from userbot.modules.sql_helper.gmute_sql import gmute
-    except AttributeError:
+    except:
         await gspdr.edit(NO_SQL)
         return
 
@@ -516,13 +524,10 @@ async def gspider(gspdr):
     else:
         return
 
-
-
     # Eğer kullanıcı sudo ise
     if user.id in BRAIN_CHECKER:
         await gspdr.edit("`Gmute Hatası! Seden Yetkilisini küresel olarak susturamam.`")
         return
-
 
     # Başarı olursa bilgi ver
     await gspdr.edit("`Susturuluyor...`")
@@ -581,16 +586,15 @@ async def rm_deletedacc(show):
             try:
                 await show.client(
                     EditBannedRequest(show.chat_id, user.id, BANNED_RIGHTS))
-            except ChatAdminRequiredError:
-                await show.edit("`Bu grupta ban yetkim bulunmamakta`")
-                return
             except UserAdminInvalidError:
                 del_u -= 1
                 del_a += 1
+            except:
+                await show.edit("`Bu grupta ban yetkim bulunmamakta`")
+                return
             await show.client(
                 EditBannedRequest(show.chat_id, user.id, UNBAN_RIGHTS))
             del_u += 1
-
 
     if del_u > 0:
         del_status = f"**{del_u}** tane silinmiş hesap gruptan çıkarıldı"
@@ -599,18 +603,15 @@ async def rm_deletedacc(show):
         del_status = f"**{del_u}** tane silinmiş hesap gruptan çıkarıldı \
         \n**{del_a}** tane silinmiş olan yönetici hesapları çıkartılamadı"
 
-
     await show.edit(del_status)
     await sleep(2)
     await show.delete()
-
 
     if BOTLOG:
         await show.client.send_message(
             BOTLOG_CHATID, "#TEMIZLIK\n"
             f"**{del_u}** tane silinmiş hesap çıkartıldı !!\
             \nGRUP: {show.chat.title}(`{show.chat_id}`)")
-
 
 
 @register(outgoing=True, pattern="^.admins$")
@@ -662,7 +663,7 @@ async def pin(msg):
     try:
         await msg.client(
             UpdatePinnedMessageRequest(msg.to_id, to_pin, is_silent))
-    except BadRequestError:
+    except:
         await msg.edit(NO_PERM)
         return
 
@@ -696,14 +697,12 @@ async def kick(usr):
         await usr.edit("`Kullanıcı bulunamadı.`")
         return
 
-
     # Eğer kullanıcı sudo ise
     if user.id in BRAIN_CHECKER:
         await usr.edit(
             "`Kick Hatası! Seden Yetkilisini gruptan tekmeleyemem.`"
         )
         return
-
 
     await usr.edit("`Çıkartılıyor...`")
 
@@ -750,7 +749,7 @@ async def get_users(show):
                     mentions += f"\n[{user.first_name}](tg://user?id={user.id}) `{user.id}`"
                 else:
                     mentions += f"\nSilinen hesap `{user.id}`"
-    except ChatAdminRequiredError as err:
+    except Exception as err:
         mentions += " " + str(err) + "\n"
     try:
         await show.edit(mentions)
@@ -799,7 +798,7 @@ async def get_user_from_event(event):
                 return user_obj
         try:
             user_obj = await event.client.get_entity(user)
-        except (TypeError, ValueError) as err:
+        except Exception as err:
             await event.edit(str(err))
             return None
 
@@ -812,13 +811,13 @@ async def get_user_from_id(user, event):
 
     try:
         user_obj = await event.client.get_entity(user)
-    except (TypeError, ValueError) as err:
+    except Exception as err:
         await event.edit(str(err))
         return None
 
     return user_obj
 
-  
+
 @register(outgoing=True, pattern="^.usersdel ?(.*)")
 async def get_usersdel(show):
     """ .usersdel komutu grup içinde ki silinen hesapları gösterir """
@@ -835,7 +834,7 @@ async def get_usersdel(show):
         else:
             searchq = show.pattern_match.group(1)
             async for user in show.client.iter_participants(
-                   show.chat_id, search=f'{searchq}'):
+                    show.chat_id, search=f'{searchq}'):
                 if not user.deleted:
                     mentions += f"\n[{user.first_name}](tg://user?id={user.id}) `{user.id}`"
          #       else:
@@ -889,7 +888,7 @@ async def get_userdel_from_event(event):
                 return user_obj
         try:
             user_obj = await event.client.get_entity(user)
-        except (TypeError, ValueError) as err:
+        except Exception as err:
             await event.edit(str(err))
             return None
 
@@ -902,11 +901,12 @@ async def get_userdel_from_id(user, event):
 
     try:
         user_obj = await event.client.get_entity(user)
-    except (TypeError, ValueError) as err:
+    except Exception as err:
         await event.edit(str(err))
         return None
 
     return user_obj
+
 
 @register(outgoing=True, pattern="^.bots$", groups_only=True)
 async def get_bots(show):
@@ -917,16 +917,16 @@ async def get_bots(show):
     try:
        # if isinstance(message.to_id, PeerChat):
         #    await show.edit("`Sadece süper grupların botlara sahip olabileceğini duydum.`")
-         #   return
+        #   return
        # else:
-            async for user in show.client.iter_participants(
-                    show.chat_id, filter=ChannelParticipantsBots):
-                if not user.deleted:
-                    link = f"<a href=\"tg://user?id={user.id}\">{user.first_name}</a>"
-                    userid = f"<code>{user.id}</code>"
-                    mentions += f"\n{link} {userid}"
-                else:
-                    mentions += f"\nSilinmiş bot <code>{user.id}</code>"
+        async for user in show.client.iter_participants(
+                show.chat_id, filter=ChannelParticipantsBots):
+            if not user.deleted:
+                link = f"<a href=\"tg://user?id={user.id}\">{user.first_name}</a>"
+                userid = f"<code>{user.id}</code>"
+                mentions += f"\n{link} {userid}"
+            else:
+                mentions += f"\nSilinmiş bot <code>{user.id}</code>"
     except ChatAdminRequiredError as err:
         mentions += " " + str(err) + "\n"
     try:
@@ -945,7 +945,6 @@ async def get_bots(show):
         )
         remove("botlist.txt")
 
-  
 
 CMD_HELP.update({
     "admin":

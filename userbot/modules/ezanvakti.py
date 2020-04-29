@@ -22,7 +22,7 @@ logging.basicConfig(format='[%(levelname) 5s/%(asctime)s] %(name)s: %(message)s'
 
 @register(outgoing=True, pattern="^.ezanvakti ?(.*)")
 async def ezanvakti(event):
-    konum = event.pattern_match.group(1)
+    konum = event.pattern_match.group(1).lower()
 
     if len(konum) < 1:
         await event.edit("`Lütfen komutun yanına bir şehir belirtin.`")
@@ -82,17 +82,14 @@ async def ramazan(event):
                  f"📍 **Yer: **`{konum}`\n\n" +
                  f"🏙 **Sahur: ** `{sahur}`\n" +
                  f"🌃 **İftar: ** `{iftar}`\n" +
-                 f"🌌 **Teravih: ** `{teravih}`\n\n" +
-                 f"**Hayırlı Ramazanlar** ☺️ \n")
+                 f"🌌 **Teravih: ** `{teravih}`\n")
 
-    await event.edit(vakitler)    
+    await event.edit(vakitler)
 
 CMD_HELP.update({
-    "ezanvakti":
-    ".ezanvakti <şehir> \
-    \n**Kullanım**: Belirtilen şehir için namaz vakitlerini gösterir. \
-    \n**Örnek**: .ezanvakti istanbul \
-    \n.ramazan <şehir> \
-    \n**Kullanım**: Belirtilen şehir için ramazan vakitlerini gösterir. \
-    \n**Örnek**: .ramazan istanbul"
-})
+        "ezanvakti": 
+        ".ezanvakti \
+          \nKullanım: ezanvakti bilmem ne.\n\n \
+         .ramazan \
+          \nKullanım: ramazan bilmem ne.\n"
+    })

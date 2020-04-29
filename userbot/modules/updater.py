@@ -45,7 +45,7 @@ async def update_requirements():
         return repr(e)
 
 
-@register(outgoing=True, pattern="^\.update(?: |$)(.*)")
+@register(outgoing=True, pattern=r"^\.update(?: |$)(.*)")
 async def upstream(ups):
     ".update komutu ile botunun güncel olup olmadığını denetleyebilirsin."
     await ups.edit("`Güncellemeler denetleniyor...`")
@@ -77,7 +77,7 @@ async def upstream(ups):
         origin.fetch()
         force_update = True
         repo.create_head('seden', origin.refs.seden)
-        repo.heads.seden.set_tracking_branch(origin.refs.sql-extended)
+        repo.heads.seden.set_tracking_branch(origin.refs.sql)
         repo.heads.seden.checkout(True)
 
     ac_br = repo.active_branch.name
@@ -177,7 +177,7 @@ async def upstream(ups):
             ups_rem.pull(ac_br)
         except GitCommandError:
             repo.git.reset("--hard", "FETCH_HEAD")
-        reqs_upgrade = await update_requirements()
+        await update_requirements()
         await ups.edit('`Güncelleme başarıyla tamamlandı!\n'
                        'Yeniden başlatılıyor...`')
         # Bot için Heroku üzerinde yeni bir instance oluşturalım.

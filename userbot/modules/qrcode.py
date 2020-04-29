@@ -15,6 +15,7 @@ import asyncio
 import qrcode
 import barcode
 from barcode.writer import ImageWriter
+from urllib3 import PoolManager
 
 from bs4 import BeautifulSoup
 
@@ -27,24 +28,22 @@ async def parseqr(qr_e):
     """ .decode komutu cevap verilen fotoğraftan QR kodu / Barkod içeriğini alır """
     downloaded_file_name = await qr_e.client.download_media(
         await qr_e.get_reply_message())
+
     # QR kodunu çözmek için resmi ZXing web sayfasını ayrıştır
-    command_to_exec = [
-        "curl", "-X", "POST", "-F", "f=@" + downloaded_file_name + "",
-        "https://zxing.org/w/decode"
-    ]
-    process = await asyncio.create_subprocess_exec(
-        *command_to_exec,
-        stdout=asyncio.subprocess.PIPE,
-        stderr=asyncio.subprocess.PIPE,
-    )
-    # Alt işlemin bitmesini bekle
-    stdout, stderr = await process.communicate()
-    e_response = stderr.decode().strip()
-    t_response = stdout.decode().strip()
+    files = {'f': open(downloaded_file_name, 'rb').read()}
+    t_response = None
+
+    try:
+        http = PoolManager()
+        t_response = http.request(
+            'POST', "https://zxing.org/w/decode", fields=files)
+        t_response = t_response.data
+        http.clear()
+    except:
+        pass
+
     os.remove(downloaded_file_name)
     if not t_response:
-        logger.info(e_response)
-        logger.info(t_response)
         await qr_e.edit("decode başarısız oldu.")
         return
     soup = BeautifulSoup(t_response, "html.parser")
@@ -53,7 +52,7 @@ async def parseqr(qr_e):
 
 
 @register(pattern=r".barcode(?: |$)([\s\S]*)", outgoing=True)
-async def barcode(event):
+async def barcode_read(event):
     """ .barcode komutu verilen içeriği içeren bir barkod oluşturur. """
     await event.edit("`İşleniyor..`")
     input_str = event.pattern_match.group(1)

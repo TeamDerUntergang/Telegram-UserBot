@@ -17,7 +17,7 @@ from userbot import BOTLOG, BOTLOG_CHATID, CMD_HELP, ANTI_SPAMBOT, ANTI_SPAMBOT_
 
 
 @bot.on(ChatAction)
-async def ANTI_SPAMBOT(welcm):
+async def anti_spambot(welcm):
     try:
         ''' Eğer bir kullanıcı spam algoritmasıyla eşleşiyorsa
            onu gruptan yasaklar. '''
@@ -69,7 +69,8 @@ async def ANTI_SPAMBOT(welcm):
                     message_date = message.date
 
                     if message_date < join_time:
-                        continue  # Eğer mesaj kullanıcı katılma tarihinden daha önce ise yoksayılır.
+                        # Eğer mesaj kullanıcı katılma tarihinden daha önce ise yoksayılır.
+                        continue
 
                     check_user = await welcm.client.get_entity(user_id)
 
@@ -119,7 +120,7 @@ async def ANTI_SPAMBOT(welcm):
                                                      "Announcements", "Info",
                                                      "Duyuru", "Duyurular"
                                                      "Bilgilendirme", "Bilgilendirmeler"):
-                            if user.last_name == "Bot":
+                            if check_user.last_name == "Bot":
                                 reason = "Bilinen SpamBot"
                                 spambot = True
 
@@ -172,7 +173,7 @@ async def ANTI_SPAMBOT(welcm):
                     if kicked or reported:
                         await welcm.client.send_message(
                             BOTLOG_CHATID, "#ANTI_SPAMBOT RAPORU\n"
-                            f"Kullanıcı: [{user.first_name}](tg://user?id={check_user.id})\n"
+                            f"Kullanıcı: [{check_user.first_name}](tg://user?id={check_user.id})\n"
                             f"Kullanıcı IDsi: `{check_user.id}`\n"
                             f"Sohbet: {welcm.chat.title}\n"
                             f"Sohbet IDsi: `{welcm.chat_id}`\n"

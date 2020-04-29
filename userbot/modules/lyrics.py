@@ -31,7 +31,7 @@ async def lyrics(lyric):
             args = lyric.text.split('.lyrics')[1].split('-')
             artist = args[0].strip(' ')
             song = args[1].strip(' ')
-        except Exception:
+        except:
             await lyric.edit("`Lütfen sanatçı ve şarkı ismini veriniz`")
             return
 
@@ -57,7 +57,7 @@ async def lyrics(lyric):
             lyric.chat_id,
             "lyrics.txt",
             reply_to=lyric.id,
-            )
+        )
         os.remove("lyrics.txt")
     else:
         await lyric.edit(f"**Arama sorgusu**: \n`{artist} - {song}`\n\n```{songs.lyrics}```")

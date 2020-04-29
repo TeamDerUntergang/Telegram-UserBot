@@ -55,6 +55,11 @@
       "value": "1",
       "required": false
     },
+    "TZ": {
+      "description": "Bunun ne işe yaradığı hakkında fikrin yoksa kurcalama :)",
+      "value": "Europe/Istanbul",
+      "required": true  
+    },
     "CHROME_DRIVER": {
       "description": "Selenium tabanlı modüller için ChromeDriver konumu.",
       "value": "/usr/bin/chromedriver",

@@ -15,6 +15,9 @@ RUN apk add --no-cache=true --update \
     bzip2-dev \
     curl \
     figlet \
+    freetype-dev \
+    libjpeg-turbo-dev \
+    libpng-dev \
     gcc \
     g++ \
     git \

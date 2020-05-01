@@ -795,7 +795,7 @@ async def get_user_from_event(event):
                           MessageEntityMentionName):
                 user_id = probable_user_mention_entity.user_id
                 user_obj = await event.client.get_entity(user_id)
-                return user_obj
+                return user_obj, extra
         try:
             user_obj = await event.client.get_entity(user)
         except Exception as err:

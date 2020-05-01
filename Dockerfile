@@ -1,86 +1,59 @@
-# Biz Alpine Latest kullanıyoruz
-FROM alpine:latest
+# Biz Arch Linux kullanıyoruz <3
+FROM archlinux:latest
 
-#
-# Bazı paketler için topluluk reposunun eklenmesi gerek
-#
-RUN sed -e 's;^#http\(.*\)/edge/community;http\1/edge/community;g' -i /etc/apk/repositories
 
-#
-# Paketleri yükle
-#
-RUN apk add --no-cache=true --update \
-        bash \
-    build-base \
-    bzip2-dev \
-    curl \
-    figlet \
-    freetype-dev \
-    libjpeg-turbo-dev \
-    libpng-dev \
-    gcc \
-    g++ \
-    git \
-    sudo \
+# Gerekyi paketleri yükle
+RUN pacman -Syyu --noconfirm \
     aria2 \
-    util-linux \
+    curl \
+    chromium \
+    ffmpeg \
+    figlet \
+    gcc \
+    git \
+    jq \
     libevent \
-    jpeg-dev \
-    libffi-dev \
-    libpq \
-    libwebp-dev \
+    libffi \
+    libjpeg \
+    libpng \
+    libpqxx \
+    libsystemd \
+    libwebp \
     libxml2 \
-    libxml2-dev \
-    libxslt-dev \
+    libxslt \
     linux-headers \
     musl \
     neofetch \
-    openssl-dev \
+    nss \
+    openssl \
     postgresql \
     postgresql-client \
-    postgresql-dev \
-    openssl \
-    pv \
-    jq \
-    wget \
-    python \
-    python-dev \
     python3 \
-    python3-dev \
-    readline-dev \
-    sqlite \
-    ffmpeg \
-    sqlite-dev \
+    python-pip \
+    pv \
     sudo \
-    chromium \
-    chromium-chromedriver \
-    zlib-dev \
-    jpeg 
-    
-  
+    tzdata \
+    util-linux \
+    wget  
 
 
-RUN python3 -m ensurepip \
-    && pip3 install --upgrade pip setuptools \
-    && rm -r /usr/lib/python*/ensurepip && \
-    if [ ! -e /usr/bin/pip ]; then ln -s pip3 /usr/bin/pip ; fi && \
-    if [[ ! -e /usr/bin/python ]]; then ln -sf /usr/bin/python3 /usr/bin/python; fi && \
-    rm -r /root/.cache
-
-#
 # Repoyu klonla ve çalışma dizinini hazırla
-#
-RUN git clone -b seden https://github.com/TeamDerUntergang/Telegram-UserBot /root/userbot
-RUN mkdir /root/userbot/bin/
-WORKDIR /root/userbot/
+RUN git clone https://github.com/TeamDerUntergang/Telegram-UserBot -b seden /root/sedenbot
+RUN mkdir /root/sedenbot/bin/
+WORKDIR /root/sedenbot/
 
-#
+
 # Oturum ve yapılandırmayı kopyala (varsa)
-#
-COPY ./sample_config.env ./userbot.session* ./config.env* /root/userbot/
+COPY ./sample_config.env ./userbot.session* ./config.env* /root/sedenbot/
 
-#
-# Gereksinimleri yükle
-#
+
+# Zaman dilimini ayarla
+ENV TZ=Europe/Istanbul
+
+
+# Gerekli pip modüllerini kur
 RUN pip3 install -r requirements.txt
+
+
+# Botu çalıştır
 CMD ["python3","main.py"]

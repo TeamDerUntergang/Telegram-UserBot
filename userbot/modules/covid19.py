@@ -44,5 +44,5 @@ async def covid(event):
 CMD_HELP.update({
     "covid19":
     ".covid \
-    \n**Kullanım**: Hem Dünya geneli hem de Türkiye için güncel Covid 19 istatistikleri."
+    \nKullanım: Hem Dünya geneli hem de Türkiye için güncel Covid 19 istatistikleri."
 })

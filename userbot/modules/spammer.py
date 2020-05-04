@@ -26,7 +26,7 @@ async def tmeme(e):
             await e.client.send_message(
                 BOTLOG_CHATID,
                 "#TSPAM \n\n"
-                "TSpam başarıyla gerçemleştirildi"
+                "TSpam başarıyla gerçekleştirildi"
                 )
 
 @register(outgoing=True, pattern="^.spam")
@@ -42,7 +42,7 @@ async def spammer(e):
             await e.client.send_message(
                 BOTLOG_CHATID,
                 "#SPAM \n\n"
-                "Spam başarıyla gerçemleştirildi"
+                "Spam başarıyla gerçekleştirildi"
                 )
                                
 @register(outgoing=True, pattern="^.bigspam")
@@ -59,7 +59,7 @@ async def bigspam(e):
             await e.client.send_message(
                 BOTLOG_CHATID,
                 "#BIGSPAM \n\n"
-                "Bigspam başarıyla gerçemleştirildi"
+                "Bigspam başarıyla gerçekleştirildi"
                 )
         
         
@@ -77,7 +77,7 @@ async def tiny_pic_spam(e):
             await e.client.send_message(
                 BOTLOG_CHATID,
                 "#PICSPAM \n\n"
-                "PicSpam başarıyla gerçemleştirildi"
+                "PicSpam başarıyla gerçekleştirildi"
                 )
 
 
@@ -100,7 +100,7 @@ async def delayspammer(e):
             await e.client.send_message(
                 BOTLOG_CHATID,
                 "#DelaySPAM \n\n"
-                "DelaySpam başarıyla gerçemleştirildi"
+                "DelaySpam başarıyla gerçekleştirildi"
                 )
                                
 CMD_HELP.update({

@@ -52,6 +52,6 @@ async def _(event):
 CMD_HELP.update({
     "tagall":
     ".tagall\
-    \n**Kullanım**: Bu komutu kullandığınızda sohbet içerisinde ki herkesi etiketler.\n\n.admin \
-    \n**Kullanım**: Bu komutu kullandığınızda sohbet içerisinde ki yöneticileri etiketler."
+    \nKullanım: Bu komutu kullandığınızda sohbet içerisinde ki herkesi etiketler.\n\n.admin \
+    \nKullanım: Bu komutu kullandığınızda sohbet içerisinde ki yöneticileri etiketler."
 })

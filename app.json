@@ -78,6 +78,14 @@
       "description": "Günlüğe kaydetmeyi açmak istiyorsanız, bunu True olarak ayarlayın",
       "value": "False"
     },
+    "BOT_USERNAME": {
+      "description": "Inline bot özelliğinin çalışması için gereklidir. Buraya botunuzun kullanıcı adınız yazmanız lazım (Örnek: @NaytSeydBot). Botunuz yok ise @BotFather yardımı ile bot oluşturabilirsiniz.",
+      "required": false  
+    },
+    "BOT_TOKEN": {
+      "description": "Inline bot özelliğinin çalışması için gereklidir. Buraya botunuzun tokenini yazmanız lazım. Botunuz yok ise @BotFather yardımı ile bot oluşturabilirsiniz.",
+      "required": false    
+    },
     "GENIUS_API_TOKEN": {
       "description": "Genius API Key, 'https://genius.com/developers' adresinden alın.",
       "required": false

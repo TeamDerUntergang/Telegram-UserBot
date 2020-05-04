@@ -89,9 +89,9 @@ async def ramazan(event):
 CMD_HELP.update({
     "ezanvakti":
     ".ezanvakti <şehir> \
-    \n**Kullanım**: Belirtilen şehir için namaz vakitlerini gösterir. \
-    \n**Örnek**: .ezanvakti istanbul \
+    \nKullanım: Belirtilen şehir için namaz vakitlerini gösterir. \
+    \nÖrnek: .ezanvakti istanbul \
     \n.ramazan <şehir> \
-    \n**Kullanım**: Belirtilen şehir için ramazan vakitlerini gösterir. \
-    \n**Örnek**: .ramazan istanbul"
+    \nKullanım: Belirtilen şehir için ramazan vakitlerini gösterir. \
+    \nÖrnek: .ramazan istanbul"
 })

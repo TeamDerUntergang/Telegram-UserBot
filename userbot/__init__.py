@@ -8,18 +8,46 @@
 """ UserBot hazırlanışı. """
 
 import os
+import re
 
 from sys import version_info
 from logging import basicConfig, getLogger, INFO, DEBUG
 from distutils.util import strtobool as sb
+from math import ceil
 
 from pylast import LastFMNetwork, md5
+from pySmartDL import SmartDL
 from dotenv import load_dotenv
 from requests import get
-from telethon import TelegramClient
+from telethon.sync import TelegramClient, custom, events
 from telethon.sessions import StringSession
-
+from telethon.utils import get_peer_id
 load_dotenv("config.env")
+
+def paginate_help(page_number, loaded_modules, prefix):
+    number_of_rows = 5
+    number_of_cols = 2
+    helpable_modules = []
+    for p in loaded_modules:
+        if not p.startswith("_"):
+            helpable_modules.append(p)
+    helpable_modules = sorted(helpable_modules)
+    modules = [custom.Button.inline(
+        "{} {}".format("🔸", x),
+        data="ub_modul_{}".format(x))
+        for x in helpable_modules]
+    pairs = list(zip(modules[::number_of_cols], modules[1::number_of_cols]))
+    if len(modules) % number_of_cols == 1:
+        pairs.append((modules[-1],))
+    max_num_pages = ceil(len(pairs) / number_of_rows)
+    modulo_page = page_number % max_num_pages
+    if len(pairs) > number_of_rows:
+        pairs = pairs[modulo_page * number_of_rows:number_of_rows * (modulo_page + 1)] + \
+            [
+            (custom.Button.inline("⬅️Geri", data="{}_prev({})".format(prefix, modulo_page)),
+             custom.Button.inline("İleri➡️", data="{}_next({})".format(prefix, modulo_page)))
+        ]
+    return pairs
 
 # Bot günlükleri kurulumu:
 CONSOLE_LOGGER_VERBOSE = sb(os.environ.get("CONSOLE_LOGGER_VERBOSE", "False"))
@@ -36,8 +64,8 @@ else:
                 level=INFO)
 LOGS = getLogger(__name__)
 
-if version_info[0] < 3 or version_info[1] < 6:
-    LOGS.info("En az python 3.7 sürümüne sahip olmanız gerekir."
+if version_info[0] < 3 or version_info[1] < 8:
+    LOGS.info("En az python 3.8 sürümüne sahip olmanız gerekir."
               "Birden fazla özellik buna bağlıdır. Bot kapatılıyor.")
     quit(1)
 
@@ -91,6 +119,9 @@ OCR_SPACE_API_KEY = os.environ.get("OCR_SPACE_API_KEY", None)
 # remove.bg API key
 REM_BG_API_KEY = os.environ.get("REM_BG_API_KEY", None)
 
+# AUTO PP
+AUTO_PP = os.environ.get("AUTO_PP", None)
+
 # Chrome sürücüsü ve Google Chrome dosyaları
 CHROME_DRIVER = os.environ.get("CHROME_DRIVER", None)
 GOOGLE_CHROME_BIN = os.environ.get("GOOGLE_CHROME_BIN", None)
@@ -115,9 +146,6 @@ TZ_NUMBER = int(os.environ.get("TZ_NUMBER", 1))
 
 # Temiz Karşılama
 CLEAN_WELCOME = sb(os.environ.get("CLEAN_WELCOME", "True"))
-
-# Otomatik saate göre pp
-AUTO_PP = os.environ.get("AUTO_PP", None)
 
 # Last.fm Modülü
 BIO_PREFIX = os.environ.get("BIO_PREFIX", None)
@@ -144,11 +172,15 @@ GDRIVE_FOLDER_ID = os.environ.get("GDRIVE_FOLDER_ID", None)
 TEMP_DOWNLOAD_DIRECTORY = os.environ.get("TMP_DOWNLOAD_DIRECTORY",
                                          "./downloads")
 
+# Inline bot çalışması için
+BOT_TOKEN = os.environ.get("BOT_TOKEN", None)
+BOT_USERNAME = os.environ.get("BOT_USERNAME", None)
 
 # Genius modülünün çalışması için buradan değeri alın https://genius.com/developers her ikisi de aynı değerlere sahiptir
 GENIUS_API_TOKEN = os.environ.get("GENIUS", None)
 # Genius modülünün çalışması için buradan değeri alın https://genius.com/developers her ikisi de aynı değerlere sahiptir
 GENIUS = os.environ.get("GENIUS_API_TOKEN", None)
+CMD_HELP = {}
 
 
 # CloudMail.ru ve MEGA.nz ayarlama
@@ -163,16 +195,9 @@ binaries = {
 }
 
 for binary, path in binaries.items():
-    if os.path.isfile(path):
-        LOGS.info(msg=f"Dosya zaten indirilmiş: {path}")
-        continue
-    try:
-        from pySmartDL import SmartDL
-        downloader = SmartDL(binary, path, progress_bar=False)
-        downloader.start()
-        os.chmod(path, 0o755)
-    except:
-        pass
+    downloader = SmartDL(binary, path, progress_bar=False)
+    downloader.start()
+    os.chmod(path, 0o755)
 
 # 'bot' değişkeni
 if STRING_SESSION:
@@ -217,6 +242,113 @@ async def check_botlog_chatid():
 
 
 with bot:
+    tgbot = TelegramClient(
+        "TG_BOT_TOKEN",
+        api_id=API_KEY,
+        api_hash=API_HASH
+    ).start(bot_token=BOT_TOKEN)
+
+    moduller = CMD_HELP
+    me = bot.get_me()
+    uid = me.id
+    
+    @tgbot.on(events.NewMessage(pattern='/start'))
+    async def handler(event):
+        if not event.message.from_id == uid:
+            await event.reply(f'`Merhaba ben` @SedenUserBot`! Ben sahibime (`@{me.username}`) yardımcı olmak için varım, yaani sana yardımcı olamam :/ Ama sen de bir Seden açabilirsin; Kanala bak` @SedenUserBot')
+        else:
+            await event.reply(f'`Senin için çalışıyorum :) Seni seviyorum. ❤️`')    
+
+    @tgbot.on(events.InlineQuery)  # pylint:disable=E0602
+    async def inline_handler(event):
+        builder = event.builder
+        result = None
+        query = event.text
+        if event.query.user_id == uid and query.startswith("@SedenUserBot"):
+            rev_text = query[::-1]
+            buttons = paginate_help(0, moduller, "helpme")
+            result = builder.article(
+                f"Lütfen Sadece .yardım Komutu İle Kullanın",
+                text="{}\nYüklenen Modül Sayısı: {}".format(
+                    "Merhaba! Ben @SedenUserBot kullanıyorum!\n\nhttps://github.com/TeamDerUntergang/Telegram-UserBot", len(moduller)),
+                buttons=buttons,
+                link_preview=False
+            )
+        elif query.startswith("tb_btn"):
+            result = builder.article(
+                "© @SedenUserBot",
+                text=f"@SedenUserBot ile güçlendirildi",
+                buttons=[],
+                link_preview=True
+            )
+        else:
+            result = builder.article(
+                "© @SedenUserBot",
+                text="""@SedenUserBot'u kullanmayı deneyin!
+Hesabınızı bot'a çevirebilirsiniz ve bunları kullanabilirsiniz. Unutmayın, siz başkasının botunu yönetemezsiniz! Alttaki GitHub adresinden tüm kurulum detayları anlatılmıştır.""",
+                buttons=[
+                    [custom.Button.url("Kanala Katıl", "https://t.me/SedenUserBot"), custom.Button.url(
+                        "Gruba Katıl", "https://t.me/SedenUserBotSupport")],
+                    [custom.Button.url(
+                        "GitHub", "https://github.com/TeamDerUntergang/Telegram-UserBot")]
+                ],
+                link_preview=False
+            )
+        await event.answer([result] if result else None)
+    @tgbot.on(events.callbackquery.CallbackQuery(  # pylint:disable=E0602
+        data=re.compile(b"helpme_next\((.+?)\)")
+    ))
+    async def on_plug_in_callback_query_handler(event):
+        if event.query.user_id == uid:  # pylint:disable=E0602
+            current_page_number = int(
+                event.data_match.group(1).decode("UTF-8"))
+            buttons = paginate_help(
+                current_page_number + 1, moduller, "helpme")
+            # https://t.me/TelethonChat/115200
+            await event.edit(buttons=buttons)
+        else:
+            reply_pop_up_alert = "Lütfen kendine bir @SedenUserBot aç, benim mesajlarımı düzenlemeye çalışma!"
+            await event.answer(reply_pop_up_alert, cache_time=0, alert=True)
+
+
+    @tgbot.on(events.callbackquery.CallbackQuery(  # pylint:disable=E0602
+        data=re.compile(b"helpme_prev\((.+?)\)")
+    ))
+    async def on_plug_in_callback_query_handler(event):
+        if event.query.user_id == uid:  # pylint:disable=E0602
+            current_page_number = int(
+                event.data_match.group(1).decode("UTF-8"))
+            buttons = paginate_help(
+                current_page_number - 1,
+                moduller,  # pylint:disable=E0602
+                "helpme"
+            )
+            # https://t.me/TelethonChat/115200
+            await event.edit(buttons=buttons)
+        else:
+            reply_pop_up_alert = "Lütfen kendine bir @SedenUserBot aç, benim mesajlarımı düzenlemeye çalışma!"
+            await event.answer(reply_pop_up_alert, cache_time=0, alert=True)
+
+    @tgbot.on(events.callbackquery.CallbackQuery(  # pylint:disable=E0602
+        data=re.compile(b"ub_modul_(.*)")
+    ))
+    async def on_plug_in_callback_query_handler(event):
+        if event.query.user_id == uid:  # pylint:disable=E0602
+            modul_name = event.data_match.group(1).decode("UTF-8")
+
+            cmdhel = str(CMD_HELP[modul_name])
+            if len(cmdhel) > 90:
+                help_string = str(CMD_HELP[modul_name])[:90] + "\n\nDevamı için .seden " + modul_name + " yazın."
+            else:
+                help_string = str(CMD_HELP[modul_name])
+
+            reply_pop_up_alert = help_string if help_string is not None else \
+            "No DOCSTRING has been setup for {} modul".format(modul_name)
+            await event.answer(reply_pop_up_alert, cache_time=0, alert=True)
+        else:
+            reply_pop_up_alert = "Lütfen kendine bir @SedenUserBot aç, benim mesajlarımı düzenlemeye çalışma!"
+            await event.answer(reply_pop_up_alert, cache_time=0, alert=True)
+
     try:
         bot.loop.run_until_complete(check_botlog_chatid())
     except:
@@ -225,6 +357,7 @@ with bot:
             "Ortam değişkenlerinizi / config.env dosyanızı kontrol edin.")
         quit(1)
 
+
 # Küresel Değişkenler
 COUNT_MSG = 0
 USERS = {}
@@ -232,80 +365,77 @@ BRAIN_CHECKER = []
 COUNT_PM = {}
 LASTMSG = {}
 ENABLE_KILLME = True
-CMD_HELP = {}
 ISAFK = False
 AFKREASON = None
-ZALG_LIST = [
-    [
-        "̖",
-        " ̗",
-        " ̘",
-        " ̙",
-        " ̜",
-        " ̝",
-        " ̞",
-        " ̟",
-        " ̠",
-        " ̤",
-        " ̥",
-        " ̦",
-        " ̩",
-        " ̪",
-        " ̫",
-        " ̬",
-        " ̭",
-        " ̮",
-        " ̯",
-        " ̰",
-        " ̱",
-        " ̲",
-        " ̳",
-        " ̹",
-        " ̺",
-        " ̻",
-        " ̼",
-        " ͅ",
-        " ͇",
-        " ͈",
-        " ͉",
-        " ͍",
-        " ͎",
-        " ͓",
-        " ͔",
-        " ͕",
-        " ͖",
-        " ͙",
-        " ͚",
-        " ",
-    ],
-    [
-        " ̍", " ̎", " ̄", " ̅", " ̿", " ̑", " ̆", " ̐", " ͒", " ͗",
-        " ͑", " ̇", " ̈", " ̊", " ͂", " ̓", " ̈́", " ͊", " ͋", " ͌",
-        " ̃", " ̂", " ̌", " ͐", " ́", " ̋", " ̏", " ̽", " ̉", " ͣ",
-        " ͤ", " ͥ", " ͦ", " ͧ", " ͨ", " ͩ", " ͪ", " ͫ", " ͬ", " ͭ",
-        " ͮ", " ͯ", " ̾", " ͛", " ͆", " ̚"
-    ],
-    [
-        " ̕",
-        " ̛",
-        " ̀",
-        " ́",
-        " ͘",
-        " ̡",
-        " ̢",
-        " ̧",
-        " ̨",
-        " ̴",
-        " ̵",
-        " ̶",
-        " ͜",
-        " ͝",
-        " ͞",
-        " ͟",
-        " ͠",
-        " ͢",
-        " ̸",
-        " ̷",
-        " ͡",
-    ]
-]
+ZALG_LIST = [[
+    "̖",
+    " ̗",
+    " ̘",
+    " ̙",
+    " ̜",
+    " ̝",
+    " ̞",
+    " ̟",
+    " ̠",
+    " ̤",
+    " ̥",
+    " ̦",
+    " ̩",
+    " ̪",
+    " ̫",
+    " ̬",
+    " ̭",
+    " ̮",
+    " ̯",
+    " ̰",
+    " ̱",
+    " ̲",
+    " ̳",
+    " ̹",
+    " ̺",
+    " ̻",
+    " ̼",
+    " ͅ",
+    " ͇",
+    " ͈",
+    " ͉",
+    " ͍",
+    " ͎",
+    " ͓",
+    " ͔",
+    " ͕",
+    " ͖",
+    " ͙",
+    " ͚",
+    " ",
+],
+             [
+                 " ̍", " ̎", " ̄", " ̅", " ̿", " ̑", " ̆", " ̐", " ͒", " ͗",
+                 " ͑", " ̇", " ̈", " ̊", " ͂", " ̓", " ̈́", " ͊", " ͋", " ͌",
+                 " ̃", " ̂", " ̌", " ͐", " ́", " ̋", " ̏", " ̽", " ̉", " ͣ",
+                 " ͤ", " ͥ", " ͦ", " ͧ", " ͨ", " ͩ", " ͪ", " ͫ", " ͬ", " ͭ",
+                 " ͮ", " ͯ", " ̾", " ͛", " ͆", " ̚"
+             ],
+             [
+                 " ̕",
+                 " ̛",
+                 " ̀",
+                 " ́",
+                 " ͘",
+                 " ̡",
+                 " ̢",
+                 " ̧",
+                 " ̨",
+                 " ̴",
+                 " ̵",
+                 " ̶",
+                 " ͜",
+                 " ͝",
+                 " ͞",
+                 " ͟",
+                 " ͠",
+                 " ͢",
+                 " ̸",
+                 " ̷",
+                 " ͡",
+             ]]

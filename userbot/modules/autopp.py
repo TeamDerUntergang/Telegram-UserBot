@@ -79,7 +79,7 @@ async def get_font_file(client, channel_id):
 CMD_HELP.update({
     "autopp": 
     ".autopp \
-    \n**Kullanım**: Bu komut belirlediğiniz fotoğrafı profil resmi yapar \
+    \nKullanım: Bu komut belirlediğiniz fotoğrafı profil resmi yapar \
     \nve bir saat ekler. Bu saat her dakika değişir. \
-    \n**NOT*: Küçük bir ihtimal bile olsa ban yeme riskiniz var. Bu yüzden dikkatli kullanın."
+    \nNOT: Küçük bir ihtimal bile olsa ban yeme riskiniz var. Bu yüzden dikkatli kullanın."
 })

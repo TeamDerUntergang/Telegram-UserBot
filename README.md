@@ -1,3 +1,6 @@
+![GitHub repo size](https://img.shields.io/github/repo-size/TeamDerUntergang/Telegram-UserBot?color=Blue&label=Repo%20Boyutu)
+![GitHub](https://img.shields.io/github/license/TeamDerUntergang/Telegram-UserBot?color=Orange&label=Lisans)
+
 # Seden-UserBot
 
 ### CI derlemesi başarılı, ancak yerel olarak çalışırken hala sözdizimi hataları alıyorsanız, muhtemelen kaynakla ilgili bir sorun değil, python sürümünüzle alakalı bir sorun.

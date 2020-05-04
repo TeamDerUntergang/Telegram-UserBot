@@ -62,6 +62,6 @@ async def tdk(event):
 CMD_HELP.update({
     "sozluk":
     ".tdk <kelime> .\
-    \n**Kullanım**: Verdiğiniz kelimeyi TDK Sözlükte arar.\n\n.tureng <kelime> .\
-    \n**Kullanım**: Verdiğiniz kelimeyi Tureng Sözlükte arar."
+    \nKullanım: Verdiğiniz kelimeyi TDK Sözlükte arar.\n\n.tureng <kelime> .\
+    \nKullanım: Verdiğiniz kelimeyi Tureng Sözlükte arar."
 })

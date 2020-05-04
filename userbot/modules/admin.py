@@ -715,11 +715,11 @@ async def kick(usr):
 
     if reason:
         await usr.edit(
-            f"[{user.first_name}](tg://user?id={user.id})`gruptan atıldı !`\nNedeni: {reason}"
+            f"[{user.first_name}](tg://user?id={user.id}) `gruptan atıldı !`\nNedeni: {reason}"
         )
     else:
         await usr.edit(
-            f"[{user.first_name}](tg://user?id={user.id})`gruptan atıldı !`")
+            f"[{user.first_name}](tg://user?id={user.id}) `gruptan atıldı !`")
 
     if BOTLOG:
         await usr.client.send_message(

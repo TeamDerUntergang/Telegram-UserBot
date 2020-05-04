@@ -343,5 +343,5 @@ async def ecem(e):
 CMD_HELP.update({
     "ecem":
     ".ecem veya .ecem ile birinin metnine cevap verin.\
-    \n**Kullanım**: Ecem'den alıntılar."
+    \nKullanım: Ecem'den alıntılar."
 })

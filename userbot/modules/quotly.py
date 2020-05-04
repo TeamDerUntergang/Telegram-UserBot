@@ -55,5 +55,5 @@ async def _(event):
 CMD_HELP.update({
     "quotly": 
     ".q \
-    \n**Kullanım**: Metninizi çıkartmaya dönüştürün.\n"
+    \nKullanım: Metninizi çıkartmaya dönüştürün.\n"
 })

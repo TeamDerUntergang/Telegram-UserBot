@@ -55,5 +55,5 @@ async def _(event):
 CMD_HELP.update({
     "sangmata": 
     ".sangmata \
-    \n**Kullanım**: Kullanıcı geçmişini görüntüleyin.\n"
+    \nKullanım: Belirtilen kullanıcının isim geçmişini görüntüleyin.\n"
 })

@@ -95,5 +95,5 @@ async def get_font_file(client, channel_id):
 CMD_HELP.update({
     "rgb": 
     ".rgb \
-    \n**Kullanım**: Metninizi RGB çıkartmaya dönüştürün.\n"
+    \nKullanım: Metninizi RGB çıkartmaya dönüştürün.\n"
 })

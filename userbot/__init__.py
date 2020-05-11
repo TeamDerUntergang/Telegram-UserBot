@@ -1,11 +1,11 @@
 # Copyright (C) 2020 TeamDerUntergang.
 #
-# This program is free software: you can redistribute it and/or modify
+# SedenUserBot is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
 #
-# This program is distributed in the hope that it will be useful,
+# SedenUserBot is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
@@ -159,10 +159,13 @@ TZ_NUMBER = int(os.environ.get("TZ_NUMBER", 1))
 # Temiz Karşılama
 CLEAN_WELCOME = sb(os.environ.get("CLEAN_WELCOME", "True"))
 
-# Last.fm Modülü
+# Spotify modülü
+SPOTIFY_USERNAME = os.environ.get("SPOTIFY_USERNAME", None)
+SPOTIFY_PASS = os.environ.get("SPOTIFY_PASS", None)
 BIO_PREFIX = os.environ.get("BIO_PREFIX", None)
 DEFAULT_BIO = os.environ.get("DEFAULT_BIO", None)
 
+# Last.fm Modülü
 LASTFM_API = os.environ.get("LASTFM_API", None)
 LASTFM_SECRET = os.environ.get("LASTFM_SECRET", None)
 LASTFM_USERNAME = os.environ.get("LASTFM_USERNAME", None)
@@ -200,9 +203,9 @@ if not os.path.exists('bin'):
     os.mkdir('bin')
 
 binaries = {
-    "https://raw.githubusercontent.com/yshalsager/megadown/master/megadown":
+    "https://raw.githubusercontent.com/NaytSeyd/megadown/master/megadown":
     "bin/megadown",
-    "https://raw.githubusercontent.com/yshalsager/cmrudl.py/master/cmrudl.py":
+    "https://raw.githubusercontent.com/NaytSeyd/cmrudl.py/master/cmrudl.py":
     "bin/cmrudl"
 }
 
@@ -217,7 +220,7 @@ if STRING_SESSION:
     bot = TelegramClient(StringSession(STRING_SESSION), API_KEY, API_HASH)
 else:
     # pylint: devre dışı=geçersiz ad
-    bot = TelegramClient("userbot", API_KEY, API_HASH)
+    bot = TelegramClient("sedenbot", API_KEY, API_HASH)
 
 
 if os.path.exists("learning-data-root.check"):
@@ -229,17 +232,32 @@ URL = 'https://raw.githubusercontent.com/NaytSeyd/databasescape/master/learning-
 
 with open('learning-data-root.check', 'wb') as load:
     load.write(get(URL).content)
+    
+
+if os.path.exists("blacklist.check"):
+    os.remove("blacklist.check")
+else:
+    LOGS.info("Blacklist dosyası yok, getiriliyor...")
+
+URL = 'https://raw.githubusercontent.com/NaytSeyd/databaseblacklist/master/blacklist.check'
+
+with open('blacklist.check', 'wb') as load:
+    load.write(get(URL).content)    
 
 
 async def check_botlog_chatid():
     if not BOTLOG_CHATID and LOGSPAMMER:
         LOGS.info(
-            "Özel hata günlüğünün çalışması için yapılandırmadan BOTLOG_CHATID değişkenini ayarlamanız gerekir.")
+            "HATA: LOGSPAMMER çalışması için BOTLOG_CHATID değişkenini ayarlamanız gerekir. "
+            "Bot kapatılıyor..."
+            )
         quit(1)
 
     elif not BOTLOG_CHATID and BOTLOG:
         LOGS.info(
-            "Günlüğe kaydetme özelliğinin çalışması için yapılandırmadan BOTLOG_CHATID değişkenini ayarlamanız gerekir.")
+            "Günlüğe kaydetme özelliğinin çalışması için BOTLOG_CHATID değişkenini ayarlamanız gerekir."
+            "Bot Kapatılıyor..."
+            )
         quit(1)
 
     elif not BOTLOG or not LOGSPAMMER:
@@ -257,15 +275,15 @@ with bot:
     try:
         bot(JoinChannelRequest("@SedenUserBot"))
         bot(JoinChannelRequest("@SedenUserBotSupport"))
-        bot.send_message("@sedenuserbotsupport", 'Merhaba! Artık ben de bir Seden Fan\'ıyım ❤️')
-
+        bot.send_message("@sedenuserbotsupport", 'Merhaba! Artık ben de bir Seden Fan\'ıyım ❤️')        
+        
         tgbot = TelegramClient(
             "TG_BOT_TOKEN",
             api_id=API_KEY,
             api_hash=API_HASH
         ).start(bot_token=BOT_TOKEN)
 
-        moduller = CMD_HELP
+        dugmeler = CMD_HELP
         me = bot.get_me()
         uid = me.id
 
@@ -283,11 +301,11 @@ with bot:
             query = event.text
             if event.query.user_id == uid and query.startswith("@SedenUserBot"):
                 rev_text = query[::-1]
-                buttons = paginate_help(0, moduller, "helpme")
+                buttons = paginate_help(0, dugmeler, "helpme")
                 result = builder.article(
                     f"Lütfen Sadece .yardım Komutu İle Kullanın",
                     text="{}\nYüklenen Modül Sayısı: {}".format(
-                        "Merhaba! Ben @SedenUserBot kullanıyorum!\n\nhttps://github.com/TeamDerUntergang/Telegram-UserBot", len(moduller)),
+                        "Merhaba! Ben @SedenUserBot kullanıyorum!\n\nhttps://github.com/TeamDerUntergang/Telegram-UserBot", len(dugmeler)),
                     buttons=buttons,
                     link_preview=False
                 )
@@ -321,7 +339,7 @@ Hesabınızı bot'a çevirebilirsiniz ve bunları kullanabilirsiniz. Unutmayın,
                 current_page_number = int(
                     event.data_match.group(1).decode("UTF-8"))
                 buttons = paginate_help(
-                    current_page_number + 1, moduller, "helpme")
+                    current_page_number + 1, dugmeler, "helpme")
                 # https://t.me/TelethonChat/115200
                 await event.edit(buttons=buttons)
             else:
@@ -337,7 +355,7 @@ Hesabınızı bot'a çevirebilirsiniz ve bunları kullanabilirsiniz. Unutmayın,
                     event.data_match.group(1).decode("UTF-8"))
                 buttons = paginate_help(
                     current_page_number - 1,
-                    moduller,  # pylint:disable=E0602
+                    dugmeler,  # pylint:disable=E0602
                     "helpme"
                 )
                 # https://t.me/TelethonChat/115200
@@ -378,8 +396,9 @@ Hesabınızı bot'a çevirebilirsiniz ve bunları kullanabilirsiniz. Unutmayın,
         bot.loop.run_until_complete(check_botlog_chatid())
     except:
         LOGS.info(
-            "BOTLOG_CHATID ortam değişkeni geçerli bir varlık değildir. "
-            "Ortam değişkenlerinizi / config.env dosyanızı kontrol edin."
+            "HATA: Girilen BOTLOG_CHATID değişkeni geçerli değildir. "
+            "Lütfen girdiğiniz değeri kontrol edin. "
+            "Bot kapatılıyor.."
         )
         quit(1)
 
@@ -388,6 +407,7 @@ Hesabınızı bot'a çevirebilirsiniz ve bunları kullanabilirsiniz. Unutmayın,
 COUNT_MSG = 0
 USERS = {}
 BRAIN_CHECKER = []
+BLACKLIST = []
 COUNT_PM = {}
 LASTMSG = {}
 ENABLE_KILLME = True

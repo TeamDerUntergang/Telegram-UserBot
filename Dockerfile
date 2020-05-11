@@ -1,7 +1,6 @@
 # Biz Arch Linux kullanıyoruz <3
 FROM archlinux:latest
 
-
 # Gerekyi paketleri yükle
 RUN pacman -Syyu --noconfirm \
     aria2 \
@@ -36,24 +35,19 @@ RUN pacman -Syyu --noconfirm \
     util-linux \
     wget  
 
-
 # Repoyu klonla ve çalışma dizinini hazırla
-RUN git clone https://github.com/TeamDerUntergang/Telegram-UserBot -b seden /root/sedenbot
-RUN mkdir /root/sedenbot/bin/
-WORKDIR /root/sedenbot/
-
+RUN git clone https://github.com/TeamDerUntergang/Telegram-UserBot -b seden /root/seden
+RUN mkdir /root/seden/bin/
+WORKDIR /root/seden/
 
 # Oturum ve yapılandırmayı kopyala (varsa)
-COPY ./sample_config.env ./userbot.session* ./config.env* /root/sedenbot/
-
+COPY ./sample_config.env ./userbot.session* ./config.env* /root/seden/
 
 # Zaman dilimini ayarla
 ENV TZ=Europe/Istanbul
 
-
 # Gerekli pip modüllerini kur
 RUN pip3 install -r requirements.txt
 
-
 # Botu çalıştır
-CMD ["python3","main.py"]
+CMD ["python3","seden.py"]

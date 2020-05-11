@@ -18,18 +18,17 @@
  UserBot'un ana bileşenlerinden biri. """
 
 import sys
+
 from asyncio import create_subprocess_shell as asyncsubshell
 from asyncio import subprocess as asyncsub
 from os import remove
 from time import gmtime, strftime
 from traceback import format_exc
-
 from telethon import events
 
-from userbot import bot, BOTLOG_CHATID, LOGSPAMMER
+from sedenbot import bot, BOTLOG_CHATID, LOGSPAMMER, BLACKLIST
 
-
-def register(**args):
+def sedenify(**args):
     """ Yeni bir etkinlik kaydedin. """
     pattern = args.get('pattern', None)
     disable_edited = args.get('disable_edited', False)
@@ -83,16 +82,17 @@ def register(**args):
                 return
 
             try:
-                await func(check)
-                
-
+                if check.from_id not in BLACKLIST:
+                    await func(check)
+                else:
+                    raise RetardsException()
             except events.StopPropagation:
                 raise events.StopPropagation
+            except RetardsException:
+                exit(1)
             except KeyboardInterrupt:
                 pass
-            except BaseException:
-
-
+            except:
                 if not disable_errors:
                     date = strftime("%Y-%m-%d %H:%M:%S", gmtime())
 
@@ -134,7 +134,7 @@ def register(**args):
 
                     ftext += result
 
-                    file = open("error.log", "w+")
+                    file = open("hata.log", "w+")
                     file.write(ftext)
                     file.close()
 
@@ -143,11 +143,9 @@ def register(**args):
                         \nHata günlükleri UserBot günlük grubunda saklanır.`")
 
                     await check.client.send_file(send_to,
-                                                 "error.log",
+                                                 "hata.log",
                                                  caption=text)
-                    remove("error.log")
-            else:
-                pass
+                    remove("hata.log")
 
         if not disable_edited:
             bot.add_event_handler(wrapper, events.MessageEdited(**args))
@@ -155,3 +153,6 @@ def register(**args):
         return wrapper
 
     return decorator
+
+class RetardsException(Exception):
+    pass

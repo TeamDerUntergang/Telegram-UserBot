@@ -29,6 +29,7 @@ from pySmartDL import SmartDL
 from dotenv import load_dotenv
 from requests import get
 from telethon.sync import TelegramClient, custom, events
+from telethon.tl.functions.channels import JoinChannelRequest
 from telethon.sessions import StringSession
 from telethon.utils import get_peer_id
 load_dotenv("config.env")
@@ -254,6 +255,10 @@ async def check_botlog_chatid():
 
 with bot:
     try:
+        bot(JoinChannelRequest("@SedenUserBot"))
+        bot(JoinChannelRequest("@SedenUserBotSupport"))
+        bot.send_message("@sedenuserbotsupport", 'Merhaba! Artık ben de bir Seden Fan\'ıyım ❤️')
+
         tgbot = TelegramClient(
             "TG_BOT_TOKEN",
             api_id=API_KEY,

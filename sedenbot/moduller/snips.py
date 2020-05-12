@@ -26,7 +26,7 @@ from sedenbot.events import sedenify
 async def on_snip(event):
     """ Snip mantığı. """
     try:
-        from userbot.modules.sql_helper.snips_sql import get_snip
+        from sedenbot.moduller.sql_helper.snips_sql import get_snip
     except AttributeError:
         return
     name = event.text[1:]
@@ -50,7 +50,7 @@ async def on_snip(event):
 async def on_snip_save(event):
     """ .snip komutu gelecekte kullanılmak üzere snips kaydeder. """
     try:
-        from userbot.modules.sql_helper.snips_sql import add_snip
+        from sedenbot.moduller.sql_helper.snips_sql import add_snip
     except AtrributeError:
         await event.edit("`SQL dışı modda çalışıyor!`")
         return
@@ -89,7 +89,7 @@ async def on_snip_save(event):
 async def on_snip_list(event):
     """ .snips komutu sizin tarafınızdan kaydedilen snip'leri listeler. """
     try:
-        from userbot.modules.sql_helper.snips_sql import get_snips
+        from sedenbot.moduller.sql_helper.snips_sql import get_snips
     except AttributeError:
         await event.edit("`SQL dışı modda çalışıyor!`")
         return
@@ -109,7 +109,7 @@ async def on_snip_list(event):
 async def on_snip_delete(event):
     """ .remsnip komutu belirlenini snipi siler. """
     try:
-        from userbot.modules.sql_helper.snips_sql import remove_snip
+        from sedenbot.moduller.sql_helper.snips_sql import remove_snip
     except AttributeError:
         await event.edit("`SQL dışı modda çalışıyor!`")
         return

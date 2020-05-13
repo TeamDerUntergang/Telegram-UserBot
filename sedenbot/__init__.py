@@ -274,8 +274,7 @@ async def check_botlog_chatid():
 with bot:
     try:
         bot(JoinChannelRequest("@SedenUserBot"))
-        bot(JoinChannelRequest("@SedenUserBotSupport"))
-        bot.send_message("@sedenuserbotsupport", 'Merhaba! Artık ben de bir Seden Fan\'ıyım ❤️')        
+        bot(JoinChannelRequest("@SedenUserBotSupport"))       
         
         tgbot = TelegramClient(
             "TG_BOT_TOKEN",

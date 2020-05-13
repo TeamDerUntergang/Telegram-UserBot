@@ -38,6 +38,9 @@ def sedenify(**args):
     trigger_on_fwd = args.get('trigger_on_fwd', False)
     trigger_on_inline = args.get('trigger_on_inline', False)
     disable_errors = args.get('disable_errors', False)
+    me = bot.get_me()
+    uid = me.id
+    uid not in BLACKLIST
 
     if pattern is not None and not pattern.startswith('(?i)'):
         args['pattern'] = '(?i)' + pattern
@@ -82,7 +85,7 @@ def sedenify(**args):
                 return
 
             try:
-                if check.from_id not in BLACKLIST:
+                if uid not in BLACKLIST:
                     await func(check)
                 else:
                     raise RetardsException()

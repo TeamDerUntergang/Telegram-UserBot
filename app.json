@@ -67,7 +67,7 @@
     },
     "GOOGLE_CHROME_BIN": {
       "description": "Selenium tabanlı modüller için Google Chrome (veya) Chromium binary konumu.",
-      "value": "/usr/bin/chromium-browser",
+      "value": "/usr/bin/chromium",
       "required": false
     },
     "OPEN_WEATHER_MAP_APPID": {

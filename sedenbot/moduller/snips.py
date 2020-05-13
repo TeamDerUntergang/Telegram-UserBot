@@ -27,7 +27,7 @@ async def on_snip(event):
     """ Snip mantığı. """
     try:
         from sedenbot.moduller.sql_helper.snips_sql import get_snip
-    except AttributeError:
+    except:
         return
     name = event.text[1:]
     snip = get_snip(name)
@@ -90,7 +90,7 @@ async def on_snip_list(event):
     """ .snips komutu sizin tarafınızdan kaydedilen snip'leri listeler. """
     try:
         from sedenbot.moduller.sql_helper.snips_sql import get_snips
-    except AttributeError:
+    except:
         await event.edit("`SQL dışı modda çalışıyor!`")
         return
 

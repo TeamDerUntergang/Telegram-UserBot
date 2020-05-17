@@ -22,8 +22,8 @@ from sedenbot.events import sedenify
 @bot.on(ChatAction)
 async def welcome_to_chat(event):
     try:
-        from userbot.modules.sql_helper.welcome_sql import get_current_welcome_settings
-        from userbot.modules.sql_helper.welcome_sql import update_previous_welcome
+        from sedenbot.moduller.sql_helper.welcome_sql import get_current_welcome_settings
+        from sedenbot.moduller.sql_helper.welcome_sql import update_previous_welcome
     except:
         return
     cws = get_current_welcome_settings(event.chat_id)
@@ -94,7 +94,7 @@ async def welcome_to_chat(event):
 @sedenify(outgoing=True, pattern=r"^.setwelcome(?: |$)(.*)")
 async def save_welcome(event):
     try:
-        from userbot.modules.sql_helper.welcome_sql import add_welcome_setting
+        from sedenbot.moduller.sql_helper.welcome_sql import add_welcome_setting
     except:
         await event.edit("`SQL dışı modda çalışıyor!`")
         return
@@ -131,7 +131,7 @@ async def save_welcome(event):
 @sedenify(outgoing=True, pattern="^.checkwelcome$")
 async def show_welcome(event):
     try:
-        from userbot.modules.sql_helper.welcome_sql import get_current_welcome_settings
+        from sedenbot.moduller.sql_helper.welcome_sql import get_current_welcome_settings
     except:
         await event.edit("`SQL dışı modda çalışıyor!`")
         return
@@ -153,7 +153,7 @@ async def show_welcome(event):
 @sedenify(outgoing=True, pattern="^.rmwelcome$")
 async def del_welcome(event):
     try:
-        from userbot.modules.sql_helper.welcome_sql import rm_welcome_setting
+        from sedenbot.moduller.sql_helper.welcome_sql import rm_welcome_setting
     except:
         await event.edit("`SQL dışı modda çalışıyor!`")
         return

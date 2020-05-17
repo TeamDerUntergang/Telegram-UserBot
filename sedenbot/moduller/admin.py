@@ -342,7 +342,7 @@ async def spider(spdr):
 
     if user.id == self_user.id:
         await spdr.edit(
-            "`Üzgünüm ama kendime sessize alamam...\n(ヘ･_･)ヘ┳━┳`")
+            "`Üzgünüm ama kendimi sessize alamam...\n(ヘ･_･)ヘ┳━┳`")
         return
 
     # Hedefi sustaracağınızı duyurun

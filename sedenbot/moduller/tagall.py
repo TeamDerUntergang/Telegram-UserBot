@@ -44,7 +44,7 @@ async def _(event):
     await event.reply(mentions)
     await event.delete()
 
-@sedenify(outgoing=True, pattern="^.admin")
+@sedenify(outgoing=True, pattern="^.admn")
 async def _(event):
     if event.fwd_from:
         return
@@ -63,6 +63,6 @@ async def _(event):
 CMD_HELP.update({
     "tagall":
     ".tagall\
-    \nKullanım: Bu komutu kullandığınızda sohbet içerisinde ki herkesi etiketler.\n\n.admin \
+    \nKullanım: Bu komutu kullandığınızda sohbet içerisinde ki herkesi etiketler.\n\n.admn \
     \nKullanım: Bu komutu kullandığınızda sohbet içerisinde ki yöneticileri etiketler."
 })

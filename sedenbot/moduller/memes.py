@@ -568,6 +568,35 @@ async def zal(zgfy):
 
     await zgfy.edit("".join(reply_text))
     
+@sedenify(outgoing=True, pattern="^.shout(?: |$)(.*)")
+async def shout(sht):
+    textx = await sht.get_reply_message()
+    message = sht.pattern_match.group(1)
+    if message:
+        pass
+    elif textx:
+        message = textx.text
+    else:
+        await sht.edit("`Yazı nerede!`")
+        return
+    
+    if sht.fwd_from:
+        return    
+    else:
+        msg = "```"
+        messagestr = sht.text
+        messagestr = messagestr[7:]
+        text = "".join(messagestr)
+        result = []
+        result.append(' '.join([s for s in text]))
+        for pos, symbol in enumerate(text[1:]):
+            result.append(symbol + ' ' + '  ' * pos + symbol)
+        result = list("\n".join(result))
+        result[0] = text[0]
+        result = "".join(result)
+        msg = "\n" + result
+        await sht.edit("`"+msg+"`")
+    
 @sedenify(outgoing=True, pattern="^.hi$")
 async def hoi(hello):
     """ Herkesi selamlayın """
@@ -906,6 +935,8 @@ CMD_HELP.update({
 \nKullanım: UserBot'un koşmasını sağlar!\
 \n\n.mock\
 \nKullanım: Yap ve gerçek eğlenceyi bul.\
+\n\n.shout\
+\nKullanım: Değişik bir yazım türü.\
 \n\n.clap\
 \nKullanım: İnsanları övün!\
 \n\n.f <emoji/karakter>\

@@ -26,7 +26,7 @@ from time import gmtime, strftime
 from traceback import format_exc
 from telethon import events
 
-from sedenbot import bot, BOTLOG_CHATID, LOGSPAMMER, BLACKLIST
+from sedenbot import bot, BOTLOG, BOTLOG_CHATID, LOGSPAMMER, BLACKLIST
 
 def sedenify(**args):
     """ Yeni bir etkinlik kaydedin. """
@@ -69,19 +69,12 @@ def sedenify(**args):
 
     def decorator(func):
         async def wrapper(check):
-            if not LOGSPAMMER:
-                send_to = check.chat_id
-            else:
-                send_to = BOTLOG_CHATID
-
-            if not trigger_on_fwd and check.fwd_from:
+            if check.edit_date and check.is_channel and not check.is_group:
                 return
-
-            if check.via_bot_id and not trigger_on_inline:
-                return
-             
             if groups_only and not check.is_group:
-                await check.respond("`Bunun bir grup olduğunu sanmıyorum.`")
+                await check.respond("`Bunun bir grup olduğuna emin misin?`")
+                return
+            if check.via_bot_id and not insecure and check.out:
                 return
 
             try:
@@ -141,14 +134,12 @@ def sedenify(**args):
                     file.write(ftext)
                     file.close()
 
-                    if LOGSPAMMER:
-                        await check.client.respond("`Üzgünüm, UserBot'um çöktü.\
-                        \nHata günlükleri UserBot günlük grubunda saklanır.`")
-
-                    await check.client.send_file(send_to,
-                                                 "hata.log",
-                                                 caption=text)
+                    await check.client.send_file(BOTLOG_CHATID 
+                                                 if BOTLOG 
+                                                 else check.chat_id, "hata.log", caption=text, )
                     remove("hata.log")
+            else:
+                pass
 
         if not disable_edited:
             bot.add_event_handler(wrapper, events.MessageEdited(**args))

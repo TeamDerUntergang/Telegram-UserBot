@@ -19,23 +19,18 @@
 import re
 
 from sre_constants import error as sre_err
-from asyncio import sleep
 
 from sedenbot import CMD_HELP
 from sedenbot.events import sedenify
 
 DELIMITERS = ("/", ":", "|", "_")
 
-async def separate_sed(sed_string):
+def separate_sed(sed_string):
     """ Sed argümanları. """
-
-    if len(sed_string) < 2:
-        return
-
-    if (len(sed_string) >= 2 and sed_string[2] in DELIMITERS
-            and sed_string.count(sed_string[2]) >= 2):
-        delim = sed_string[2]
-        start = counter = 3
+    if (len(sed_string) > 3 and sed_string[3] in DELIMITERS
+            and sed_string.count(sed_string[3]) >= 2):
+        delim = sed_string[3]
+        start = counter = 4
         while counter < len(sed_string):
             if sed_string[counter] == "\\":
                 counter += 1
@@ -71,10 +66,10 @@ async def separate_sed(sed_string):
         return replace, replace_with, flags.lower()
     return None
 
-@sedenify(outgoing=True, pattern="^.s")
+@sedenify(outgoing=True, pattern="^sed", ignore_unsafe=True)
 async def sed(command):
     """ Sed komutu için Telegram'da sed kullanın. """
-    sed_result = await separate_sed(command.text)
+    sed_result = separate_sed(command.text)
     textx = await command.get_reply_message()
     if sed_result:
         if textx:
@@ -114,7 +109,7 @@ async def sed(command):
 
 CMD_HELP.update({
     "sed":
-    ".s<sınırlayıcı><eski kelime(ler)><sınırlayıcı><yeni kelime(ler)>\
+    "sed<sınırlayıcı><eski kelime(ler)><sınırlayıcı><yeni kelime(ler)>\
     \nKullanım: Sed kullanarak bir kelimeyi veya kelimeleri değiştirir.\
     \nSınırlayıcılar: `/, :, |, _`"
 })

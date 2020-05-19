@@ -858,7 +858,7 @@ async def scam(event):
     except BaseException:
         return
 
-@sedenify(pattern=r".type(?: |$)(.*)", outgoing=True)
+@sedenify(outgoing=True, pattern='^.type(?: |$)(.*)')
 async def typewriter(typew):
     """ Klavyenizi daktilo haline getirmek için küçük bir komut! """
     textx = await typew.get_reply_message()
@@ -872,16 +872,16 @@ async def typewriter(typew):
         return
     sleep_time = 0.03
     typing_symbol = "|"
-    old_text = ""
+    old_text = ''
     await typew.edit(typing_symbol)
-    await sleep(sleep_time)
+    await asyncio.sleep(sleep_time)
     for character in message:
         old_text = old_text + "" + character
         typing_text = old_text + "" + typing_symbol
         await typew.edit(typing_text)
-        await sleep(sleep_time)
+        await asyncio.sleep(sleep_time)
         await typew.edit(old_text)
-        await sleep(sleep_time)
+        await asyncio.sleep(sleep_time)
 
 CMD_HELP.update({
     "memes":

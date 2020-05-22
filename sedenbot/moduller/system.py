@@ -23,10 +23,10 @@ from shutil import which
 from os import remove
 from telethon import version
 
-from sedenbot import CMD_HELP
+from sedenbot import CMD_HELP, ALIVE_MESAJI
 from sedenbot.events import sedenify
 # ================= CONSTANT =================
-DEFAULTUSER = uname().node
+KULLANICIMESAJI = str(ALIVE_MESAJI) if ALIVE_MESAJI else uname().node
 # ============================================
 @sedenify(outgoing=True, pattern="^.neofetch$")
 async def sysdetails(sysd):
@@ -125,9 +125,26 @@ async def pipcheck(pip):
         await pip.edit("`Bir örnek görmek için .seden pip komutunu kullanın.`")
 
 @sedenify(outgoing=True, pattern="^.alive$")
-async def amialive(e):
-    if not e.text[0].isalpha() and e.text[0] not in ("/", "#", "@", "!"):
-        await e.edit("`Merhaba Seden! Seni Seviyorum ❤`")
+async def amialive(alive):
+    if not alive.text[0].isalpha() and alive.text[0] not in ("/", "#", "@", "!"):
+        await alive.edit(f"`{KULLANICIMESAJI}`")
+        
+@sedenify(outgoing=True, pattern="^.alives")
+async def alivename(kullanici):
+    message = kullanici.text
+    output = 'Kullanım: .alives <alive mesajı>'
+    if not (message == '.alives' or message[7:8] != ' '):
+        newuser = message[8:]
+        global KULLANICIMESAJI
+        KULLANICIMESAJI = newuser
+        output = 'Alive mesajı, ' + newuser + ' olarak ayarlandı !'
+    await kullanici.edit("`" f"{output}" "`")
+    
+@sedenify(outgoing=True, pattern="^.resalive$")
+async def alivereset(kullanicireset):
+    global KULLANICIMESAJI
+    KULLANICIMESAJI = str(ALIVE_MESAJI) if ALIVE_MESAJI else kullanicireset().node
+    await kullanicireset.edit("`Alive mesajı başarıyla sıfırlandı!`")
 
 CMD_HELP.update(
     {"neofetch": ".neofetch\
@@ -135,9 +152,13 @@ CMD_HELP.update(
 CMD_HELP.update({"botver": ".botver\
     \nKullanım: UserBot sürümünü gösterir."})
 CMD_HELP.update(
-    {"pip": ".pip <module(s)>\
+    {"pip": ".pip <modül ismi>\
     \nKullanım: Pip modüllerinde arama yapar."})
 CMD_HELP.update({
     "alive": ".alive\
-    \nKullanım: Seden botunun çalışıp çalışmadığını kontrol etmek için kullanılır."
+    \nKullanım: Seden botunun çalışıp çalışmadığını kontrol etmek için kullanılır.\
+    \n\n.alives <alive mesajı>\
+    \nKullanım: Bu komut Seden botun alive mesajını değiştirmenize yarar.\
+    \n\n.resalive\
+    \nKullanım: Bu komut ayarladığınız alive mesajını varsayılan Seden olan haline döndürür."
 })

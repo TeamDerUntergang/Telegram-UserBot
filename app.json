@@ -158,14 +158,6 @@
       "description": "Last.FM Şifre",
       "required": false
     },
-    "SPOTIFY_USERNAME": {
-       "description": "Spotify biyografiye müzik ekleme.",
-       "required": false
-    },
-    "SPOTIFY_PASS": {
-       "description": "Spotify biyografiye müzik ekleme.",
-       "required": false
-    },    
     "BIO_PREFIX": {
       "description": "Last.FM Modülü Biyografi için önek.",
       "required": false

@@ -4,7 +4,6 @@ async_generator
 bs4
 beautifulsoup4>=4.8.1
 cowpy
-# cryptg
 dnspython
 emoji
 gitpython
@@ -23,7 +22,6 @@ git+https://github.com/johnwmillr/LyricsGenius.git
 lyricsgenius
 oauth2client
 Pillow>=6.0.0
-psycopg2
 psycopg2-binary
 pybase64>=0.4.0
 pylast
@@ -43,4 +41,3 @@ telethon-session-sqlalchemy>=0.2.6
 urbandict>=0.5
 wikipedia>=1.4.0
 coffeehouse
-spotify_token

@@ -33,8 +33,12 @@ async def deepfryer(event):
         frycount = int(event.pattern_match.group(1))
         if frycount < 1:
             raise ValueError
-    except ValueError:
+    except:
         frycount = 1
+    
+    MAX_LIMIT = 5
+    if frycount > MAX_LIMIT:
+        frycount = MAX_LIMIT
 
     if event.is_reply:
         reply_message = await event.get_reply_message()

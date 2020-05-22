@@ -23,12 +23,22 @@ import asyncio
 from telethon import events, utils
 from telethon.tl import types, functions
 
-import sedenbot.moduller.sql_helper.blacklist_sql as sql
-from sedenbot import CMD_HELP, bot
+from sedenbot import CMD_HELP, bot, LOGS
 from sedenbot.events import sedenify
+
+async def blacklist_init():
+    try:
+        import sedenbot.moduller.sql_helper.blacklist_sql as sql
+    except:
+        LOGS.warn('Karaliste özelliği çalıştırılamıyor, SQL bağlantısı bulunamadı')
+        sql = None
+
+asyncio.run(blacklist_init())
 
 @sedenify(incoming=True, disable_edited=True, disable_errors=True)
 async def on_new_message(event):
+    if not sql:
+        return
     name = event.raw_text
     snips = sql.get_chat_blacklist(event.chat_id)
     for snip in snips:
@@ -44,6 +54,9 @@ async def on_new_message(event):
 
 @sedenify(outgoing=True, pattern="^.addblacklist(?: |$)(.*)")
 async def on_add_black_list(addbl):
+    if not sql:
+        await addbl.edit("`SQL dışı modda çalışıyorum, bunu gerçekleştiremem`")
+        return
     text = addbl.pattern_match.group(1)
     to_blacklist = list(set(trigger.strip() for trigger in text.split("\n") if trigger.strip()))
     for trigger in to_blacklist:
@@ -52,6 +65,9 @@ async def on_add_black_list(addbl):
 
 @sedenify(outgoing=True, pattern="^.listblacklist(?: |$)(.*)")
 async def on_view_blacklist(listbl):
+    if not sql:
+        await addbl.edit("`SQL dışı modda çalışıyorum, bunu gerçekleştiremem`")
+        return
     all_blacklisted = sql.get_chat_blacklist(listbl.chat_id)
     OUT_STR = "**Bu grup için ayarlanan karaliste:**\n"
     if len(all_blacklisted) > 0:
@@ -76,6 +92,9 @@ async def on_view_blacklist(listbl):
 
 @sedenify(outgoing=True, pattern="^.rmblacklist(?: |$)(.*)")
 async def on_delete_blacklist(rmbl):
+    if not sql:
+        await addbl.edit("`SQL dışı modda çalışıyorum, bunu gerçekleştiremem`")
+        return
     text = rmbl.pattern_match.group(1)
     to_unblacklist = list(set(trigger.strip() for trigger in text.split("\n") if trigger.strip()))
     successful = 0

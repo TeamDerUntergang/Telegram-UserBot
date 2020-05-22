@@ -102,6 +102,9 @@ STRING_SESSION = os.environ.get("STRING_SESSION", None)
 # Kanal / Grup ID yapılandırmasını günlüğe kaydetme.
 BOTLOG_CHATID = int(os.environ.get("BOTLOG_CHATID", None))
 
+# Alive Mesajını değiştirme.
+ALIVE_MESAJI = os.environ.get("ALIVE_MESAJI", "Merhaba Seden! Seni Seviyorum ❤️")
+
 # UserBot günlükleme özelliği.
 BOTLOG = sb(os.environ.get("BOTLOG", "False"))
 LOGSPAMMER = sb(os.environ.get("LOGSPAMMER", "False"))
@@ -159,13 +162,10 @@ TZ_NUMBER = int(os.environ.get("TZ_NUMBER", 1))
 # Temiz Karşılama
 CLEAN_WELCOME = sb(os.environ.get("CLEAN_WELCOME", "True"))
 
-# Spotify modülü
-SPOTIFY_USERNAME = os.environ.get("SPOTIFY_USERNAME", None)
-SPOTIFY_PASS = os.environ.get("SPOTIFY_PASS", None)
+# Last.fm modülü
 BIO_PREFIX = os.environ.get("BIO_PREFIX", None)
 DEFAULT_BIO = os.environ.get("DEFAULT_BIO", None)
 
-# Last.fm Modülü
 LASTFM_API = os.environ.get("LASTFM_API", None)
 LASTFM_SECRET = os.environ.get("LASTFM_SECRET", None)
 LASTFM_USERNAME = os.environ.get("LASTFM_USERNAME", None)
@@ -270,12 +270,14 @@ async def check_botlog_chatid():
             "Grup ID'sini doğru yazıp yazmadığınızı kontrol edin.")
         quit(1)
 
-
 with bot:
     try:
         bot(JoinChannelRequest("@SedenUserBot"))
         bot(JoinChannelRequest("@SedenUserBotSupport"))       
         
+        if not BOT_TOKEN:
+            raise Exception()
+
         tgbot = TelegramClient(
             "TG_BOT_TOKEN",
             api_id=API_KEY,

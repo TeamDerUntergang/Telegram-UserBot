@@ -51,7 +51,7 @@ for i in ALL_ROWS:
 DB.close()
 
 for module_name in ALL_MODULES:
-    imported_module = import_module("sedenbot.moduller." + module_name)
+    import_module("sedenbot.moduller." + module_name)
 
 LOGS.info("Botunuz çalışıyor! Herhangi bir sohbete .alive yazarak Test edin."
           " Yardıma ihtiyacınız varsa, Destek grubumuza gelin t.me/SedenUserBotSupport")

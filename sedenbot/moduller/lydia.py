@@ -26,17 +26,16 @@ from coffeehouse.api import API
 from telethon import events
 
 from sedenbot.events import sedenify
-from sedenbot import BOTLOG, BOTLOG_CHATID, CMD_HELP, bot
+from sedenbot import BOTLOG, BOTLOG_CHATID, CMD_HELP, bot, LOGS
 from sedenbot import LYDIA_API_KEY
-logging.basicConfig(format='[%(levelname) 5s/%(asctime)s] %(name)s: %(message)s',
-                    level=logging.WARNING)
 
+async def lydia_init():
+    try:
+        from sedenbot.moduller.sql_helper.lydia_sql import get_s, get_all_s, add_s, remove_s
+    except:
+        LOGS.warn("Lydia veritabanı bağlantısı başarısız oldu")
 
-try:
-    from sedenbot.moduller.sql_helper.lydia_sql import get_s, get_all_s, add_s, remove_s
-except:
-    logging.log(level=logging.WARNING,
-                msg="Lydia veritabanı bağlantısı başarısız oldu")
+asyncio.run(lydia_init())
 
 # SQL dışı mod
 ACC_LYDIA = {}

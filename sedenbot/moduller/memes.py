@@ -834,17 +834,17 @@ async def scam(event):
     ]
     input_str = event.pattern_match.group(1)
     args = input_str.split()
-    if len(args) is 0:
+    if len(args) == 0:
         scam_action = choice(options)
         scam_time = randint(30, 60)
-    elif len(args) is 1:
+    elif len(args) == 1:
         try:
             scam_action = str(args[0]).lower()
             scam_time = randint(30, 60)
         except ValueError:
             scam_action = choice(options)
             scam_time = int(args[0])
-    elif len(args) is 2:
+    elif len(args) == 2:
         scam_action = str(args[0]).lower()
         scam_time = int(args[1])
     else:

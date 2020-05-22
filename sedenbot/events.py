@@ -38,9 +38,6 @@ def sedenify(**args):
     trigger_on_fwd = args.get('trigger_on_fwd', False)
     trigger_on_inline = args.get('trigger_on_inline', False)
     disable_errors = args.get('disable_errors', False)
-    me = bot.get_me()
-    uid = me.id
-    uid not in BLACKLIST
 
     if pattern is not None and not pattern.startswith('(?i)'):
         args['pattern'] = '(?i)' + pattern
@@ -69,16 +66,17 @@ def sedenify(**args):
 
     def decorator(func):
         async def wrapper(check):
+            me = await bot.get_me()
             if check.edit_date and check.is_channel and not check.is_group:
                 return
             if groups_only and not check.is_group:
                 await check.respond("`Bunun bir grup olduğuna emin misin?`")
                 return
-            if check.via_bot_id and not insecure and check.out:
+            if check.via_bot_id and check.out:
                 return
 
             try:
-                if uid not in BLACKLIST:
+                if me.id not in BLACKLIST:
                     await func(check)
                 else:
                     raise RetardsException()

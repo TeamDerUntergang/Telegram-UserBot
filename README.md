@@ -52,5 +52,6 @@ Bu proje boyunca bana yardımcı olan insanlara teşekkür etmek istiyorum:
 * [@quiec](https://github.com/quiec)
 * [@erdemozdemir98](https://github.com/erdemozdemir98)
 * [@Sedenogen](https://github.com/ciyanogen)
+* [@frknkrc44](https://github.com/frknkrc44)
 
 ve burada bahsedilmeyen daha birçok insan.

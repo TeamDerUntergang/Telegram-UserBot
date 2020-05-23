@@ -14,38 +14,44 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-# @NaytSeyd tarafından portlanmıştır.
+# @frknkrc44 tarafından yeniden yazılmıştır.
 
-from urllib3 import PoolManager
-from json import loads as jsloads
+from re import sub, DOTALL
+from requests import get
+from bs4 import BeautifulSoup
 
-from sedenbot import CMD_HELP, bot
+from sedenbot import CMD_HELP
 from sedenbot.events import sedenify
 
 @sedenify(outgoing=True, pattern="^.covid$")
 async def covid(event):
     try:
-        url = 'http://67.158.54.51/corona.php'
-        http = PoolManager()
-        request = http.request('GET', url)
-        result = jsloads(request.data.decode('utf-8'))
-        http.clear()
+        request = get('https://covid19.saglik.gov.tr/')
+        result = BeautifulSoup(request.text, features="lxml")
     except:
         await event.edit("`Bir hata oluştu.`")
         return
+        
+    def to_nums(a):
+        return [sub('<span class=".*?">|</span>|\r|\n|\s|\.', '', str(s), flags=DOTALL) for s in a]
 
-    sonuclar = ("** Koronavirüs Verileri **\n" +
-                "\n**Dünya geneli**\n" +
-                f"**🌎 Vaka:** `{result['tum']}`\n" +
-                f"**🌎 Ölüm:** `{result['tumolum']}`\n" +
-                f"**🌎 İyileşen:** `{result['tumk']}`\n" +
-                "\n**Türkiye**\n" +
-                f"**🇹🇷 Vaka (toplam):** `{result['trtum']}`\n" +
-                f"**🇹🇷 Vaka (bugün):** `{result['trbtum']}`\n" +
-                f"**🇹🇷 Vaka (aktif):** `{result['tra']}`\n" +
-                f"**🇹🇷 Ölüm (toplam):** `{result['trolum']}`\n" +
-                f"**🇹🇷 Ölüm (bugün):** `{result['trbolum']}`\n" +
-                f"**🇹🇷 İyileşen:** `{result['trk']}`")
+    res1 = result.body.findAll('ul', {'class':['list-group','list-group-genislik']})
+    res2 = to_nums(res1[0].findAll('span', {'class':['']}))
+    res3 = to_nums(res1[1].findAll('span', {'class':['buyuk-bilgi-l-sayi','']}))
+    
+    sonuclar = ("**🇹🇷 Koronavirüs Verileri 🇹🇷**\n" +
+        "\n**Toplam**\n" + 
+        f"**Test:** `{res2[0]}`\n" + 
+        f"**Vaka:** `{res2[1]}`\n" +
+        f"**Ölüm:** `{res2[2]}`\n" +
+        f"**Y.Bakım:** `{res2[3]}`\n" +
+        f"**Entübe:** `{res2[4]}`\n" +
+        f"**İyileşen:** `{res2[5]}`\n" +
+        f"\n**Bugün**\n" +
+        f"**Test:** `{res3[0]}`\n" +
+        f"**Vaka:** `{res3[1]}`\n" +
+        f"**Ölüm:** `{res3[2]}`\n" +
+        f"**İyileşen:** `{res3[3]}`")
 
     await event.edit(sonuclar)
 

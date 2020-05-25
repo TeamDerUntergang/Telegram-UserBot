@@ -23,9 +23,9 @@ from asyncio import sleep
 from selenium.webdriver.chrome.options import Options
 
 from sedenbot import GOOGLE_CHROME_BIN, CHROME_DRIVER, CMD_HELP
-from sedenbot.events import sedenify
+from sedenbot.events import extract_args, sedenify
 
-@sedenify(pattern=r".ss (.*)", outgoing=True)
+@sedenify(pattern=r".ss", outgoing=True)
 async def capture(url):
     """ .ss komutu, belirttiğin herhangi bir siteden ekran görüntüsü alır ve sohbete gönderir. """
     await url.edit("`İşleniyor...`")
@@ -39,7 +39,7 @@ async def capture(url):
     chrome_options.add_argument('--disable-gpu')
     driver = webdriver.Chrome(executable_path=CHROME_DRIVER,
                               options=chrome_options)
-    input_str = url.pattern_match.group(1)
+    input_str = extract_args(url)
     link_match = match(r'\bhttps?://.*\.\S+', input_str)
     if link_match:
         link = link_match.group()

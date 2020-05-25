@@ -16,22 +16,23 @@
 
 import time
 import threading
-import asyncio
+
+from re import sub
 
 from asyncio import wait, sleep
 
 from sedenbot import BOTLOG, BOTLOG_CHATID, CMD_HELP
-from sedenbot.events import sedenify
+from sedenbot.events import extract_args, extract_args_arr, sedenify
 
 @sedenify(outgoing=True, pattern="^.tspam")
 async def tmeme(e):
-    message = e.text
-    messageSplit = message.split(" ", 1)
-    tspam = str(messageSplit[1])
-    message = tspam.replace(" ", "")
-    for letter in message:
-        await e.respond(letter)
+    message = extract_args(e)
+    if len(message) < 1:
+        await e.edit("`Bir şeyler eksik/yanlış gibi görünüyor.`")
+        return
     await e.delete()
+    for letter in message.replace(' ',''):
+        await e.respond(letter)
     if BOTLOG:
             await e.client.send_message(
                 BOTLOG_CHATID,
@@ -40,84 +41,73 @@ async def tmeme(e):
                 )
 
 @sedenify(outgoing=True, pattern="^.spam")
-async def spammer(e):
-    if not e.text[0].isalpha() and e.text[0] not in ("/", "#", "@", "!"):
-        message = e.text
-        messageSplit = message.split(" ", 2)
-        counter = int(messageSplit[1])
-        spam_message = str(messageSplit[2])
-        await asyncio.wait([e.respond(spam_message) for i in range(counter)])
-        await e.delete()
-        if BOTLOG:
-            await e.client.send_message(
-                BOTLOG_CHATID,
-                "#SPAM \n\n"
-                "Spam başarıyla gerçekleştirildi"
-                )
-
-@sedenify(outgoing=True, pattern="^.bigspam")
 async def bigspam(e):
-    if not e.text[0].isalpha() and e.text[0] not in ("/", "#", "@", "!"):
-        message = e.text
-        messageSplit = message.split(" ", 2)
-        counter = int(messageSplit[1])
-        spam_message = str(messageSplit[2])
-        for i in range(1, counter):
-            await e.respond(spam_message)
-        await e.delete()
-        if BOTLOG:
-            await e.client.send_message(
-                BOTLOG_CHATID,
-                "#BIGSPAM \n\n"
-                "Bigspam başarıyla gerçekleştirildi"
-                )
+    message = extract_args(e)
+    if len(message) < 1:
+        await e.edit("`Bir şeyler eksik/yanlış gibi görünüyor.`")
+        return
+    arr = message.split()
+    if not arr[0].isdigit():
+        await e.edit("`Bir şeyler eksik/yanlış gibi görünüyor.`")
+        return
+    await e.delete()
+    counter = int(arr[0])
+    spam_message = message.replace(arr[0],'').strip()
+    for i in range(0, counter):
+        await e.respond(spam_message)
+    if BOTLOG:
+         await e.client.send_message(
+             BOTLOG_CHATID,
+             "#BIGSPAM \n\n"
+             "Bigspam başarıyla gerçekleştirildi"
+            )
 
 @sedenify(outgoing=True, pattern="^.picspam")
 async def tiny_pic_spam(e):
-    if not e.text[0].isalpha() and e.text[0] not in ("/", "#", "@", "!"):
-        message = e.text
-        text = message.split()
-        counter = int(text[1])
-        link = str(text[2])
-        for i in range(1, counter):
-            await e.client.send_file(e.chat_id, link)
-        await e.delete()
-        if BOTLOG:
-            await e.client.send_message(
-                BOTLOG_CHATID,
-                "#PICSPAM \n\n"
-                "PicSpam başarıyla gerçekleştirildi"
-                )
+    arr = extract_args_arr(e)
+    if len(arr) < 2 or not arr[0].isdigit():
+        await e.edit("`Bir şeyler eksik/yanlış gibi görünüyor.`")
+        return
+    await e.delete()
+    counter = int(arr[0])
+    link = arr[1]
+    for i in range(0, counter):
+        await e.client.send_file(e.chat_id, link)
+    if BOTLOG:
+        await e.client.send_message(
+            BOTLOG_CHATID,
+            "#PICSPAM \n\n"
+            "PicSpam başarıyla gerçekleştirildi"
+            )
 
 @sedenify(outgoing=True, pattern="^.delayspam")
 async def delayspammer(e):
     # Teşekkürler @ReversedPosix
-    if not e.text[0].isalpha() and e.text[0] not in ("/", "#", "@", "!"):
-        message = e.text
-        messageSplit= message.split(" ", 3)
-        spam_delay = float(messageSplit[1])
-        counter = int(messageSplit[2])
-        spam_message = str(messageSplit[3])
-        from sedenbot.events import sedenify
-        await e.delete()
-        delaySpamEvent = threading.Event()
-        for i in range(1, counter):
-            await e.respond(spam_message)
-            delaySpamEvent.wait(spam_delay)
-        if BOTLOG:
-            await e.client.send_message(
-                BOTLOG_CHATID,
-                "#DelaySPAM \n\n"
-                "DelaySpam başarıyla gerçekleştirildi"
-                )
+    message = extract_args(e)
+    arr = message.split()
+    if len(arr) < 3 or not arr[0].isdigit() or not arr[1].isdigit():
+        await e.edit("`Bir şeyler eksik/yanlış gibi görünüyor.`")
+        return
+    spam_delay = int(arr[0])
+    counter = int(arr[1])
+    spam_message = sub(f'{arr[0]}|{arr[1]}', '', message).strip()
+    await e.delete()
+    delaySpamEvent = threading.Event()
+    for i in range(0, counter):
+        await e.respond(spam_message)
+        delaySpamEvent.wait(spam_delay)
+    if BOTLOG:
+        await e.client.send_message(
+            BOTLOG_CHATID,
+            "#DelaySPAM \n\n"
+            "DelaySpam başarıyla gerçekleştirildi"
+            )
                                
 CMD_HELP.update({
     "spammer": ".tspam <metin>\
 \nKullanım: Verilen mesajı tek tek göndererek spam yapar\
 \n\n.spam <miktar> <metin>\
 \nKullanım: Verilen miktarda spam gönderir\
-\n\n.bigspam <miktar> <metin>\
-\nKullanım: .spam komutunun büyük hali\
 \n\n.picspam <miktar> <link>\
 \nKullanım: Verilen miktarda resimli spam gönderir\
 \n\n.delayspam <gecikme> <miktar> <metin>\

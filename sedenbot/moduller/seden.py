@@ -17,12 +17,12 @@
 """ UserBot yardım komutu """
 
 from sedenbot import CMD_HELP
-from sedenbot.events import sedenify
+from sedenbot.events import extract_args, sedenify
 
-@sedenify(outgoing=True, pattern="^.seden(?: |$)(.*)")
+@sedenify(outgoing=True, pattern="^.seden")
 async def seden(event):
     """ .seden komutu için """
-    args = event.pattern_match.group(1).lower()
+    args = extract_args(event).lower()
     if args:
         if args in CMD_HELP:
             await event.edit(str(CMD_HELP[args]))

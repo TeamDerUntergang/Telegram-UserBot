@@ -39,8 +39,8 @@ def sedenify(**args):
     trigger_on_inline = args.get('trigger_on_inline', False)
     disable_errors = args.get('disable_errors', False)
 
-    if pattern is not None and not pattern.startswith('(?i)'):
-        args['pattern'] = '(?i)' + pattern
+    if pattern and '.' in pattern[:2]:
+        args['pattern'] = pattern = pattern.replace('.','[.?]')
 
     if "disable_edited" in args:
         del args['disable_edited']
@@ -92,7 +92,7 @@ def sedenify(**args):
 
                     text = "**USERBOT HATA RAPORU**\n"
                     link = "[Seden Destek Grubu](https://t.me/SedenUserBotSupport)"
-                    text += "İsterseniz, bunu rapor edebilirsiniz"
+                    text += "İsterseniz, bunu rapor edebilirsiniz "
                     text += f"- sadece bu mesajı buraya iletin {link}.\n"
                     text += "Hata ve Tarih dışında hiçbir şey kaydedilmez\n"
 
@@ -134,7 +134,7 @@ def sedenify(**args):
 
                     await check.client.send_file(BOTLOG_CHATID 
                                                  if BOTLOG 
-                                                 else check.chat_id, "hata.log", caption=text, )
+                                                 else me.id, "hata.log", caption=text, )
                     remove("hata.log")
             else:
                 pass
@@ -145,6 +145,21 @@ def sedenify(**args):
         return wrapper
 
     return decorator
+
+def has_args(command):
+    return command.strip().find(' ') != -1
+
+def _extract_text(command):
+    command = command.strip()
+    if not has_args(command):
+        return ''
+    return command[command.find(' ')+1:].strip()
+
+def extract_args(event):
+    return _extract_text(event.text)
+
+def extract_args_arr(event):
+	return extract_args(event).split()
 
 class RetardsException(Exception):
     pass

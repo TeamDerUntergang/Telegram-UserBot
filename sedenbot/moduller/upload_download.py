@@ -29,7 +29,7 @@ from hachoir.parser import createParser
 from telethon.tl.types import DocumentAttributeVideo
 
 from sedenbot import LOGS, CMD_HELP, TEMP_DOWNLOAD_DIRECTORY
-from sedenbot.events import sedenify
+from sedenbot.events import extract_args, sedenify
 
 async def progress(current, total, event, start, type_of_ps, file_name=None):
     """Upload-download için genel process_callback dir."""
@@ -86,11 +86,11 @@ def time_formatter(milliseconds: int) -> str:
         ((str(milliseconds) + " milisaniye, ") if milliseconds else "")
     return tmp[:-2]
 
-@sedenify(pattern=r".download(?: |$)(.*)", outgoing=True)
+@sedenify(pattern=r".download", outgoing=True)
 async def download(target_file):
     """ .download komutu userbot sunucusuna dosya indirmenizi sağlar. """
     await target_file.edit("İşleniyor...")
-    input_str = target_file.pattern_match.group(1)
+    input_str = extract_args(target_file)
     if not os.path.isdir(TEMP_DOWNLOAD_DIRECTORY):
         os.makedirs(TEMP_DOWNLOAD_DIRECTORY)
     if "|" in input_str:
@@ -158,10 +158,10 @@ async def download(target_file):
         await target_file.edit(
             "Sunucuma indirmek için bir mesajı yanıtlayın.")
 
-@sedenify(pattern=r".uploadir (.*)", outgoing=True)
+@sedenify(pattern=r".uploadir", outgoing=True)
 async def uploadir(udir_event):
     """ .uploadir komutu bir klasördeki tüm dosyaları uploadlamanıza yarar """
-    input_str = udir_event.pattern_match.group(1)
+    input_str = extract_args(udir_event)
     if os.path.exists(input_str):
         await udir_event.edit("İşleniyor...")
         lst_of_files = []
@@ -233,11 +233,11 @@ async def uploadir(udir_event):
     else:
         await udir_event.edit("404: Directory Not Found")
 
-@sedenify(pattern=r".upload (.*)", outgoing=True)
+@sedenify(pattern=r".upload", outgoing=True)
 async def upload(u_event):
     """ .upload komutu userbot sunucusundan dosya uploadlamaya yarar. """
     await u_event.edit("İşleniyor...")
-    input_str = u_event.pattern_match.group(1)
+    input_str = extract_args(u_event)
     if input_str in ("userbot.session", "config.env"):
         await u_event.edit("`Bu tehlikeli bir operasyon! Onaylanmadı!`")
         return
@@ -308,11 +308,15 @@ def extract_w_h(file):
         height = int(response_json["streams"][0]["height"])
         return width, height
 
-@sedenify(pattern=r".uploadas(stream|vn|all) (.*)", outgoing=True)
+@sedenify(pattern=r".uploadas", outgoing=True)
 async def uploadas(uas_event):
     """ .uploadas komutu size upload yaparken bazı argümanlar belirtmenizi sağlar. """
     await uas_event.edit("Lütfen bekleyin...")
-    type_of_upload = uas_event.pattern_match.group(1)
+    arr = extract_args(uas_event).split(' ', 1)
+    if len(arr) < 2:
+        await uas_event.edit("`Komut kullanımı hatalı.`")
+        return
+    type_of_upload = arr[0]
     supports_streaming = False
     round_message = False
     spam_big_messages = False
@@ -322,7 +326,7 @@ async def uploadas(uas_event):
         round_message = True
     if type_of_upload == "all":
         spam_big_messages = True
-    input_str = uas_event.pattern_match.group(2)
+    input_str = arr[1]
     thumb = None
     file_name = None
     if "|" in input_str:

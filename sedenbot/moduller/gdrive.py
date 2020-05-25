@@ -35,7 +35,7 @@ from sedenbot.moduller.upload_download import progress, humanbytes, time_formatt
 from sedenbot import (G_DRIVE_CLIENT_ID, G_DRIVE_CLIENT_SECRET,
                      G_DRIVE_AUTH_TOKEN_DATA, GDRIVE_FOLDER_ID, BOTLOG_CHATID,
                      TEMP_DOWNLOAD_DIRECTORY, CMD_HELP, LOGS)
-from sedenbot.events import sedenify
+from sedenbot.events import extract_args, sedenify
 
 # Json dosyasının yolu, script ile aynı dizinde bulunmalıdır.
 G_DRIVE_TOKEN_FILE = "./auth_token.txt"
@@ -51,13 +51,14 @@ parent_id = GDRIVE_FOLDER_ID
 # Dizinlerin mimeType değerini belirten evrensel değer
 G_DRIVE_DIR_MIME_TYPE = "application/vnd.google-apps.folder"
 
-@sedenify(pattern=r"^.gdrive(?: |$)(.*)", outgoing=True)
+@sedenify(pattern=r"^.gdrive", outgoing=True)
 async def gdrive_upload_function(dryb):
     """ .gdrive komutu dosyalarınızı Google Drive'a uploadlar. """
-    await dryb.edit("İşleniyor ...")
-    input_str = dryb.pattern_match.group(1)
-    if CLIENT_ID is None or CLIENT_SECRET is None:
+    if not CLIENT_ID or not CLIENT_SECRET:
+        await dryb.edit("`Bu özelliği kullanmanız için gereken anahtarlar eksik.`")
         return
+    await dryb.edit("`İşleniyor ...`")
+    input_str = extract_args(dryb)
     if not os.path.isdir(TEMP_DOWNLOAD_DIRECTORY):
         os.makedirs(TEMP_DOWNLOAD_DIRECTORY)
         required_file_name = None
@@ -140,7 +141,7 @@ async def gdrive_upload_function(dryb):
                 "`{}` dizinine indirme başarrılı. \nGoogle Drive'a yükleme başlatılıyor.."
                 .format(downloaded_file_name))
     if required_file_name:
-        if G_DRIVE_AUTH_TOKEN_DATA is not None:
+        if G_DRIVE_AUTH_TOKEN_DATA :
             with open(G_DRIVE_TOKEN_FILE, "w") as t_file:
                 t_file.write(G_DRIVE_AUTH_TOKEN_DATA)
         # Token dosyasının olup olmadığını kontrol eder, eğer yoksa yetkilendirme kodu ile oluşturur.
@@ -163,15 +164,16 @@ async def gdrive_upload_function(dryb):
             await dryb.edit(
                 f"Google Drive'a yükleme başarısız.\nHata kodu:\n`{e}`")
 
-@sedenify(pattern=r"^.ggd(?: |$)(.*)", outgoing=True)
+@sedenify(pattern=r"^.ggd", outgoing=True)
 async def upload_dir_to_gdrive(event):
-    await event.edit("İşleniyor ...")
-    if CLIENT_ID is None or CLIENT_SECRET is None:
+    if not CLIENT_ID or not CLIENT_SECRET:
+        await event.edit("`Bu özelliği kullanmanız için gereken anahtarlar eksik.`")
         return
-    input_str = event.pattern_match.group(1)
+    await event.edit("`İşleniyor ...`")
+    input_str = extract_args(event)
     if os.path.isdir(input_str):
         # Yapılacaklar: Gereksiz kodlar kaldırılacak.
-        if G_DRIVE_AUTH_TOKEN_DATA is not None:
+        if G_DRIVE_AUTH_TOKEN_DATA :
             with open(G_DRIVE_TOKEN_FILE, "w") as t_file:
                 t_file.write(G_DRIVE_AUTH_TOKEN_DATA)
         # Token dosyasının olup olmadığını kontrol eder, eğer yoksa yetkilendirme kodunu isteyerek oluşturur.
@@ -189,14 +191,15 @@ async def upload_dir_to_gdrive(event):
     else:
         await event.edit(f"{input_str} dizini bulunamadı.")
 
-@sedenify(pattern=r"^.list(?: |$)(.*)", outgoing=True)
+@sedenify(pattern=r"^.listdrive", outgoing=True)
 async def gdrive_search_list(event):
-    await event.edit("İşleniyor ...")
-    if CLIENT_ID is None or CLIENT_SECRET is None:
+    if not CLIENT_ID or not CLIENT_SECRET:
+        await event.edit("`Bu özelliği kullanmanız için gereken anahtarlar eksik.`")
         return
-    input_str = event.pattern_match.group(1).strip()
+    await event.edit("`İşleniyor ...`")
+    input_str = extract_args(event)
     # Yapılacaklar: Gereksiz kodlar kaldırılacak.
-    if G_DRIVE_AUTH_TOKEN_DATA is not None:
+    if G_DRIVE_AUTH_TOKEN_DATA :
         with open(G_DRIVE_TOKEN_FILE, "w") as t_file:
             t_file.write(G_DRIVE_AUTH_TOKEN_DATA)
     # Token dosyasının olup olmadığını kontrol eder, eğer yoksa yetkilendirme kodunu isteyerek oluşturur.
@@ -216,7 +219,7 @@ async def gdrive_search_list(event):
 async def download(set):
     """ .gsetf komutu dizini belirtmenizi sağlar. """
     await set.edit("İşleniyor ...")
-    input_str = set.pattern_match.group(1)
+    input_str = extract_args(set)
     if input_str:
         parent_id = input_str
         await set.edit(
@@ -228,14 +231,14 @@ async def download(set):
             ".gdrivesp <GDrive Klasörü> komutuyla yeni dosyaların uploadlanacağı klasörü belirtebilirsiniz."
         )
 
-@sedenify(pattern="^.gsetclear$", outgoing=True)
+@sedenify(pattern="^.gsetclear", outgoing=True)
 async def download(gclr):
     """ .gsetclear komutu özel dizini kaldırmanıza yarar. """
     await gclr.reply("İşleniyor ...")
     parent_id = GDRIVE_FOLDER_ID
     await gclr.edit("Özel Klasör ID'si başarıyla temizlendi.")
 
-@sedenify(pattern="^.gfolder$", outgoing=True)
+@sedenify(pattern="^.gfolder", outgoing=True)
 async def show_current_gdrove_folder(event):
     if parent_id:
         folder_link = f"https://drive.google.com/drive/folders/" + parent_id
@@ -279,7 +282,7 @@ async def create_token_file(token_file, event):
 
 def authorize(token_file, storage):
     # Kişisel bilgilei alır
-    if storage is None:
+    if not storage:
         storage = Storage(token_file)
     credentials = storage.get()
     # httplib2.Http objesi oluşturur ve kişisel bilgilerinizle yetkilendirir.
@@ -313,7 +316,7 @@ async def upload_file(http, file_path, file_name, mime_type, event, parent_id):
     file = drive_service.files().insert(body=body, media_body=media_body)
     response = None
     display_message = ""
-    while response is None:
+    while not response:
         status, response = file.next_chunk()
         await asyncio.sleep(1)
         if status:
@@ -436,7 +439,7 @@ async def gdrive_search(http, search_query):
                 else:
                     res += f"`{file_title}`\nhttps://drive.google.com/uc?id={file_id}&export=download\n\n"
             page_token = response.get("nextPageToken", None)
-            if page_token is None:
+            if not page_token:
                 break
         except Exception as e:
             res += str(e)
@@ -454,7 +457,7 @@ CMD_HELP.update({
     \nKullanım: Varsayılan upload dizinine geri döndürür.\
     \n\n.gfolder\
     \nKullanım: Halihazırda kullanılan upload dizinini gösterir.\
-    \n\n.list <sorgu>\
+    \n\n.listdrive <sorgu>\
     \nKullanım: Google Drive'da bulunan dosyalar ve dizinlerde arama yapar.\
     \n\n.ggd <sunucudaki-klasör-yolu>\
     \nKullanım: Belirtilen dizindeki tüm dosyaları Google Drive'a uploadlar."

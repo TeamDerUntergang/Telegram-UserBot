@@ -19,7 +19,7 @@ import os
 from requests import post
 
 from sedenbot import bot, OCR_SPACE_API_KEY, CMD_HELP, TEMP_DOWNLOAD_DIRECTORY
-from sedenbot.events import sedenify
+from sedenbot.events import extract_args, sedenify
 
 async def ocr_space_file(filename,
                          overlay=False,
@@ -51,12 +51,12 @@ async def ocr_space_file(filename,
         )
     return r.json()
 
-@sedenify(pattern=r".ocr (.*)", outgoing=True)
+@sedenify(pattern=r".ocr", outgoing=True)
 async def ocr(event):
     await event.edit("`Okunuyor...`")
     if not os.path.isdir(TEMP_DOWNLOAD_DIRECTORY):
         os.makedirs(TEMP_DOWNLOAD_DIRECTORY)
-    lang_code = event.pattern_match.group(1)
+    lang_code = extract_args(event)
     downloaded_file_name = await bot.download_media(
         await event.get_reply_message(), TEMP_DOWNLOAD_DIRECTORY)
     test_file = await ocr_space_file(filename=downloaded_file_name,

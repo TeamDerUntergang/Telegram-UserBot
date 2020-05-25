@@ -192,9 +192,11 @@ BOT_TOKEN = os.environ.get("BOT_TOKEN", None)
 BOT_USERNAME = os.environ.get("BOT_USERNAME", None)
 
 # Genius modülünün çalışması için buradan değeri alın https://genius.com/developers her ikisi de aynı değerlere sahiptir
-GENIUS_API_TOKEN = os.environ.get("GENIUS", None)
-# Genius modülünün çalışması için buradan değeri alın https://genius.com/developers her ikisi de aynı değerlere sahiptir
-GENIUS = os.environ.get("GENIUS_API_TOKEN", None)
+GENIUS = os.environ.get("GENIUS", None) or os.environ.get("GENIUS_API_TOKEN", None)
+
+# Ayarlanabilir PM izin verilmedi mesajı
+PM_UNAPPROVED = os.environ.get("PM_UNAPPROVED", None)
+
 CMD_HELP = {}
 
 
@@ -221,29 +223,6 @@ if STRING_SESSION:
 else:
     # pylint: devre dışı=geçersiz ad
     bot = TelegramClient("sedenbot", API_KEY, API_HASH)
-
-
-if os.path.exists("learning-data-root.check"):
-    os.remove("learning-data-root.check")
-else:
-    LOGS.info("Braincheck dosyası yok, getiriliyor...")
-
-URL = 'https://raw.githubusercontent.com/NaytSeyd/databasescape/master/learning-data-root.check'
-
-with open('learning-data-root.check', 'wb') as load:
-    load.write(get(URL).content)
-    
-
-if os.path.exists("blacklist.check"):
-    os.remove("blacklist.check")
-else:
-    LOGS.info("Blacklist dosyası yok, getiriliyor...")
-
-URL = 'https://raw.githubusercontent.com/NaytSeyd/databaseblacklist/master/blacklist.check'
-
-with open('blacklist.check', 'wb') as load:
-    load.write(get(URL).content)    
-
 
 async def check_botlog_chatid():
     if not BOTLOG_CHATID and LOGSPAMMER:
@@ -379,7 +358,7 @@ Hesabınızı bot'a çevirebilirsiniz ve bunları kullanabilirsiniz. Unutmayın,
                 else:
                     help_string = str(CMD_HELP[modul_name])
 
-                reply_pop_up_alert = help_string if help_string is not None else \
+                reply_pop_up_alert = help_string if help_string  else \
                     "{} modülü için herhangi bir döküman yazılmamış.".format(
                         modul_name)
                 await event.answer(reply_pop_up_alert, cache_time=0, alert=True)

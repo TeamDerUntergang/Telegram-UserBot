@@ -26,16 +26,19 @@ from urllib3 import PoolManager
 from bs4 import BeautifulSoup
 
 from sedenbot import CMD_HELP
-from sedenbot.events import sedenify
+from sedenbot.events import extract_args, sedenify
 
 @sedenify(pattern=r"^.decode$", outgoing=True)
 async def parseqr(qr_e):
     """ .decode komutu cevap verilen fotoğraftan QR kodu / Barkod içeriğini alır """
-    downloaded_file_name = await qr_e.client.download_media(
-        await qr_e.get_reply_message())
+    reply = await qr_e.get_reply_message()
+    if not reply:
+        await qr_e.edit("`Bir mesajı alıntılamalısın.`")
+    downloaded_file_name = await qr_e.client.download_media(reply)
 
     # QR kodunu çözmek için resmi ZXing web sayfasını ayrıştır
-    files = {'f': open(downloaded_file_name, 'rb').read()}
+    dw = open(downloaded_file_name, 'rb')
+    files = {'f': dw.read()}
     t_response = None
 
     try:
@@ -44,6 +47,7 @@ async def parseqr(qr_e):
             'POST', "https://zxing.org/w/decode", fields=files)
         t_response = t_response.data
         http.clear()
+        dw.close()
     except:
         pass
 
@@ -51,25 +55,29 @@ async def parseqr(qr_e):
     if not t_response:
         await qr_e.edit("decode başarısız oldu.")
         return
-    soup = BeautifulSoup(t_response, "html.parser")
-    qr_contents = soup.find_all("pre")[0].text
-    await qr_e.edit(qr_contents)
+    try:
+        soup = BeautifulSoup(t_response, "html.parser")
+        qr_contents = soup.find_all("pre")[0].text
+        await qr_e.edit(qr_contents)
+    except:
+        await qr_e.edit("decode başarısız oldu.")
 
-@sedenify(pattern=r".barcode(?: |$)([\s\S]*)", outgoing=True)
+@sedenify(pattern=r"^.barcode", outgoing=True)
 async def barcode_read(event):
     """ .barcode komutu verilen içeriği içeren bir barkod oluşturur. """
+    input_str = extract_args(event)
+    message = "Kullanım: `.barcode <eklenecek uzun metin>`"
+    reply = await event.get_reply_message()
+    if len(input_str) < 1 and not reply:
+        await event.edit(message)
+        return
     await event.edit("`İşleniyor..`")
-    input_str = event.pattern_match.group(1)
-    message = "SÖZDİZİMİ: `.barcode <eklenecek uzun metin>`"
-    reply_msg_id = event.message.id
-    if input_str:
-        message = input_str
-    elif event.reply_to_msg_id:
-        previous_message = await event.get_reply_message()
-        reply_msg_id = previous_message.id
-        if previous_message.media:
+    reply_msg_id = event.id
+    if reply:
+        reply_msg_id = reply.id
+        if reply.media:
             downloaded_file_name = await event.client.download_media(
-                previous_message)
+                reply)
             m_list = None
             with open(downloaded_file_name, "rb") as fd:
                 m_list = fd.readlines()
@@ -78,10 +86,9 @@ async def barcode_read(event):
                 message += m.decode("UTF-8") + "\r\n"
             os.remove(downloaded_file_name)
         else:
-            message = previous_message.message
+            message = reply.message
     else:
-        event.edit("SÖZDİZİMİ: `.barcode <eklenecek uzun metin>`")
-        return
+        message = input_str
 
     bar_code_type = "code128"
     try:
@@ -98,20 +105,22 @@ async def barcode_read(event):
         return
     await event.delete()
 
-@sedenify(pattern=r".makeqr(?: |$)([\s\S]*)", outgoing=True)
+@sedenify(pattern=r"^.makeqr", outgoing=True)
 async def make_qr(makeqr):
     """ .makeqr komutu verilen içeriği içeren bir QR kodu yapar. """
-    input_str = makeqr.pattern_match.group(1)
-    message = "SÖZDİZİMİ: `.makeqr <eklenecek uzun metin>`"
-    reply_msg_id = None
-    if input_str:
-        message = input_str
-    elif makeqr.reply_to_msg_id:
-        previous_message = await makeqr.get_reply_message()
-        reply_msg_id = previous_message.id
-        if previous_message.media:
+    input_str = extract_args(makeqr)
+    message = "Kullanım: `.makeqr <eklenecek uzun metin>`"
+    reply = await makeqr.get_reply_message()
+    if len(input_str) < 1 and not reply:
+        await makeqr.edit(message)
+        return
+    await makeqr.edit("`İşleniyor..`")
+    reply_msg_id = makeqr.id
+    if reply:
+        reply_msg_id = reply.id
+        if reply.media:
             downloaded_file_name = await makeqr.client.download_media(
-                previous_message)
+                reply)
             m_list = None
             with open(downloaded_file_name, "rb") as file:
                 m_list = file.readlines()
@@ -120,7 +129,9 @@ async def make_qr(makeqr):
                 message += media.decode("UTF-8") + "\r\n"
             os.remove(downloaded_file_name)
         else:
-            message = previous_message.message
+            message = reply.message
+    else:
+        message = input_str
 
     qr = qrcode.QRCode(
         version=1,

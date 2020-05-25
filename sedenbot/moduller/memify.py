@@ -51,16 +51,16 @@ MessageMediaPhoto
 
 from sedenbot.moduller.upload_download import progress, humanbytes
 from sedenbot import CMD_HELP, bot, TEMP_DOWNLOAD_DIRECTORY
-from sedenbot.events import sedenify
+from sedenbot.events import extract_args, sedenify
 
 thumb_image_path = TEMP_DOWNLOAD_DIRECTORY + "/thumb_image.jpg"
 
-@sedenify(outgoing=True, pattern="^.mem ?(.*)")
+@sedenify(outgoing=True, pattern="^.mem")
 async def _(event):
     if event.fwd_from:
         return 
     if not event.reply_to_msg_id:
-       await event.edit("`Kullanım: Bir fotoğrafa yanıt vererek .mem` 'üst kısmın metni' ; 'alt kısmın metni' ")
+       await event.edit("`Kullanım: Bir fotoğrafa yanıt vererek .mem 'üst kısmın metni' ; 'alt kısmın metni'`")
        return
     reply_message = await event.get_reply_message() 
     if not reply_message.media:
@@ -78,8 +78,8 @@ async def _(event):
      await event.edit("`İşleniyor...`")
     
     async with bot.conversation("@MemeAutobot") as bot_conv:
+          memeVar = extract_args(event)
           try:
-            memeVar = event.pattern_match.group(1)
             await silently_send_message(bot_conv, "/start")
             await asyncio.sleep(1)
             await silently_send_message(bot_conv, memeVar)
@@ -95,13 +95,13 @@ async def _(event):
             thumb = None
             if os.path.exists(thumb_image_path):
                 thumb = thumb_image_path
-            input_str = event.pattern_match.group(1)
-            if not os.path.isdir(Config.TMP_DOWNLOAD_DIRECTORY):
-                os.makedirs(Config.TMP_DOWNLOAD_DIRECTORY)
+            input_str = memeVar
+            if not os.path.isdir(TMP_DOWNLOAD_DIRECTORY):
+                os.makedirs(TMP_DOWNLOAD_DIRECTORY)
             if event.reply_to_msg_id:
                 file_name = "sedenmemes.png"
                 reply_message = await event.get_reply_message()
-                to_download_directory = Config.TMP_DOWNLOAD_DIRECTORY
+                to_download_directory = TMP_DOWNLOAD_DIRECTORY
                 downloaded_file_name = os.path.join(to_download_directory, file_name)
                 downloaded_file_name = await bot.download_media(
                     reply_message,
@@ -120,14 +120,16 @@ async def _(event):
                 else:
                     await event.edit("Dosya bulunamadı {}".format(input_str))
             response = await bot_conv.get_response()
-            the_download_directory = Config.TMP_DOWNLOAD_DIRECTORY
+            the_download_directory = TMP_DOWNLOAD_DIRECTORY
             files_name = "sedenmemes.webp"
             download_file_name = os.path.join(the_download_directory, files_name)
             await bot.download_media(
                 response.media,
                 download_file_name,
                 )
-            requires_file_name = Config.TMP_DOWNLOAD_DIRECTORY + "sedenmemes.webp"
+            requires_file_name = (TMP_DOWNLOAD_DIRECTORY 
+                + ('/' if TMP_DOWNLOAD_DIRECTORY[-1:] != '/' else '') 
+                    + files_name)
             await bot.send_file(  # pylint:disable=E0602
                 event.chat_id,
                 requires_file_name,

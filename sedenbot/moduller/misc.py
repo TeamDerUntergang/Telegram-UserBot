@@ -16,18 +16,15 @@
 
 """ Birkaç küçük komutu içeren UserBot modülü. """
 
-import sys
-import os
-import io
-import sys
-import json
+from io import BytesIO
+from sys import executable, argv
 
 from os import execl
 from random import randint
 from asyncio import sleep
 
 from sedenbot import BOTLOG, BOTLOG_CHATID, CMD_HELP, bot
-from sedenbot.events import sedenify
+from sedenbot.events import extract_args, sedenify
 
 @sedenify(outgoing=True, pattern="^.random")
 async def randomise(items):
@@ -42,19 +39,20 @@ async def randomise(items):
     await items.edit("**Sorgu: **\n`" + items.text[8:] + "`\n**Çıktı: **\n`" +
                      itemo[index] + "`")
 
-@sedenify(outgoing=True, pattern="^.sleep( [0-9]+)?$")
+@sedenify(outgoing=True, pattern="^.sleep")
 async def sleepybot(time):
     """ .sleep komutu Seden'in birkaç saniye uyumasına olanak sağlar. """
-    if " " not in time.pattern_match.group(1):
-        await time.reply("Kullanım Şekli: `.sleep [saniye]`")
+    args = extract_args(time)
+    if len(args) < 1 or not args.isdigit():
+        await time.edit("Kullanım Şekli: `.sleep [saniye]`")
     else:
-        counter = int(time.pattern_match.group(1))
+        counter = int(args)
         await time.edit("`Horlayarak uyuyorum...`")
         await sleep(2)
         if BOTLOG:
             await time.client.send_message(
                 BOTLOG_CHATID,
-                "Botu" + str(counter) + "saniye uykuya bıraktın.",
+                f"#SLEEP\nBotu {counter} saniye uykuya bıraktın.",
             )
         await sleep(counter)
         await time.edit("`Günaydın!`")
@@ -83,7 +81,7 @@ async def restart(event):
     except:
         pass
 
-    execl(sys.executable, sys.executable, *sys.argv)
+    execl(executable, executable, *argv)
 
 @sedenify(outgoing=True, pattern="^.support$")
 async def bot_support(wannahelp):
@@ -103,9 +101,16 @@ async def reedme(e):
     await e.edit("[Seden README.md](https://github.com/TeamDerUntergang/Telegram-UserBot/blob/seden/README.md)")
 
 # Copyright (c) Gegham Zakaryan | 2019
-@sedenify(outgoing=True, pattern="^.repeat (.*)")
+@sedenify(outgoing=True, pattern="^.repeat")
 async def repeat(rep):
-    cnt, txt = rep.pattern_match.group(1).split(' ', 1)
+    args = extract_args(rep).split(' ', 1)
+    if len(args) < 2:
+        await rep.edit("`Kullanım şekli hatalı.`")
+        return
+    cnt, txt = args
+    if not cnt.isdigit():
+        await rep.edit("`Kullanım şekli hatalı.`")
+        return
     replyCount = int(cnt)
     toBeRepeated = txt
 
@@ -132,7 +137,7 @@ async def raw(event):
     else:
         the_real_message = event.stringify()
         reply_to_id = event.message.id
-    with io.BytesIO(str.encode(the_real_message)) as out_file:
+    with BytesIO(str.encode(the_real_message)) as out_file:
         out_file.name = "raw_message_data.txt"
         await event.edit(
             "`Çözülmüş mesaj için UserBot loglarını kontrol et!`")

@@ -24,9 +24,9 @@ from telethon.tl.types import MessageEntityMentionName
 from telethon.utils import get_input_location
 
 from sedenbot import CMD_HELP, TEMP_DOWNLOAD_DIRECTORY
-from sedenbot.events import sedenify
+from sedenbot.events import extract_args, sedenify
 
-@sedenify(pattern=".whois(?: |$)(.*)", outgoing=True)
+@sedenify(pattern="^.whois", outgoing=True)
 async def who(event):
 
     await event.edit(
@@ -67,12 +67,12 @@ async def who(event):
 
 async def get_user(event):
     """ Kullanıcıyı argümandan veya yanıtlanan mesajdan alın. """
-    if event.reply_to_msg_id and not event.pattern_match.group(1):
+    if event.reply_to_msg_id:
         previous_message = await event.get_reply_message()
         replied_user = await event.client(
             GetFullUserRequest(previous_message.from_id))
     else:
-        user = event.pattern_match.group(1)
+        user = extract_args(event)
 
         if user.isnumeric():
             user = int(user)
@@ -81,7 +81,7 @@ async def get_user(event):
             self_user = await event.client.get_me()
             user = self_user.id
 
-        if event.message.entities is not None:
+        if event.message.entities :
             probable_user_mention_entity = event.message.entities[0]
 
             if isinstance(probable_user_mention_entity,

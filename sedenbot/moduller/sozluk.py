@@ -23,7 +23,7 @@ from bs4 import BeautifulSoup
 
 from sedenbot.moduller.admin import get_user_from_event
 from sedenbot import CMD_HELP
-from sedenbot.events import sedenify
+from sedenbot.events import extract_args, sedenify
 
 def searchTureng_tr(word):
     url="https://tureng.com/tr/turkce-ingilizce/"+word
@@ -43,17 +43,17 @@ def searchTureng_tr(word):
     except:
         return "Sonuç bulunamadı"
 
-@sedenify(outgoing=True, pattern="^.tureng ?(.*)")
+@sedenify(outgoing=True, pattern="^.tureng")
 async def tureng(event): 
-    input_str = event.pattern_match.group(1)
+    input_str = extract_args(event)
     result = searchTureng_tr(input_str)
     await event.edit(result)
 
-@sedenify(outgoing=True, pattern="^.tdk ?(.*)")
+@sedenify(outgoing=True, pattern="^.tdk")
 async def tdk(event): 
     if event.fwd_from:
         return
-    inp = event.pattern_match.group(1)
+    inp = extract_args(event)
     kelime = "https://sozluk.gov.tr/gts?ara={}".format(inp)
     headers = {"USER-AGENT": "Seden"}
     response = requests.get(kelime, headers=headers).json()

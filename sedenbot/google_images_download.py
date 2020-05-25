@@ -407,7 +407,7 @@ class googleimagesdownload:
                   'aspect_ratio':[arguments['aspect_ratio'],{'tall':'iar:t','square':'iar:s','wide':'iar:w','panoramic':'iar:xw'}],
                   'format':[arguments['format'],{'jpg':'ift:jpg','gif':'ift:gif','png':'ift:png','bmp':'ift:bmp','svg':'ift:svg','webp':'webp','ico':'ift:ico','raw':'ift:craw'}]}
         for key, value in params.items():
-            if value[0] is not None:
+            if value[0] :
                 ext_param = value[1][value[0]]
                 # counter will tell if it is first param added or not
                 if counter == 0:
@@ -898,8 +898,8 @@ class googleimagesdownload:
             search_keyword = [current_time.replace(":", "_")]
 
         # If single_image or url argument not present then keywords is mandatory argument
-        if arguments['single_image'] is None and arguments['url'] is None and arguments['similar_images'] is None and \
-                        arguments['keywords'] is None and arguments['keywords_from_file'] is None:
+        if not arguments['single_image'] and not arguments['url'] and not arguments['similar_images'] and \
+                        not arguments['keywords'] and not arguments['keywords_from_file']:
             print('-------------------------------\n'
                   'Uh oh! Keywords is a required argument \n\n'
                   'Please refer to the documentation on guide to writing queries \n'

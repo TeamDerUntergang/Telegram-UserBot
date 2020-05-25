@@ -24,7 +24,7 @@ from os import remove
 from telethon import version
 
 from sedenbot import CMD_HELP, ALIVE_MESAJI
-from sedenbot.events import sedenify
+from sedenbot.events import extract_args, sedenify
 # ================= CONSTANT =================
 KULLANICIMESAJI = str(ALIVE_MESAJI) if ALIVE_MESAJI else uname().node
 # ============================================
@@ -50,7 +50,7 @@ async def sysdetails(sysd):
 @sedenify(outgoing=True, pattern="^.botver$")
 async def bot_ver(event):
     """ .botver komutu bot versiyonunu gösterir. """
-    if which("git") is not None:
+    if which("git") :
         invokever = "git describe --all --long"
         ver = await asyncrunapp(
             invokever,
@@ -72,7 +72,7 @@ async def bot_ver(event):
             + str(stderr.decode().strip())
 
         await event.edit("[Seden UserBot](https://telegram.dog/SedenUserBot) `Versiyonu: "
-                         f"{verout} v3.0"
+                         f"{verout} v3.2"
                          "` \n"
                          "`Toplam değişiklik: "
                          f"{revout}"
@@ -82,11 +82,11 @@ async def bot_ver(event):
             "Bu arada Seden seni çok seviyor. ❤"
         )
 
-@sedenify(outgoing=True, pattern="^.pip(?: |$)(.*)")
+@sedenify(outgoing=True, pattern="^.pip")
 async def pipcheck(pip):
     """ .pip komutu python-pip araması yapar. """
-    pipmodule = pip.pattern_match.group(1)
-    if pipmodule:
+    pipmodule = extract_args(pip)
+    if len(pipmodule) > 0:
         await pip.edit("`Aranıyor . . .`")
         invokepip = f"pip3 search {pipmodule}"
         pipc = await asyncrunapp(
@@ -126,8 +126,7 @@ async def pipcheck(pip):
 
 @sedenify(outgoing=True, pattern="^.alive$")
 async def amialive(alive):
-    if not alive.text[0].isalpha() and alive.text[0] not in ("/", "#", "@", "!"):
-        await alive.edit(f"`{KULLANICIMESAJI}`")
+    await alive.edit(f"`{KULLANICIMESAJI}`")
         
 @sedenify(outgoing=True, pattern="^.alives")
 async def alivename(kullanici):

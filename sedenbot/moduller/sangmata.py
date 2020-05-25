@@ -26,7 +26,7 @@ from telethon.tl.functions.account import UpdateNotifySettingsRequest
 from sedenbot import bot, CMD_HELP
 from sedenbot.events import sedenify
 
-@sedenify(outgoing=True, pattern="^.sangmata(?: |$)(.*)")
+@sedenify(outgoing=True, pattern="^.sangmata")
 async def _(event):
     if event.fwd_from:
         return 

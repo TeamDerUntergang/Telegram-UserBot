@@ -30,7 +30,7 @@ from telethon.tl.functions.photos import (DeletePhotosRequest,
 from telethon.tl.types import InputPhoto, MessageMediaPhoto, User, Chat, Channel
 
 from sedenbot import bot, CMD_HELP
-from sedenbot.events import sedenify
+from sedenbot.events import extract_args, sedenify
 # ====================== CONSTANT ===============================
 INVALID_MEDIA = "```Medya geçerli değil.```"
 PP_CHANGED = "```Profil resmi başarıyla değiştirildi.```"
@@ -55,7 +55,7 @@ async def mine(event):
 @sedenify(outgoing=True, pattern="^.name")
 async def update_name(name):
     """ .name komutu Telegram'daki isminizi değişir. """
-    newname = name.text[6:]
+    newname = extract_args(name)
     if " " not in newname:
         firstname = newname
         lastname = ""
@@ -73,7 +73,7 @@ async def set_profilepic(propic):
     """ .setpfp komutu Telegram'daki profil resminizi yanıtladığınız resimle değişir. """
     replymsg = await propic.get_reply_message()
     photo = None
-    if replymsg.media:
+    if replymsg and replymsg.media:
         if isinstance(replymsg.media, MessageMediaPhoto):
             photo = await propic.client.download_media(message=replymsg.photo)
         elif "image" in replymsg.media.document.mime_type.split('/'):
@@ -94,18 +94,20 @@ async def set_profilepic(propic):
             await propic.edit(PP_ERROR)
         except PhotoExtInvalidError:
             await propic.edit(INVALID_MEDIA)
+    else:
+        await propic.edit(INVALID_MEDIA)
 
-@sedenify(outgoing=True, pattern="^.setbio (.*)")
+@sedenify(outgoing=True, pattern="^.setbio")
 async def set_biograph(setbio):
     """ .setbio komutu Telegram'da yeni bir biyografi ayarlamanızı sağlar. """
-    newbio = setbio.pattern_match.group(1)
+    newbio = extract_args(setbio)
     await setbio.client(UpdateProfileRequest(about=newbio))
     await setbio.edit(BIO_SUCCESS)
 
-@sedenify(outgoing=True, pattern="^.username (.*)")
+@sedenify(outgoing=True, pattern="^.username")
 async def update_username(username):
     """ .username komutu Telegram'da yeni bir kullanıcı adı belirlemenizi sağlar. """
-    newusername = username.pattern_match.group(1)
+    newusername = extract_args(username)
     try:
         await username.client(UpdateUsernameRequest(newusername))
         await username.edit(USERNAME_SUCCESS)

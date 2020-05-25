@@ -22,15 +22,15 @@ import os
 from requests import get, post, exceptions
 
 from sedenbot import BOTLOG, BOTLOG_CHATID, CMD_HELP, LOGS, TEMP_DOWNLOAD_DIRECTORY
-from sedenbot.events import sedenify
+from sedenbot.events import extract_args, sedenify
 
 DOGBIN_URL = "https://del.dog/"
 
-@sedenify(outgoing=True, pattern=r"^.paste(?: |$)([\s\S]*)")
+@sedenify(outgoing=True, pattern=r"^.paste")
 async def paste(pstl):
     """ .paste komutu metni doğrudan dogbine yapıştırır """
     dogbin_final_url = ""
-    match = pstl.pattern_match.group(1).strip()
+    match = extract_args(pstl)
     reply_id = pstl.reply_to_msg_id
 
     if not match and not reply_id:
@@ -83,11 +83,11 @@ async def paste(pstl):
             f"Dogbine metin yapıştırma başarıyla yürütüldü",
         )
 
-@sedenify(outgoing=True, pattern="^.getpaste(?: |$)(.*)")
+@sedenify(outgoing=True, pattern="^.getpaste")
 async def get_dogbin_content(dog_url):
     """ .getpaste komutu dogbin url içeriğini aktarır """
     textx = await dog_url.get_reply_message()
-    message = dog_url.pattern_match.group(1)
+    message = extract_args(dog_url)
     await dog_url.edit("`Dogbin içeriği alınıyor...`")
 
     if textx:

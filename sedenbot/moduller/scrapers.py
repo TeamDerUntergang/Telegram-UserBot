@@ -53,16 +53,16 @@ from telethon.tl.types import DocumentAttributeAudio
 from sedenbot.moduller.upload_download import progress, humanbytes, time_formatter
 from sedenbot.google_images_download import googleimagesdownload
 from sedenbot import CMD_HELP, BOTLOG, BOTLOG_CHATID, YOUTUBE_API_KEY, CHROME_DRIVER, GOOGLE_CHROME_BIN
-from sedenbot.events import sedenify
+from sedenbot.events import extract_args, sedenify
 
 CARBONLANG = "auto"
 TTS_LANG = "tr"
 TRT_LANG = "tr"
 
-@sedenify(outgoing=True, pattern="^.crblang (.*)")
+@sedenify(outgoing=True, pattern="^.crblang")
 async def setlang(prog):
     global CARBONLANG
-    CARBONLANG = prog.pattern_match.group(1)
+    CARBONLANG = extract_args(prog)
     await prog.edit(f"Karbon modülü için varsayılan dil {CARBONLANG} olarak ayarlandı.")
 
 @sedenify(outgoing=True, pattern="^.carbon")
@@ -130,11 +130,11 @@ async def carbon_api(e):
     # Karşıya yüklemenin ardından carbon.png kaldırılıyor
     await e.delete()  # Mesaj siliniyor
 
-@sedenify(outgoing=True, pattern="^.img (.*)")
+@sedenify(outgoing=True, pattern="^.img")
 async def img_sampler(event):
     """ .img komutu Google'da resim araması yapar. """
     await event.edit("İşleniyor...")
-    query = event.pattern_match.group(1)
+    query = extract_args(event)
     lim = findall(r"lim=\d+", query)
     try:
         lim = lim[0]
@@ -162,7 +162,7 @@ async def img_sampler(event):
 
 @sedenify(outgoing=True, pattern="^.currency (.*)")
 async def moni(event):
-    input_str = event.pattern_match.group(1)
+    input_str = extract_args(event)
     input_sgra = input_str.split(" ")
     if len(input_sgra) == 3:
         try:
@@ -187,10 +187,10 @@ async def moni(event):
         await event.edit("`Sözdizimi hatası.`")
         return
 
-@sedenify(outgoing=True, pattern=r"^.google (.*)")
+@sedenify(outgoing=True, pattern=r"^.google")
 async def gsearch(q_event):
     """ .google komutu ile basit Google aramaları gerçekleştirilebilir """
-    match = q_event.pattern_match.group(1)
+    match = extract_args(q_event)
     page = findall(r"page=\d+", match)
     try:
         page = page[0]
@@ -220,10 +220,10 @@ async def gsearch(q_event):
             match + " `sözcüğü başarıyla Google'da aratıldı!`",
         )
 
-@sedenify(outgoing=True, pattern=r"^.wiki (.*)")
+@sedenify(outgoing=True, pattern=r"^.wiki")
 async def wiki(wiki_q):
     """ .wiki komutu Vikipedi üzerinden bilgi çeker. """
-    match = wiki_q.pattern_match.group(1)
+    match = extract_args(wiki_q)
     try:
         summary(match)
     except DisambiguationError as error:
@@ -251,11 +251,11 @@ async def wiki(wiki_q):
         await wiki_q.client.send_message(
             BOTLOG_CHATID, f"{match}` teriminin Wikipedia sorgusu başarıyla gerçekleştirildi!`")
 
-@sedenify(outgoing=True, pattern="^.ud (.*)")
+@sedenify(outgoing=True, pattern="^.ud")
 async def urban_dict(ud_e):
     """ .ud komutu Urban Dictionary'den bilgi çeker. """
     await ud_e.edit("İşleniyor...")
-    query = ud_e.pattern_match.group(1)
+    query = extract_args(ud_e)
     try:
         define(query)
     except HTTPError:
@@ -290,11 +290,11 @@ async def urban_dict(ud_e):
     else:
         await ud_e.edit(query + "**için hiçbir sonuç bulunamadı**")
 
-@sedenify(outgoing=True, pattern=r"^.tts(?: |$)([\s\S]*)")
+@sedenify(outgoing=True, pattern=r"^.tts")
 async def text_to_speech(query):
     """ .tts komutu ile Google'ın metinden yazıya dönüştürme servisi kullanılabilir. """
     textx = await query.get_reply_message()
-    message = query.pattern_match.group(1)
+    message = extract_args(query)
     if message:
         pass
     elif textx:
@@ -334,10 +334,10 @@ async def text_to_speech(query):
                 BOTLOG_CHATID, "Metin başarıyla sese dönüştürüldü!")
         await query.delete()
 
-@sedenify(outgoing=True, pattern="^.imdb (.*)")
+@sedenify(outgoing=True, pattern="^.imdb")
 async def imdb(e):
     try:
-        movie_name = e.pattern_match.group(1)
+        movie_name = extract_args(e)
         remove_space = movie_name.split(' ')
         final_name = '+'.join(remove_space)
         page = get("https://www.imdb.com/find?ref_=nv_sr_fn&q=" + final_name +
@@ -416,12 +416,12 @@ async def imdb(e):
     except IndexError:
         await e.edit("Geçerli bir film ismi gir.")
 
-@sedenify(outgoing=True, pattern=r"^.trt(?: |$)([\s\S]*)")
+@sedenify(outgoing=True, pattern=r"^.trt")
 async def translateme(trans):
     """ .trt komutu verilen metni Google Çeviri kullanarak çevirir. """
     translator = Translator()
     textx = await trans.get_reply_message()
-    message = trans.pattern_match.group(1)
+    message = extract_args(trans)
     if message:
         pass
     elif textx:
@@ -447,14 +447,15 @@ async def translateme(trans):
             f"Birkaç {source_lan.title()} kelime az önce {transl_lan.title()} diline çevirildi.",
         )
 
-@sedenify(pattern=".lang (trt|tts) (.*)", outgoing=True)
+@sedenify(pattern="^.lang", outgoing=True)
 async def lang(value):
     """ .lang komutu birkaç modül için varsayılan dili değiştirir. """
-    util = value.pattern_match.group(1).lower()
+    arr = extract_args(value).split(' ', 1)
+    util = arr[0].lower()
+    arg = arr[1].lower()
     if util == "trt":
         scraper = "Translator"
         global TRT_LANG
-        arg = value.pattern_match.group(2).lower()
         if arg in LANGUAGES:
             TRT_LANG = arg
             LANG = LANGUAGES[arg]
@@ -466,7 +467,6 @@ async def lang(value):
     elif util == "tts":
         scraper = "Yazıdan Sese"
         global TTS_LANG
-        arg = value.pattern_match.group(2).lower()
         if arg in tts_langs():
             TTS_LANG = arg
             LANG = tts_langs()[arg]
@@ -481,10 +481,10 @@ async def lang(value):
             BOTLOG_CHATID,
             f"`{scraper} modülü için varsayılan dil {LANG.title()} diline çevirildi.`")
 
-@sedenify(outgoing=True, pattern="^.yt (.*)")
+@sedenify(outgoing=True, pattern="^.yt")
 async def yt_search(video_q):
     """ .yt komutu YouTube üzerinde arama yapar. """
-    query = video_q.pattern_match.group(1)
+    query = extract_args(video_q)
     result = ''
 
     if not YOUTUBE_API_KEY:
@@ -543,11 +543,15 @@ async def youtube_search(query,
         nexttok = "API anahtarı hatası, lütfen yeniden dene."
         return (nexttok, videos)
 
-@sedenify(outgoing=True, pattern=r".rip(audio|video) (.*)")
+@sedenify(outgoing=True, pattern=r"^.rip")
 async def download_video(v_url):
     """ .rip komutu ile YouTube ve birkaç farklı siteden medya çekebilirsin. """
-    url = v_url.pattern_match.group(2)
-    type = v_url.pattern_match.group(1).lower()
+    arr = extract_args(v_url).split(' ', 1)
+    if len(arr) < 2 or arr[0].lower() not in ['audio','video']:
+        await v_url.edit("`Komut kullanımı hatalı.`")
+        return
+    url = arr[1]
+    type = arr[0].lower()
 
     await v_url.edit("`İndirmeye hazırlanıyor...`")
 

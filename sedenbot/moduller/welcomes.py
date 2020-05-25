@@ -17,7 +17,7 @@
 from telethon.events import ChatAction
 
 from sedenbot import CMD_HELP, bot, LOGS, CLEAN_WELCOME, BOTLOG_CHATID
-from sedenbot.events import sedenify
+from sedenbot.events import extract_args, sedenify
 
 @bot.on(ChatAction)
 async def welcome_to_chat(event):
@@ -91,7 +91,7 @@ async def welcome_to_chat(event):
                 file=file_media)
             update_previous_welcome(event.chat_id, current_message.id)
 
-@sedenify(outgoing=True, pattern=r"^.setwelcome(?: |$)(.*)")
+@sedenify(outgoing=True, pattern=r"^.setwelcome")
 async def save_welcome(event):
     try:
         from sedenbot.moduller.sql_helper.welcome_sql import add_welcome_setting
@@ -99,7 +99,7 @@ async def save_welcome(event):
         await event.edit("`SQL dışı modda çalışıyor!`")
         return
     msg = await event.get_reply_message()
-    string = event.pattern_match.group(1)
+    string = extract_args(event)
     msg_id = None
     if msg and msg.media and not string:
         if BOTLOG_CHATID:
@@ -128,7 +128,7 @@ async def save_welcome(event):
     else:
         await event.edit(success.format('güncellendi'))
 
-@sedenify(outgoing=True, pattern="^.checkwelcome$")
+@sedenify(outgoing=True, pattern="^.checkwelcome")
 async def show_welcome(event):
     try:
         from sedenbot.moduller.sql_helper.welcome_sql import get_current_welcome_settings
@@ -150,7 +150,7 @@ async def show_welcome(event):
             "`Şu anda bu karşılama notu ile yeni kullanıcıları ağırlıyorum.`")
         await event.reply(cws.reply)
 
-@sedenify(outgoing=True, pattern="^.rmwelcome$")
+@sedenify(outgoing=True, pattern="^.rmwelcome")
 async def del_welcome(event):
     try:
         from sedenbot.moduller.sql_helper.welcome_sql import rm_welcome_setting

@@ -25,7 +25,7 @@ from telethon.tl.functions.account import UpdateNotifySettingsRequest
 from sedenbot import bot, CMD_HELP
 from sedenbot.events import sedenify
 
-@sedenify(outgoing=True, pattern="^.q(?: |$)(.*)")
+@sedenify(outgoing=True, pattern="^.q$")
 async def _(event):
     if event.fwd_from:
         return 

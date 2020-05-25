@@ -18,13 +18,13 @@
 from re import sub, DOTALL
 from requests import get
 from sedenbot import CMD_HELP
-from sedenbot.events import sedenify
+from sedenbot.events import extract_args, sedenify
 from functools import reduce
 from bs4 import BeautifulSoup
 
-@sedenify(outgoing=True, pattern="^.ezanvakti ?(.*)")
+@sedenify(outgoing=True, pattern="^.ezanvakti")
 async def ezanvakti(event):
-    konum = event.pattern_match.group(1).lower()
+    konum = extract_args(event).lower()
     if len(konum) < 1:
         await event.edit("`Lütfen komutun yanına bir şehir belirtin.`")
         return

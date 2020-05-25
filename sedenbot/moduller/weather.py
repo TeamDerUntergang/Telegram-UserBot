@@ -26,7 +26,7 @@ from pytz import country_names as c_n
 
 from sedenbot import OPEN_WEATHER_MAP_APPID as OWM_API
 from sedenbot import CMD_HELP, WEATHER_DEFCITY
-from sedenbot.events import sedenify
+from sedenbot.events import extract_args, sedenify
 # ===== CONSTANT =====
 if WEATHER_DEFCITY:
     DEFCITY = WEATHER_DEFCITY
@@ -45,7 +45,7 @@ async def get_tz(con):
     except KeyError:
         return
 
-@sedenify(outgoing=True, pattern="^.havadurumu(?: |$)(.*)")
+@sedenify(outgoing=True, pattern="^.havadurumu")
 async def get_weather(weather):
     """ .havadurumu komutu bir bölgenin hava durumunu OpenWeatherMap üzerinden alır. """
 
@@ -55,8 +55,10 @@ async def get_weather(weather):
         return
 
     APPID = OWM_API
+    
+    args = extract_args(weather)
 
-    if not weather.pattern_match.group(1):
+    if len(args) < 1:
         CITY = DEFCITY
         if not CITY:
             await weather.edit(
@@ -64,7 +66,7 @@ async def get_weather(weather):
             )
             return
     else:
-        CITY = weather.pattern_match.group(1)
+        CITY = args
 
     timezone_countries = {
         timezone: country

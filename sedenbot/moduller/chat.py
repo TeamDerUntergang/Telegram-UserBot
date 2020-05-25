@@ -20,9 +20,9 @@ from asyncio import sleep
 
 from sedenbot.moduller.admin import get_user_from_event
 from sedenbot import CMD_HELP, BOTLOG, BOTLOG_CHATID, bot
-from sedenbot.events import sedenify
+from sedenbot.events import extract_args, sedenify
 
-@sedenify(outgoing=True, pattern="^.id$")
+@sedenify(outgoing=True, pattern="^.id")
 async def useridgetter(target):
     """ .id komutu belirlenen kullanıcının ID numarasını verir """
     message = await target.get_reply_message()
@@ -41,8 +41,10 @@ async def useridgetter(target):
                 name = "*" + message.forward.sender.first_name + "*"
         await target.edit("**Kullanıcı Adı:** {} \n**Kullanıcı ID:** `{}`".format(
             name, user_id))
+    else:
+        await target.edit("`Bir mesajı alıntılamalısın.`")
 
-@sedenify(outgoing=True, pattern="^.link(?: |$)(.*)")
+@sedenify(outgoing=True, pattern="^.link")
 async def permalink(mention):
     """ .link komutu belirlenen kullanıcının profil bağlantısını metin ile ulaşılabilir hale getirir """
     user, custom = await get_user_from_event(mention)
@@ -55,21 +57,22 @@ async def permalink(mention):
                                       "") if user.first_name else user.username
         await mention.edit(f"[{tag}](tg://user?id={user.id})")
 
-@sedenify(outgoing=True, pattern="^.chatid$")
+@sedenify(outgoing=True, pattern="^.chatid")
 async def chatidgetter(chat):
     """ .chatid komutu belirlenen grubun ID numarasını verir """
     await chat.edit("Grup ID: `" + str(chat.chat_id) + "`")
 
-@sedenify(outgoing=True, pattern=r"^.log(?: |$)([\s\S]*)")
+@sedenify(outgoing=True, pattern=r"^.log")
 async def log(log_text):
     """ .log komutu seçilen mesajı günlük grubuna gönderir """
+    args = extract_args(log_text)
     if BOTLOG:
         if log_text.reply_to_msg_id:
             reply_msg = await log_text.get_reply_message()
             await reply_msg.forward_to(BOTLOG_CHATID)
-        elif log_text.pattern_match.group(1):
+        elif len(args) > 1:
             user = f"#LOG / Grup ID: {log_text.chat_id}\n\n"
-            textx = user + log_text.pattern_match.group(1)
+            textx = user + args
             await bot.send_message(BOTLOG_CHATID, textx)
         else:
             await log_text.edit("`Bununla ne yapmam gerekiyor ?`")
@@ -80,13 +83,13 @@ async def log(log_text):
     await sleep(2)
     await log_text.delete()
 
-@sedenify(outgoing=True, pattern="^.kickme$")
+@sedenify(outgoing=True, pattern="^.kickme")
 async def kickme(leave):
     """ .kickme komutu gruptan çıkmaya yarar """
     await leave.edit("Güle Güle ben gidiyorum 🤠")
     await leave.client.kick_participant(leave.chat_id, 'me')
 
-@sedenify(outgoing=True, pattern="^.unmutechat$")
+@sedenify(outgoing=True, pattern="^.unmutechat")
 async def unmute_chat(unm_e):
     """ .unmutechat komutu susturulmuş grubun sesini açar """
     try:
@@ -99,7 +102,7 @@ async def unmute_chat(unm_e):
     await sleep(2)
     await unm_e.delete()
 
-@sedenify(outgoing=True, pattern="^.mutechat$")
+@sedenify(outgoing=True, pattern="^.mutechat")
 async def mute_chat(mute_e):
     """ .mutechat komutu grubu susturur """
     try:
@@ -140,20 +143,24 @@ async def sedNinja(event):
         await sleep(.5)
         await event.delete()
 
-@sedenify(outgoing=True, pattern="^.regexninja (on|off)$")
+@sedenify(outgoing=True, pattern="^.regexninja")
 async def sedNinjaToggle(event):
     """ Regex ninja modülünü etkinleştirir veya devre dışı bırakır. """
     global regexNinja
-    if event.pattern_match.group(1) == "on":
-        regexNinja = True
-        await event.edit("`Regexbot için ninja modu etkinleştirdi.`")
-        await sleep(1)
-        await event.delete()
-    elif event.pattern_match.group(1) == "off":
-        regexNinja = False
-        await event.edit("`Regexbot için ninja modu devre dışı bırakıldı.`")
-        await sleep(1)
-        await event.delete()
+    args = extract_args(event)
+    if len(args) < 1 or args not in ['on','off']:
+        await event.edit("`Regexbot ninja modu konusunda ne yapacağımı bilmiyorum.`")
+    else:
+        if args == "on":
+            regexNinja = True
+            await event.edit("`Regexbot için ninja modu etkinleştirdi.`")
+            await sleep(1)
+            await event.delete()
+        elif args == "off":
+            regexNinja = False
+            await event.edit("`Regexbot için ninja modu devre dışı bırakıldı.`")
+            await sleep(1)
+            await event.delete()
 
 CMD_HELP.update({
     "chat":

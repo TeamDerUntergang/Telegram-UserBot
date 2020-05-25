@@ -25,16 +25,16 @@ from PIL import Image, ImageChops, ImageDraw, ImageFont
 from telethon.tl.types import InputMessagesFilterDocument
 
 from sedenbot import CMD_HELP, bot
-from sedenbot.events import sedenify
+from sedenbot.events import extract_args, sedenify
 
-@sedenify(outgoing=True, pattern="^.rgb(?: |$)(.*)")
+@sedenify(outgoing=True, pattern="^.rgb")
 async def sticklet(event):
     R = random.randint(0,256)
     G = random.randint(0,256)
     B = random.randint(0,256)
 
     # Giriş metnini al
-    sticktext = event.pattern_match.group(1).strip()
+    sticktext = extract_args(event)
 
     if len(sticktext) < 1:
         await event.edit("`Lütfen komutun yanına bir metin yazın`")
@@ -52,7 +52,7 @@ async def sticklet(event):
     draw = ImageDraw.Draw(image)
     fontsize = 230
 
-    FONT_FILE = await get_font_file(event.client, "@FontRes")
+    FONT_FILE = await get_font_file(event.client, "@FontDunyasi")
 
     font = ImageFont.truetype(FONT_FILE, size=fontsize)
 

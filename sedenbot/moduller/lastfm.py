@@ -28,7 +28,7 @@ from telethon.tl.types import User as Userbot
 from telethon.errors.rpcerrorlist import FloodWaitError
 
 from sedenbot import CMD_HELP, BOTLOG, BOTLOG_CHATID, DEFAULT_BIO, BIO_PREFIX, lastfm, LASTFM_USERNAME, bot
-from sedenbot.events import sedenify
+from sedenbot.events import extract_args, sedenify
 
 # =================== CONSTANT ===================
 LFM_BIO_ENABLED = "```last.fm'de oynatılan müziği biyografiye ekleme aktif.```"
@@ -53,14 +53,14 @@ LASTFMCHECK = False
 RUNNING = False
 LastLog = False
 # ================================================
-@sedenify(outgoing=True, pattern="^.lastfm$")
+@sedenify(outgoing=True, pattern="^.lastfm")
 async def last_fm(lastFM):
     """ .lastfm komutu last.fm'den verileri çeker. """
     await lastFM.edit("İşleniyor...")
     preview = None
     playing = User(LASTFM_USERNAME, lastfm).get_now_playing()
     username = f"https://www.last.fm/user/{LASTFM_USERNAME}"
-    if playing is not None:
+    if playing :
         try:
             image = User(LASTFM_USERNAME,
                          lastfm).get_now_playing().get_cover_image()
@@ -91,7 +91,7 @@ async def last_fm(lastFM):
             output += f"• [{printable}]({rectrack})\n"
             if tags:
                 output += f"`{tags}`\n\n"
-    if preview is not None:
+    if preview :
         await lastFM.edit(f"{output}", parse_mode='md', link_preview=True)
     else:
         await lastFM.edit(f"{output}", parse_mode='md')
@@ -138,7 +138,7 @@ async def get_curr_track(lfmbio):
             ARTIST = playing.get_artist()
             oldsong = environ.get("oldsong", None)
             oldartist = environ.get("oldartist", None)
-            if playing is not None and SONG != oldsong and ARTIST != oldartist:
+            if playing  and SONG != oldsong and ARTIST != oldartist:
                 environ["oldsong"] = str(SONG)
                 environ["oldartist"] = str(ARTIST)
                 if BIOPREFIX:
@@ -155,7 +155,7 @@ async def get_curr_track(lfmbio):
                     short_bio = f"🎧: {SONG}"
                     await bot(UpdateProfileRequest(about=short_bio))
             else:
-                if playing is None and user_info.about != DEFAULT_BIO:
+                if not playing and user_info.about != DEFAULT_BIO:
                     await sleep(6)
                     await bot(UpdateProfileRequest(about=DEFAULT_BIO))
                     if BOTLOG and LastLog:
@@ -184,9 +184,9 @@ async def get_curr_track(lfmbio):
         await sleep(2)
     RUNNING = False
 
-@sedenify(outgoing=True, pattern=r"^.lastbio (on|off)")
+@sedenify(outgoing=True, pattern=r"^.lastbio")
 async def lastbio(lfmbio):
-    arg = lfmbio.pattern_match.group(1).lower()
+    arg = extract_args(lfmbio).lower()
     global LASTFMCHECK
     global RUNNING
     if arg == "on":
@@ -207,9 +207,9 @@ async def lastbio(lfmbio):
     else:
         await lfmbio.edit(LFM_BIO_ERR)
 
-@sedenify(outgoing=True, pattern=r"^.lastlog (on|off)")
+@sedenify(outgoing=True, pattern=r"^.lastlog")
 async def lastlog(lstlog):
-    arg = lstlog.pattern_match.group(1).lower()
+    arg = extract_args(lstlog).lower()
     global LastLog
     LastLog = False
     if arg == "on":

@@ -30,13 +30,13 @@ from bs4 import BeautifulSoup
 from telethon.tl.types import MessageMediaPhoto
 
 from sedenbot import bot, CMD_HELP
-from sedenbot.events import sedenify
+from sedenbot.events import extract_args, sedenify
 
 opener = urllib.request.build_opener()
 useragent = 'Mozilla/5.0 (Linux; Android 9; SM-G960F Build/PPR1.180610.011; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/78.0.3904.70 Mobile Safari/537.36'
 opener.addheaders = [('User-agent', useragent)]
 
-@sedenify(outgoing=True, pattern=r"^.reverse(?: |$)(\d*)")
+@sedenify(outgoing=True, pattern=r"^.reverse")
 async def okgoogle(img):
     """ .reverse komutu Google'da görsel araması yapar """
     if os.path.isfile("okgoogle.png"):
@@ -89,9 +89,10 @@ async def okgoogle(img):
         else:
             await img.edit("`Çirkin kıçın için bir şey bulamadım.`")
             return
-
-        if img.pattern_match.group(1):
-            lim = img.pattern_match.group(1)
+        
+        msg = extract_args(img)
+        if len(msg) > 1 and msg.isdigit():
+            lim = msg
         else:
             lim = 3
         images = await scam(match, lim)

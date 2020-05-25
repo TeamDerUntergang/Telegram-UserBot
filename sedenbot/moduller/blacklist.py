@@ -24,14 +24,17 @@ from telethon import events, utils
 from telethon.tl import types, functions
 
 from sedenbot import CMD_HELP, bot, LOGS
-from sedenbot.events import sedenify
+from sedenbot.events import extract_args, sedenify
+
+from importlib import import_module
 
 async def blacklist_init():
     try:
-        import sedenbot.moduller.sql_helper.blacklist_sql as sql
+        global sql
+        sql = import_module("sedenbot.moduller.sql_helper.blacklist_sql")
     except:
-        LOGS.warn('Karaliste özelliği çalıştırılamıyor, SQL bağlantısı bulunamadı')
         sql = None
+        LOGS.warn('Karaliste özelliği çalıştırılamıyor, SQL bağlantısı bulunamadı')
 
 asyncio.run(blacklist_init())
 
@@ -52,21 +55,21 @@ async def on_new_message(event):
             break
         pass
 
-@sedenify(outgoing=True, pattern="^.addblacklist(?: |$)(.*)")
+@sedenify(outgoing=True, pattern="^.addblacklist")
 async def on_add_black_list(addbl):
     if not sql:
         await addbl.edit("`SQL dışı modda çalışıyorum, bunu gerçekleştiremem`")
         return
-    text = addbl.pattern_match.group(1)
+    text = extract_args(addbl)
     to_blacklist = list(set(trigger.strip() for trigger in text.split("\n") if trigger.strip()))
     for trigger in to_blacklist:
         sql.add_to_blacklist(addbl.chat_id, trigger.lower())
     await addbl.edit("{} **adet kelime bu sohbet için karalisteye alındı.**".format(len(to_blacklist)))
 
-@sedenify(outgoing=True, pattern="^.listblacklist(?: |$)(.*)")
+@sedenify(outgoing=True, pattern="^.showblacklist")
 async def on_view_blacklist(listbl):
     if not sql:
-        await addbl.edit("`SQL dışı modda çalışıyorum, bunu gerçekleştiremem`")
+        await listbl.edit("`SQL dışı modda çalışıyorum, bunu gerçekleştiremem`")
         return
     all_blacklisted = sql.get_chat_blacklist(listbl.chat_id)
     OUT_STR = "**Bu grup için ayarlanan karaliste:**\n"
@@ -90,12 +93,12 @@ async def on_view_blacklist(listbl):
     else:
         await listbl.edit(OUT_STR)
 
-@sedenify(outgoing=True, pattern="^.rmblacklist(?: |$)(.*)")
+@sedenify(outgoing=True, pattern="^.rmblacklist")
 async def on_delete_blacklist(rmbl):
     if not sql:
-        await addbl.edit("`SQL dışı modda çalışıyorum, bunu gerçekleştiremem`")
+        await rmbl.edit("`SQL dışı modda çalışıyorum, bunu gerçekleştiremem`")
         return
-    text = rmbl.pattern_match.group(1)
+    text = extract_args(rmbl)
     to_unblacklist = list(set(trigger.strip() for trigger in text.split("\n") if trigger.strip()))
     successful = 0
     for trigger in to_unblacklist:
@@ -105,7 +108,7 @@ async def on_delete_blacklist(rmbl):
     
 CMD_HELP.update({
     "blacklist":
-    ".listblaclist\
+    ".showblacklist\
     \nKullanım: Bir sohbetteki etkin kara listeyi listeler.\
     \n\n.addblacklist <kelime>\
     \nKullanım: İletiyi 'kara liste anahtar kelimesine' kaydeder.\

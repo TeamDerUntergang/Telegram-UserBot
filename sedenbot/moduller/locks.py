@@ -18,11 +18,11 @@ from telethon.tl.functions.messages import EditChatDefaultBannedRightsRequest
 from telethon.tl.types import ChatBannedRights
 
 from sedenbot import CMD_HELP
-from sedenbot.events import sedenify
+from sedenbot.events import extract_args, sedenify
 
-@sedenify(outgoing=True, pattern=r"^.lock ?(.*)")
+@sedenify(outgoing=True, pattern=r"^.lock")
 async def locks(event):
-    input_str = event.pattern_match.group(1).lower()
+    input_str = extract_args(event).lower()
     peer_id = event.chat_id
     msg = None
     media = None
@@ -107,9 +107,9 @@ async def locks(event):
             f"`Bunun için gerekli haklara sahip olduğuna emin misin?`\n**Hata:** {str(e)}")
         return
 
-@sedenify(outgoing=True, pattern=r"^.unlock ?(.*)")
+@sedenify(outgoing=True, pattern=r"^.unlock")
 async def rem_locks(event):
-    input_str = event.pattern_match.group(1).lower()
+    input_str = extract_args(event).lower()
     peer_id = event.chat_id
     msg = None
     media = None

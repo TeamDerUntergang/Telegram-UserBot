@@ -275,7 +275,7 @@ async def resize_photo(photo):
 
     return image
 
-@sedenify(outgoing=True, pattern="^.dızbilgisi$")
+@sedenify(outgoing=True, pattern="^.dızbilgisi")
 async def dizbilgisi(event):
     if not event.is_reply:
         await event.edit("`Hiçlikten bir bilgi çekemem, sence yapabilir miyim?!`")

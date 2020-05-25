@@ -22,13 +22,13 @@ from telethon import events
 from PIL import Image, ImageColor
 
 from sedenbot import CMD_HELP, bot
-from sedenbot.events import sedenify
+from sedenbot.events import extract_args, sedenify
 
-@sedenify(outgoing=True, pattern="^.color (.*)")
+@sedenify(outgoing=True, pattern="^.color")
 async def _(event):
     if event.fwd_from:
         return
-    input_str = event.pattern_match.group(1)
+    input_str = extract_args(event)
     message_id = event.message.id
     if event.reply_to_msg_id:
         message_id = event.reply_to_msg_id

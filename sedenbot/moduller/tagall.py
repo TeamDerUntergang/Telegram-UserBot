@@ -30,7 +30,7 @@ from sedenbot.moduller.admin import get_user_from_event
 from sedenbot import CMD_HELP, bot
 from sedenbot.events import sedenify
 
-@sedenify(outgoing=True, pattern="^.tagall$")
+@sedenify(outgoing=True, pattern="^.tagall")
 async def _(event):
     if event.fwd_from:
         return

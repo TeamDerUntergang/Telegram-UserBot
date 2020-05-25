@@ -22,18 +22,18 @@ import requests
 
 from telethon.tl.types import MessageMediaPhoto
 
-from sedenbot.events import sedenify
+from sedenbot.events import extract_args, sedenify
 from sedenbot import CMD_HELP, REM_BG_API_KEY, TEMP_DOWNLOAD_DIRECTORY
 
-@sedenify(outgoing=True, pattern="^.rbg(?: |$)(.*)")
+@sedenify(outgoing=True, pattern="^.rbg")
 async def kbg(remob):
     """ .rbg komutu ile görüntünün arka planını kaldırın """
-    if REM_BG_API_KEY is None:
+    if not REM_BG_API_KEY:
         await remob.edit(
             "`Hata: Remove.BG API key eksik! Lütfen ekleyin.`"
         )
         return
-    input_str = remob.pattern_match.group(1)
+    input_str = extract_args(remob)
     message_id = remob.message.id
     if remob.reply_to_msg_id:
         message_id = remob.reply_to_msg_id

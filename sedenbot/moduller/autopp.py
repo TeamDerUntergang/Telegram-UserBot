@@ -31,7 +31,7 @@ from telethon.tl.types import InputMessagesFilterDocument
 from sedenbot import CMD_HELP, AUTO_PP, ASYNC_POOL
 from sedenbot.events import sedenify
 
-@sedenify(outgoing=True, pattern="^.autopp ?(.*)")
+@sedenify(outgoing=True, pattern="^.autopp")
 async def autopic(event):
     if 'autopic' in ASYNC_POOL:
         await event.edit("`Görünüşe göre profil fotoğrafınız zaten otomatik olarak değişiyor.`")

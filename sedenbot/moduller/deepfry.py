@@ -25,12 +25,12 @@ from telethon import events
 from telethon.tl.types import DocumentAttributeFilename
 
 from sedenbot import bot, CMD_HELP
-from sedenbot.events import sedenify
+from sedenbot.events import extract_args, sedenify
 
-@sedenify(pattern="^.deepfry(?: |$)(.*)", outgoing=True) 
+@sedenify(pattern="^.deepfry", outgoing=True) 
 async def deepfryer(event):
     try:
-        frycount = int(event.pattern_match.group(1))
+        frycount = int(extract_args(event))
         if frycount < 1:
             raise ValueError
     except:
@@ -116,7 +116,7 @@ async def check_media(reply_message):
     else:
         return False
 
-    if not data or data is None:
+    if not data:
         return False
     else:
         return data

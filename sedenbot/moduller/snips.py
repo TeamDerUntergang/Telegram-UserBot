@@ -17,7 +17,7 @@
 """ Küresel notlar tutmak için yapılmış olan UserBot modülü. """
 
 from sedenbot import CMD_HELP, BOTLOG_CHATID
-from sedenbot.events import sedenify
+from sedenbot.events import extract_args, sedenify
 
 @sedenify(outgoing=True,
           pattern=r"\$\w*",
@@ -46,16 +46,20 @@ async def on_snip(event):
                                         snip.reply,
                                         reply_to=message_id_to_reply)
 
-@sedenify(outgoing=True, pattern="^.snip (\w*)")
+@sedenify(outgoing=True, pattern="^.addsnip")
 async def on_snip_save(event):
     """ .snip komutu gelecekte kullanılmak üzere snips kaydeder. """
     try:
         from sedenbot.moduller.sql_helper.snips_sql import add_snip
-    except AtrributeError:
+    except:
         await event.edit("`SQL dışı modda çalışıyor!`")
         return
-    keyword = event.pattern_match.group(1)
-    string = event.text.partition(keyword)[2]
+    arr = extract_args(event).split(' ', 1)
+    if len(arr) < 2:
+        await event.edit("`Komut kullanımı hatalı.`")
+        return
+    keyword = arr[0]
+    string = arr[1]
     msg = await event.get_reply_message()
     msg_id = None
     if msg and msg.media and not string:
@@ -105,7 +109,7 @@ async def on_snip_list(event):
 
     await event.edit(message)
 
-@sedenify(outgoing=True, pattern="^.remsnip (\w*)")
+@sedenify(outgoing=True, pattern="^.remsnip")
 async def on_snip_delete(event):
     """ .remsnip komutu belirlenini snipi siler. """
     try:
@@ -113,7 +117,10 @@ async def on_snip_delete(event):
     except AttributeError:
         await event.edit("`SQL dışı modda çalışıyor!`")
         return
-    name = event.pattern_match.group(1)
+    name = extract_args(event)
+    if len(name) < 1:
+        await event.edit("`Komut kullanımı hatalı.`")
+        return
     if remove_snip(name) is True:
         await event.edit(f"`snip:` **{name}** `Başarıyla silindi`")
     else:
@@ -124,7 +131,7 @@ CMD_HELP.update({
     "\
 $<snip_adı>\
 \nKullanım: Belirtilen snipi kullanır.\
-\n\n.snip <isim> <veri> veya .snip <isim> ile bir iletiyi yanıtlayın.\
+\n\n.addsnip <isim> <veri> veya .addsnip <isim> ile bir iletiyi yanıtlayın.\
 \nKullanım: Bir snip (küresel not) olarak kaydeder. (Resimler, dokümanlar ve çıkartmalar ile çalışır !)\
 \n\n.snips\
 \nKullanım: Kaydedilen tüm snip'leri listeler.\

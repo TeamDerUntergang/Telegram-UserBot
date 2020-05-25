@@ -23,17 +23,17 @@ from os import remove
 from sys import executable
 
 from sedenbot import CMD_HELP, BOTLOG, BOTLOG_CHATID
-from sedenbot.events import sedenify
+from sedenbot.events import extract_args, sedenify
 
-@sedenify(outgoing=True, pattern="^.eval(?: |$)(.*)")
+@sedenify(outgoing=True, pattern="^.eval")
 async def evaluate(query):
     """ .eval komutu verilen Python ifadesini değerlendirir. """
     if query.is_channel and not query.is_group:
         await query.edit("`Eval komutlarına kanallarda izin verilmiyor`")
         return
-
-    if query.pattern_match.group(1):
-        expression = query.pattern_match.group(1)
+    args = extract_args(query)
+    if len(args) > 1:
+        expression = args
     else:
         await query.edit("``` Değerlendirmek için bir ifade verin. ```")
         return
@@ -78,16 +78,16 @@ async def evaluate(query):
             BOTLOG_CHATID,
             f"Eval sorgusu {expression} başarıyla yürütüldü")
 
-@sedenify(outgoing=True, pattern=r"^.exec(?: |$)([\s\S]*)")
+@sedenify(outgoing=True, pattern=r"^.exec")
 async def run(run_q):
     """ .exec komutu dinamik olarak oluşturulan programı yürütür """
-    code = run_q.pattern_match.group(1)
-
     if run_q.is_channel and not run_q.is_group:
         await run_q.edit("`Exec komutlarına kanallarda izin verilmiyor`")
         return
 
-    if not code:
+    code = extract_args(run_q)
+
+    if len(code) < 1:
         await run_q.edit("``` Yürütmek için en az bir değişken gereklidir \
 .seden exec kullanarak örnek alabilirsiniz.```")
         return
@@ -142,11 +142,11 @@ async def run(run_q):
             BOTLOG_CHATID,
             "Exec sorgusu " + codepre + " başarıyla yürütüldü")
 
-@sedenify(outgoing=True, pattern="^.term(?: |$)(.*)")
+@sedenify(outgoing=True, pattern="^.term")
 async def terminal_runner(term):
     """ .term komutu sunucunuzda bash komutlarını ve komut dosyalarını çalıştırır. """
     curruser = getuser()
-    command = term.pattern_match.group(1)
+    command = extract_args(term)
     try:
         from os import geteuid
         uid = geteuid()

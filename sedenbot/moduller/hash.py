@@ -22,12 +22,15 @@ from subprocess import PIPE
 from subprocess import run as runapp
 
 from sedenbot import CMD_HELP
-from sedenbot.events import sedenify
+from sedenbot.events import extract_args, sedenify
 
-@sedenify(outgoing=True, pattern="^.hash (.*)")
+@sedenify(outgoing=True, pattern="^.hash")
 async def gethash(hash_q):
     """ .hash komutu md5, sha1, sha256, sha512 dizelerini bulur. """
-    hashtxt_ = hash_q.pattern_match.group(1)
+    hashtxt_ = extract_args(hash_q)
+    if len(hashtxt_) < 1:
+        await hash_q.edit("`Komutun yanına bir metin yazın.`")
+        return
     hashtxt = open("hashdis.txt", "w+")
     hashtxt.write(hashtxt_)
     hashtxt.close()
@@ -40,8 +43,15 @@ async def gethash(hash_q):
     sha512 = runapp(["sha512sum", "hashdis.txt"], stdout=PIPE)
     runapp(["rm", "hashdis.txt"], stdout=PIPE)
     sha512 = sha512.stdout.decode()
-    ans = ("Text: `" + hashtxt_ + "`\nMD5: `" + md5 + "`SHA1: `" + sha1 +
-           "`SHA256: `" + sha256 + "`SHA512: `" + sha512[:-1] + "`")
+    
+    def rem_filename(st):
+        return st[:st.find(' ')]
+    
+    ans = (f"Text: `{hashtxt_}`"
+           f"\nMD5: `{rem_filename(md5)}`"
+           f"\nSHA1: `{rem_filename(sha1)}`"
+           f"\nSHA256: `{rem_filename(sha256)}`"
+           f"\nSHA512: `{rem_filename(sha512)}`")
     if len(ans) > 4096:
         hashfile = open("hashes.txt", "w+")
         hashfile.write(ans)
@@ -52,22 +62,25 @@ async def gethash(hash_q):
             reply_to=hash_q.id,
             caption="`Çok büyük, bunun yerine bir metin dosyası gönderiliyor. `")
         runapp(["rm", "hashes.txt"], stdout=PIPE)
+        hash_q.delete()
     else:
-        await hash_q.reply(ans)
+        await hash_q.edit(ans)
 
-@sedenify(outgoing=True, pattern="^.base64 (en|de) (.*)")
+@sedenify(outgoing=True, pattern="^.base64")
 async def endecrypt(query):
     """ .base64 komutu verilen dizenin base64 kodlamasını bulur. """
-    if query.pattern_match.group(1) == "en":
-        lething = str(
-            pybase64.b64encode(bytes(query.pattern_match.group(2),
-                                     "utf-8")))[2:]
-        await query.reply("Encoded: `" + lething[:-1] + "`")
+    argv = extract_args(query)
+    args = argv.split(' ', 1)
+    if len(args) < 2 or args[0] not in ['en','de']:
+        await query.edit('`Komut kullanımı hatalı.`')
+        return
+    args[1] = args[1].replace('`','')
+    if args[0] == "en":
+        lething = str(pybase64.b64encode(bytes(args[1], "utf-8")))[2:]
+        await query.edit(f"Input: `{args[1]}`\nEncoded: `{lething[:-1]}`")
     else:
-        lething = str(
-            pybase64.b64decode(bytes(query.pattern_match.group(2), "utf-8"),
-                               validate=True))[2:]
-        await query.reply("Decoded: `" + lething[:-1] + "`")
+        lething = str(pybase64.b64decode(bytes(args[1], "utf-8")))[2:]
+        await query.edit(f"Input: `{args[1]}`\nDecoded: `{lething[:-1]}`")
 
 CMD_HELP.update({"base64": "Verilen dizenin base64 kodlamasını bulun"})
 

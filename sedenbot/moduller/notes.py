@@ -19,7 +19,7 @@
 from asyncio import sleep
 
 from sedenbot import BOTLOG, BOTLOG_CHATID, CMD_HELP
-from sedenbot.events import sedenify
+from sedenbot.events import extract_args, sedenify
 
 @sedenify(outgoing=True, pattern="^.notes$")
 async def notes_active(svd):
@@ -39,7 +39,7 @@ async def notes_active(svd):
             message += "`#{}`\n".format(note.keyword)
     await svd.edit(message)
 
-@sedenify(outgoing=True, pattern=r"^.clear (\w*)")
+@sedenify(outgoing=True, pattern=r"^.clear")
 async def remove_notes(clr):
     """ .clear komutu istenilen notu siler. """
     try:
@@ -47,14 +47,14 @@ async def remove_notes(clr):
     except AttributeError:
         await clr.edit("`Bot Non-SQL modunda çalışıyor!!`")
         return
-    notename = clr.pattern_match.group(1)
+    notename = extract_args(clr)
     if rm_note(clr.chat_id, notename) is False:
         return await clr.edit(" **{}** `notu bulunamadı`".format(notename))
     else:
         return await clr.edit(
             "**{}** `notu başarıyla silindi`".format(notename))
 
-@sedenify(outgoing=True, pattern=r"^.save (\w*)")
+@sedenify(outgoing=True, pattern=r"^.save(.*)")
 async def add_note(fltr):
     """ .save komutu bir sohbette not kaydeder. """
     try:
@@ -62,8 +62,12 @@ async def add_note(fltr):
     except AttributeError:
         await fltr.edit("`Bot Non-SQL modunda çalışıyor!!`")
         return
-    keyword = fltr.pattern_match.group(1)
-    string = fltr.text.partition(keyword)[2]
+    args = extract_args(fltr).split(' ', 1)
+    if len(args) < 2:
+        await fltr.edit("`Komut kullanımı hatalı.`")
+        return
+    keyword = args[0]
+    string = args[1]
     msg = await fltr.get_reply_message()
     msg_id = None
     if msg and msg.media and not string:
@@ -125,17 +129,20 @@ async def incom_note(getnt):
     except AttributeError:
         pass
 
-@sedenify(outgoing=True, pattern="^.rmbotnotes (.*)")
+@sedenify(outgoing=True, pattern="^.rmbotnotes")
 async def kick_marie_notes(kick):
     """ .rmbotnotes komutu Marie'de (ya da onun tabanındaki botlarda) \
         kayıtlı olan notları silmeye yarar. """
-    bot_type = kick.pattern_match.group(1).lower()
+    bot_type = extract_args(kick).lower()
     if bot_type not in ["marie", "rose"]:
         await kick.edit("`Bu bot henüz desteklenmiyor.`")
         return
     await kick.edit("```Tüm notlar temizleniyor...```")
     await sleep(3)
     resp = await kick.get_reply_message()
+    if not resp:
+        await kick.edit("`Komut kullanımı hatalı.`")
+        return
     filters = resp.text.split("-")[1:]
     for i in filters:
         if bot_type == "marie":

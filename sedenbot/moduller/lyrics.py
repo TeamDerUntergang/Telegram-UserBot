@@ -19,26 +19,27 @@ import random
 import lyricsgenius
 
 from sedenbot import CMD_HELP, LOGS, GENIUS
-from sedenbot.events import sedenify
+from sedenbot.events import extract_args, sedenify
 
-@sedenify(outgoing=True, pattern="^.lyrics(?: |$)(.*)")
+@sedenify(outgoing=True, pattern="^.lyrics")
 async def lyrics(lyric):
-    if r"-" in lyric.text:
+    args = extract_args(lyric)
+    if r"-" in args:
         pass
     else:
         await lyric.edit("`Hata: lütfen <sanatçı> ve <şarkı> için bölücü olarak '-' kullanın`\n"
                          "Örnek: `Stabil - Reenkarne`")
         return
 
-    if GENIUS is None:
+    if not GENIUS:
         await lyric.edit(
             "`Lütfen Genius tokeni ayarlayınız. Teşekkürler!`")
     else:
         genius = lyricsgenius.Genius(GENIUS)
         try:
-            args = lyric.text.split('.lyrics')[1].split('-')
-            artist = args[0].strip(' ')
-            song = args[1].strip(' ')
+            args = args.split('-')
+            artist = args[0].strip()
+            song = args[1].strip()
         except:
             await lyric.edit("`Lütfen sanatçı ve şarkı ismini veriniz`")
             return
@@ -54,7 +55,7 @@ async def lyrics(lyric):
     except TypeError:
         songs = None
 
-    if songs is None:
+    if not songs:
         await lyric.edit(f"Şarkı **{artist} - {song}** bulunamadı!")
         return
     if len(songs.lyrics) > 4096:

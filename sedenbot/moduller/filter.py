@@ -20,43 +20,44 @@ from asyncio import sleep
 from re import fullmatch, IGNORECASE, escape
 
 from sedenbot import BOTLOG, BOTLOG_CHATID, CMD_HELP
-from sedenbot.events import sedenify
+from sedenbot.events import extract_args, sedenify
 
 @sedenify(incoming=True, disable_edited=True, disable_errors=True)
 async def filter_incoming_handler(handler):
     """ Gelen mesajın filtre tetikleyicisi içerip içermediğini kontrol eder """
-    try:
-        if not (await handler.get_sender()).bot:
-            try:
-                from sedenbot.moduller.sql_helper.filter_sql import get_filters
-            except AttributeError:
-                await handler.edit("`Bot Non-SQL modunda çalışıyor!!`")
-                return
-            name = handler.raw_text
-            filters = get_filters(handler.chat_id)
-            if not filters:
-                return
-            for trigger in filters:
-                pro = fullmatch(trigger.keyword, name, flags=IGNORECASE)
-                if pro and trigger.f_mesg_id:
-                    msg_o = await handler.client.get_messages(
-                        entity=BOTLOG_CHATID, ids=int(trigger.f_mesg_id))
-                    await handler.reply(msg_o.message, file=msg_o.media)
-                elif pro and trigger.reply:
-                    await handler.reply(trigger.reply)
-    except AttributeError:
-        pass
+    if not (await handler.get_sender()).bot:
+        try:
+            from sedenbot.moduller.sql_helper.filter_sql import get_filters
+        except:
+            await handler.edit("`Bot Non-SQL modunda çalışıyor!!`")
+            return
+        name = handler.raw_text
+        filters = get_filters(handler.chat_id)
+        if not filters:
+            return
+        for trigger in filters:
+            pro = fullmatch(trigger.keyword, name, flags=IGNORECASE)
+            if pro and trigger.f_mesg_id:
+                msg_o = await handler.client.get_messages(
+                    entity=BOTLOG_CHATID, ids=int(trigger.f_mesg_id))
+                await handler.reply(msg_o.message, file=msg_o.media)
+            elif pro and trigger.reply:
+                await handler.reply(trigger.reply)
 
-@sedenify(outgoing=True, pattern="^.filter (\w*)")
+@sedenify(outgoing=True, pattern="^.filter")
 async def add_new_filter(new_handler):
     """ .filter komutu bir sohbete yeni filtreler eklemeye izin verir """
     try:
         from sedenbot.moduller.sql_helper.filter_sql import add_filter
-    except AttributeError:
+    except:
         await new_handler.edit("`Bot Non-SQL modunda çalışıyor!!`")
         return
-    keyword = new_handler.pattern_match.group(1)
-    string = new_handler.text.partition(keyword)[2]
+    arr = extract_args(new_handler).split(' ', 1)
+    if len(arr) < 2:
+        await new_handler.edit("`Komut kullanımı hatalı.`")
+        return
+    keyword = arr[0]
+    string = arr[1]
     msg = await new_handler.get_reply_message()
     msg_id = None
     if msg and msg.media and not string:
@@ -87,38 +88,41 @@ async def add_new_filter(new_handler):
     else:
         await new_handler.edit(success.format(keyword, 'güncellendi'))
 
-@sedenify(outgoing=True, pattern="^.stop (\w*)")
+@sedenify(outgoing=True, pattern="^.stop")
 async def remove_a_filter(r_handler):
     """ .stop komutu bir filtreyi durdurmanızı sağlar. """
     try:
         from sedenbot.moduller.sql_helper.filter_sql import remove_filter
-    except AttributeError:
+    except:
         await r_handler.edit("`Bot Non-SQL modunda çalışıyor!!`")
         return
-    filt = r_handler.pattern_match.group(1)
+    filt = extract_args(r_handler)
     if not remove_filter(r_handler.chat_id, filt):
         await r_handler.edit(" **{}** `filtresi mevcut değil.`".format(filt))
     else:
         await r_handler.edit(
             "**{}** `filtresi başarıyla silindi`".format(filt))
 
-@sedenify(outgoing=True, pattern="^.rmbotfilters (.*)")
+@sedenify(outgoing=True, pattern="^.rmbotfilters")
 async def kick_marie_filter(event):
     """ .rmfilters komutu Marie'de (ya da onun tabanındaki botlarda) \
         kayıtlı olan notları silmeye yarar. """
     cmd = event.text[0]
-    bot_type = event.pattern_match.group(1).lower()
+    bot_type = extract_args(event).lower()
     if bot_type not in ["marie", "rose"]:
         await event.edit("`Bu bot henüz desteklenmiyor.`")
         return
     await event.edit("```Tüm filtreler temizleniyor...```")
     await sleep(3)
     resp = await event.get_reply_message()
+    if not resp:
+        await event.edit("`Komut kullanımı hatalı.`")
+        return
     filters = resp.text.split("-")[1:]
     for i in filters:
         if bot_type.lower() == "marie":
             await event.reply("/stop %s" % (i.strip()))
-        if bot_type.lower() == "rose":
+        elif bot_type.lower() == "rose":
             i = i.replace('`', '')
             await event.reply("/stop %s" % (i.strip()))
         await sleep(0.3)
@@ -133,7 +137,7 @@ async def filters_active(event):
     """ .filters komutu bir sohbetteki tüm aktif filtreleri gösterir. """
     try:
         from sedenbot.moduller.sql_helper.filter_sql import get_filters
-    except AttributeError:
+    except:
         await event.edit("`Bot Non-SQL modunda çalışıyor!!`")
         return
     transact = "`Bu sohbette hiç filtre yok.`"

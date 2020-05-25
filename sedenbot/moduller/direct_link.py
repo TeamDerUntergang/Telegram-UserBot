@@ -27,14 +27,14 @@ from bs4 import BeautifulSoup
 from humanize import naturalsize
 
 from sedenbot import CMD_HELP
-from sedenbot.events import sedenify
+from sedenbot.events import extract_args, sedenify
 
-@sedenify(outgoing=True, pattern=r"^.direct(?: |$)([\s\S]*)")
+@sedenify(outgoing=True, pattern=r"^.direct")
 async def direct_link_generator(request):
     """ doğrudan bağlantı oluşturma """
     await request.edit("`İşleniyor...`")
     textx = await request.get_reply_message()
-    message = request.pattern_match.group(1)
+    message = extract_args(request)
     if message:
         pass
     elif textx:

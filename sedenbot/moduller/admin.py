@@ -36,7 +36,7 @@ from telethon.tl.types import (PeerChannel, ChannelParticipantsAdmins,
                                ChannelParticipantsBots)
 
 from sedenbot import BOTLOG, BOTLOG_CHATID, BRAIN_CHECKER, CMD_HELP, bot
-from sedenbot.events import sedenify
+from sedenbot.events import extract_args, sedenify
 
 # =================== CONSTANT ===================
 PP_TOO_SMOL = "`Görüntü çok küçük`"
@@ -78,7 +78,7 @@ MUTE_RIGHTS = ChatBannedRights(until_date=None, send_messages=True)
 
 UNMUTE_RIGHTS = ChatBannedRights(until_date=None, send_messages=False)
 # ================================================
-@sedenify(outgoing=True, pattern="^.setgpic$")
+@sedenify(outgoing=True, pattern="^.setgpic")
 async def set_group_photo(gpic):
     """ .setgpic komutu ile grubunuzun fotoğrafını değiştirebilirsiniz """
     if not gpic.is_group:
@@ -96,11 +96,10 @@ async def set_group_photo(gpic):
 
     if replymsg and replymsg.media:
         if isinstance(replymsg.media, MessageMediaPhoto):
-            photo = await gpic.client.download_media(message=replymsg.photo)
+            if not replymsg.sticker:
+                photo = await gpic.client.download_media(message=replymsg.photo)
         elif "image" in replymsg.media.document.mime_type.split('/'):
             photo = await gpic.client.download_file(replymsg.media.document)
-        else:
-            await gpic.edit(INVALID_MEDIA)
 
     if photo:
         try:
@@ -113,9 +112,13 @@ async def set_group_photo(gpic):
             await gpic.edit(PP_TOO_SMOL)
         except ImageProcessFailedError:
             await gpic.edit(PP_ERROR)
+        except:
+            await gpic.edit(INVALID_MEDIA)
+    else:
+        await gpic.edit(INVALID_MEDIA)
 
-@sedenify(outgoing=True, pattern="^.promote(?: |$)(.*)")
-@sedenify(incoming=True, from_users=BRAIN_CHECKER, pattern="^.promote(?: |$)(.*)")
+@sedenify(outgoing=True, pattern="^.promote")
+@sedenify(incoming=True, from_users=BRAIN_CHECKER, pattern="^.promote")
 async def promote(promt):
     """ .promote komutu ile belirlenen kişiyi yönetici yapar """
     # Hedef sohbeti almak
@@ -164,7 +167,7 @@ async def promote(promt):
             f"KULLANICI: [{user.first_name}](tg://user?id={user.id})\n"
             f"GRUP: {promt.chat.title}(`{promt.chat_id}`)")
 
-@sedenify(outgoing=True, pattern="^.demote(?: |$)(.*)")
+@sedenify(outgoing=True, pattern="^.demote")
 async def demote(dmod):
     """ .demote komutu belirlenen kişiyi yöneticilikten çıkarır """
     # Yetki kontrolü
@@ -212,7 +215,7 @@ async def demote(dmod):
             f"KULLANICI: [{user.first_name}](tg://user?id={user.id})\n"
             f"GRUP: {dmod.chat.title}(`{dmod.chat_id}`)")
 
-@sedenify(outgoing=True, pattern="^.ban(?: |$)(.*)")
+@sedenify(outgoing=True, pattern="^.ban")
 async def ban(bon):
     """ .ban komutu belirlenen kişiyi gruptan yasaklar """
     # Yetki kontrolü
@@ -268,7 +271,7 @@ async def ban(bon):
             f"KULLANICI: [{user.first_name}](tg://user?id={user.id})\n"
             f"GRUP: {bon.chat.title}(`{bon.chat_id}`)")
 
-@sedenify(outgoing=True, pattern="^.unban(?: |$)(.*)")
+@sedenify(outgoing=True, pattern="^.unban")
 async def nothanos(unbon):
     """ .unban komutu belirlenen kişinin yasağını kaldırır """
     # Yetki kontrolü
@@ -303,7 +306,7 @@ async def nothanos(unbon):
     except:
         await unbon.edit("`Sanırım bu kişi yasaklama mantığım ile uyuşmuyor`")
 
-@sedenify(outgoing=True, pattern="^.mute(?: |$)(.*)")
+@sedenify(outgoing=True, pattern="^.mute")
 async def spider(spdr):
     """
     Bu fonksiyon temelde susturmaya yarar
@@ -375,7 +378,7 @@ async def mutmsg(spdr, user, reason):
             f"KULLANICI: [{user.first_name}](tg://user?id={user.id})\n"
             f"GRUP: {spdr.chat.title}(`{spdr.chat_id}`)")
 
-@sedenify(outgoing=True, pattern="^.unmute(?: |$)(.*)")
+@sedenify(outgoing=True, pattern="^.unmute")
 async def unmoot(unmot):
     """ .unmute komutu belirlenin kişinin sesini açar (yani grupta tekrardan konuşabilir) """
     # Yetki kontrolü
@@ -456,7 +459,7 @@ async def muter(moot):
         if i.sender == str(moot.sender_id):
             await moot.delete()
 
-@sedenify(outgoing=True, pattern="^.ungmute(?: |$)(.*)")
+@sedenify(outgoing=True, pattern="^.ungmute")
 async def ungmoot(un_gmute):
     """ .ungmute komutu belirlenen kişinin küresel susturulmasını kaldırır """
     # Yetki kontrolü
@@ -497,7 +500,7 @@ async def ungmoot(un_gmute):
                 f"KULLANICI: [{user.first_name}](tg://user?id={user.id})\n"
                 f"GRUP: {un_gmute.chat.title}(`{un_gmute.chat_id}`)")
 
-@sedenify(outgoing=True, pattern="^.gmute(?: |$)(.*)")
+@sedenify(outgoing=True, pattern="^.gmute")
 async def gspider(gspdr):
     """ .gmute komutu belirlenen kişiyi küresel olarak susturur """
     # Yetki kontrolü
@@ -545,11 +548,11 @@ async def gspider(gspdr):
                 f"USER: [{user.first_name}](tg://user?id={user.id})\n"
                 f"CHAT: {gspdr.chat.title}(`{gspdr.chat_id}`)")
 
-@sedenify(outgoing=True, pattern="^.zombies(?: |$)(.*)", groups_only=False)
+@sedenify(outgoing=True, pattern="^.zombies", groups_only=False)
 async def rm_deletedacc(show):
     """ .zombies komutu bir sohbette tüm hayalet / silinmiş / zombi hesaplarını listeler. """
 
-    con = show.pattern_match.group(1).lower()
+    con = extract_args(show).lower()
     del_u = 0
     del_status = "`Silinmiş hesap bulunamadı, grup temiz`"
 
@@ -630,7 +633,7 @@ async def get_admin(show):
         mentions += " " + str(err) + "\n"
     await show.edit(mentions, parse_mode="html")
 
-@sedenify(outgoing=True, pattern="^.pin(?: |$)(.*)")
+@sedenify(outgoing=True, pattern="^.pin$")
 async def pin(msg):
     """ .pin komutu verildiği grupta ki yazıyı & medyayı sabitler """
     # Yönetici kontrolü
@@ -649,7 +652,7 @@ async def pin(msg):
         await msg.edit("`Sabitlemek için herhangi bir mesaja yanıt verin`")
         return
 
-    options = msg.pattern_match.group(1)
+    options = extract_args(msg)
 
     is_silent = True
 
@@ -674,7 +677,7 @@ async def pin(msg):
             f"GRUP: {msg.chat.title}(`{msg.chat_id}`)\n"
             f"LOUD: {not is_silent}")
 
-@sedenify(outgoing=True, pattern="^.kick(?: |$)(.*)")
+@sedenify(outgoing=True, pattern="^.kick")
 async def kick(usr):
     """ .kick komutu belirlenen kişiyi gruptan çıkartır """
     # Yetki kontrolü
@@ -722,21 +725,21 @@ async def kick(usr):
             f"KULLANICI: [{user.first_name}](tg://user?id={user.id})\n"
             f"GRUP: {usr.chat.title}(`{usr.chat_id}`)\n")
 
-@sedenify(outgoing=True, pattern="^.users ?(.*)")
+@sedenify(outgoing=True, pattern="^.users$")
 async def get_users(show):
     """ .users komutu girilen gruba ait kişileri listeler """
     info = await show.client.get_entity(show.chat_id)
     title = info.title if info.title else "this chat"
     mentions = '{} grubunda bulunan kişiler: \n'.format(title)
     try:
-        if not show.pattern_match.group(1):
+        searchq = extract_args(show)
+        if len(searchq) < 1:
             async for user in show.client.iter_participants(show.chat_id):
                 if not user.deleted:
                     mentions += f"\n[{user.first_name}](tg://user?id={user.id}) `{user.id}`"
                 else:
                     mentions += f"\nSilinen hesap `{user.id}`"
         else:
-            searchq = show.pattern_match.group(1)
             async for user in show.client.iter_participants(
                     show.chat_id, search=f'{searchq}'):
                 if not user.deleted:
@@ -764,12 +767,13 @@ async def get_users(show):
 
 async def get_user_from_event(event):
     """ Kullanıcıyı argümandan veya yanıtlanan mesajdan alın. """
-    args = event.pattern_match.group(1).split(' ', 1)
+    msg = extract_args(event)
+    args = msg.split(' ', 1)
     extra = None
     if event.reply_to_msg_id and not len(args) == 2:
         previous_message = await event.get_reply_message()
         user_obj = await event.client.get_entity(previous_message.from_id)
-        extra = event.pattern_match.group(1)
+        extra = msg
     elif args:
         user = args[0]
         if len(args) == 2:
@@ -780,9 +784,9 @@ async def get_user_from_event(event):
 
         if not user:
             await event.edit("`Kişinin kullanıcı adını, ID'sini veya yanıtını iletin!`")
-            return
+            return user, extra
 
-        if event.message.entities is not None:
+        if event.message.entities :
             probable_user_mention_entity = event.message.entities[0]
 
             if isinstance(probable_user_mention_entity,
@@ -811,27 +815,23 @@ async def get_user_from_id(user, event):
 
     return user_obj
 
-@sedenify(outgoing=True, pattern="^.usersdel ?(.*)")
+@sedenify(outgoing=True, pattern="^.usersdel$")
 async def get_usersdel(show):
     """ .usersdel komutu grup içinde ki silinen hesapları gösterir """
     info = await show.client.get_entity(show.chat_id)
     title = info.title if info.title else "this chat"
     mentions = '{} grubunda bulunan silinmiş hesaplar: \n'.format(title)
     try:
-        if not show.pattern_match.group(1):
+        searchq = extract_args(show)
+        if len(searchq) < 1:
             async for user in show.client.iter_participants(show.chat_id):
-                if not user.deleted:
-                    mentions += f"\n[{user.first_name}](tg://user?id={user.id}) `{user.id}`"
-         #       else:
-    #                mentions += f"\nDeleted Account `{user.id}`"
+                if user.deleted:
+                    mentions += f"\nDeleted Account `{user.id}`"
         else:
-            searchq = show.pattern_match.group(1)
             async for user in show.client.iter_participants(
                     show.chat_id, search=f'{searchq}'):
-                if not user.deleted:
-                    mentions += f"\n[{user.first_name}](tg://user?id={user.id}) `{user.id}`"
-         #       else:
-      #              mentions += f"\nDeleted Account `{user.id}`"
+                if user.deleted:
+                    mentions += f"\nDeleted Account `{user.id}`"
     except ChatAdminRequiredError as err:
         mentions += " " + str(err) + "\n"
     try:
@@ -853,12 +853,13 @@ async def get_usersdel(show):
 
 async def get_userdel_from_event(event):
     """ Silinen kullanıcıyı argümandan veya yanıtlanan mesajdan alın. """
-    args = event.pattern_match.group(1).split(' ', 1)
+    msg = extract_args(event)
+    args = msg.split(' ', 1)
     extra = None
     if event.reply_to_msg_id and not len(args) == 2:
         previous_message = await event.get_reply_message()
         user_obj = await event.client.get_entity(previous_message.from_id)
-        extra = event.pattern_match.group(1)
+        extra = msg
     elif args:
         user = args[0]
         if len(args) == 2:
@@ -871,7 +872,7 @@ async def get_userdel_from_event(event):
             await event.edit("`Silinen kullanıcının kullanıcı adını, ID'sini veya yanıtını iletin!`")
             return
 
-        if event.message.entities is not None:
+        if event.message.entities :
             probable_user_mention_entity = event.message.entities[0]
 
             if isinstance(probable_user_mention_entity,

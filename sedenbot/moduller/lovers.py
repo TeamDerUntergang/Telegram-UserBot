@@ -16,12 +16,7 @@
 # NaytSeyd ve Saniş için ❤️
 #
 
-import asyncio
-
-from telethon import events
-from collections import deque
-
-from sedenbot import CMD_HELP, bot
+from asyncio import sleep
 from sedenbot.events import sedenify
 
 @sedenify(outgoing=True, pattern="^.saniş")
@@ -30,7 +25,7 @@ async def _(event):
         return
     animation_interval = 0.1
     animation_ttl = range(0, 100)
-    await event.edit("@dinfarbitch 💞 @NightShade")
+    await event.edit("[Saniş](tg://user?id=623847224) 💘 [NaytSeyd](tg://user?id=551728027)")
     animation_chars = [
             "`◼️◼️◼️◼️◼️\n◼️◼️◼️◼️❤️\n◼️🧛🏻‍♂️❤️🧛🏻‍♀️◼️\n❤️◼️◼️◼️◼️\n◼️◼️◼️◼️◼️`",
             "`◼️◼️◼️◼️◼️\n❤️◼️◼️◼️◼️\n◼️🧛🏻‍♂️❤️🧛🏻‍♀️◼️\n◼️◼️◼️◼️❤️\n◼️◼️◼️◼️◼️`",
@@ -178,8 +173,8 @@ async def _(event):
             "`◼️◼️◼️❤️◼️\n◼️◼️◼️◼️◼️\n◼️🧛🏻‍♂️❤️🧛🏻‍♀️◼️\n◼️◼️◼️◼️◼️\n◼️❤️◼️◼️◼️`",
             ]
     for i in animation_ttl:
-        await asyncio.sleep(animation_interval)
-        await event.edit(animation_chars[i % 100])
+        await sleep(animation_interval)
+        await event.edit(animation_chars[i % len(animation_chars)])
         
 @sedenify(outgoing=True, pattern="^.snş")
 async def _(event):
@@ -198,8 +193,8 @@ async def _(event):
             "[Saniş](tg://user?id=623847224) 💘 [NaytSeyd](tg://user?id=551728027)",
         ]
     for i in animation_ttl:
-        await asyncio.sleep(animation_interval)
-        await event.edit(animation_chars[i % 7])
+        await sleep(animation_interval)
+        await event.edit(animation_chars[i % len(animation_chars)])
         
 @sedenify(outgoing=True, pattern="^.naytsaniş")
 async def _(event):
@@ -217,13 +212,13 @@ async def _(event):
             "`⠀⠀⠀⣠⣶⡾⠏⠉⠙⠳⢦⡀⠀⠀⠀⢠⠞⠉⠙⠲⡀⠀\n ⠀⣴⠿⠏⠀⠀⠀⠀⠀  ⠀⢳⡀⠀⡏⠀⠀    ⠀⢷\n⢠⣟⣋⡀⢀⣀⣀⡀⠀⣀⡀⣧⠀⢸⠀  ⠀     ⡇\n⢸⣯⡭⠁⠸⣛⣟⠆⡴⣻⡲⣿  ⣸ Saniş   ⡇\n ⣟⣿⡭⠀⠀⠀⠀⠀⢱⠀   ⣿  ⢹⠀        ⡇\n  ⠙⢿⣯⠄⠀⠀❤️⠀⠀⡿ ⠀⡇⠀⠀⠀⠀    ⡼\n⠀⠀⠀⠹⣶⠆⠀⠀⠀⠀⠀⡴⠃⠀   ⠘⠤⣄⣠⠞⠀\n⠀⠀⠀⠀⢸⣷⡦⢤⡤⢤⣞⣁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀\n⠀⢀⣤⣴⣿⣏⠁⠀⠀⠸⣏⢯⣷⣖⣦⡀⠀⠀⠀⠀⠀⠀\n⢀⣾⣽⣿⣿⣿⣿⠛⢲⣶⣾⢉⡷⣿⣿⠵⣿⠀⠀⠀⠀⠀⠀\n⣼⣿⠍⠉⣿⡭⠉⠙⢺⣇⣼⡏⠀⠀ ⠀⣄⢸⠀⠀⠀⠀⠀⠀`",
         ]
     for i in animation_ttl:
-        await asyncio.sleep(animation_interval)
-        await event.edit(animation_chars[i % 6])
+        await sleep(animation_interval)
+        await event.edit(animation_chars[i % len(animation_chars)])
 
 @sedenify(outgoing=True, pattern="^.❤️$")
 async def sanisveamed(e):
     await e.edit(
-"`--.-----.    .-----.--  `\n"
+"⠀⠀`.-----.    .-----.    `\n"
 "` /       '..'       \   `\n"
 "`|                    |  `\n"
 "`|       Ahmet        |  `\n"

@@ -22,7 +22,7 @@ from pytz import country_timezones as c_tz
 from pytz import timezone as tz
 
 from sedenbot import CMD_HELP, COUNTRY, TZ_NUMBER
-from sedenbot.events import sedenify
+from sedenbot.events import extract_args, sedenify
 
 async def get_tz(con):
     """ Seçilen bölgenin saat dilimini elde etmek içindir. """
@@ -48,15 +48,20 @@ async def get_tz(con):
     except KeyError:
         return
 
-@sedenify(outgoing=True, pattern="^.time(?: |$)(.*)(?<![0-9])(?: |$)([0-9]+)?")
+@sedenify(outgoing=True, pattern="^.time")
 async def time_func(tdata):
     """ .time komutu şu şekilde kullanılabilir
         1- Bölge belirtilerek.
         2. Varsayılan userbot bölgesi (.settime komutuyla ayarlanabilir)
         3. UserBot'un barındığı sunucunun tarihi.
     """
-    con = tdata.pattern_match.group(1).title()
-    tz_num = tdata.pattern_match.group(2)
+    arr = extract_args(tdata).split(' ', 1)
+    if len(arr) < 2:
+        await tdata.edit("`Komut kullanımı hatalı.`")
+        return
+
+    con = arr[0]
+    tz_num = arr[1]
 
     t_form = "%H:%M"
     c_name = None

@@ -17,17 +17,17 @@
 import aiohttp
 
 from sedenbot import CMD_HELP
-from sedenbot.events import sedenify
+from sedenbot.events import extract_args, sedenify
 
-@sedenify(pattern=r".git (.*)", outgoing=True)
+@sedenify(pattern=r"^.git", outgoing=True)
 async def github(event):
-    URL = f"https://api.github.com/users/{event.pattern_match.group(1)}"
+    args = extract_args(event)
+    URL = f"https://api.github.com/users/{args}"
     chat = await event.get_chat()
     async with aiohttp.ClientSession() as session:
         async with session.get(URL) as request:
             if request.status == 404:
-                await event.reply("`" + event.pattern_match.group(1) +
-                                  " bulunamadı`")
+                await event.reply(f"`{args} bulunamadı`")
                 return
 
             result = await request.json()
@@ -38,7 +38,7 @@ async def github(event):
             bio = result.get("bio", None)
             created_at = result.get("created_at", "Not Found")
 
-            REPLY = f"`{event.pattern_match.group(1)} adlı kullanıcının GitHub bilgileri:`\
+            REPLY = f"`{args} adlı kullanıcının GitHub bilgileri:`\
             \nİsim: `{name}`\
             \nBiyografi: `{bio}`\
             \nURL: {url}\

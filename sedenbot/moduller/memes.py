@@ -27,7 +27,7 @@ from re import sub
 from random import choice, getrandbits, randint
 
 from sedenbot import CMD_HELP, ZALG_LIST
-from sedenbot.events import sedenify
+from sedenbot.events import extract_args, sedenify
 from sedenbot.moduller.admin import get_user_from_event
 
 # ================= CONSTANT =================
@@ -378,16 +378,24 @@ HIT = [
 ]
 
 # ===========================================
-@sedenify(outgoing=True, pattern=r"^.(\w+)say (.*)")
+@sedenify(outgoing=True, pattern=r"^.(\w+)say")
 async def univsaye(cowmsg):
     """ .cowsay komutu bir şeyler söyleyen inek yapar """
-    arg = cowmsg.pattern_match.group(1).lower()
-    text = cowmsg.pattern_match.group(2)
-
-    if arg == "cow":
-        arg = "default"
-    if arg not in cow.COWACTERS:
+    ext = cowmsg.text.split(' ', 1)
+    arg = ext[0]
+    arg = arg[1:arg.find('say')]
+    textx = await cowmsg.get_reply_message()
+    if textx and textx.text:
+        text = textx.text
+    elif len(ext) > 1:
+        text = ext[1]
+    else:
+        await cowmsg.edit("`Komut kullanımı hatalı.`")
         return
+
+    if arg == "cow" or arg not in cow.COWACTERS:
+        arg = "default"
+
     cheese = cow.get_cow(arg)
     cheese = cheese()
 
@@ -401,7 +409,7 @@ async def kek(keks):
         time.sleep(0.3)
         await keks.edit(":" + uio[i % 2])
 
-@sedenify(pattern="^.slap(?: |$)(.*)", outgoing=True)
+@sedenify(pattern="^.slap", outgoing=True)
 async def who(event):
     """ Hedeflenen kullanıcıya tokat atar. """
     replied_user = await get_user_from_event(event)
@@ -465,13 +473,13 @@ async def cry(e):
     """ bunu yaparsan, her zaman ağlarım !! """
     await e.edit(choice(CRI))
 
-@sedenify(outgoing=True, pattern="^.cp(?: |$)(.*)")
+@sedenify(outgoing=True, pattern="^.cp")
 async def copypasta(cp_e):
     """ copypasta """
     textx = await cp_e.get_reply_message()
-    message = cp_e.pattern_match.group(1)
+    message = extract_args(cp_e)
 
-    if message:
+    if len(message) > 0:
         pass
     elif textx:
         message = textx.text
@@ -497,13 +505,13 @@ async def copypasta(cp_e):
     reply_text += choice(EMOJIS)
     await cp_e.edit(reply_text)
 
-@sedenify(outgoing=True, pattern="^.vapor(?: |$)(.*)")
+@sedenify(outgoing=True, pattern="^.vapor")
 async def vapor(vpr):
     """ Her şeyi vaporlaştırın! """
     reply_text = list()
     textx = await vpr.get_reply_message()
-    message = vpr.pattern_match.group(1)
-    if message:
+    message = extract_args(vpr)
+    if len(message) > 0:
         pass
     elif textx:
         message = textx.text
@@ -521,13 +529,12 @@ async def vapor(vpr):
 
     await vpr.edit("".join(reply_text))
 
-@sedenify(outgoing=True, pattern="^.str(?: |$)(.*)")
+@sedenify(outgoing=True, pattern="^.str")
 async def stretch(stret):
     """ Mesajı iyice uzatın."""
     textx = await stret.get_reply_message()
-    message = stret.text
-    message = stret.pattern_match.group(1)
-    if message:
+    message = extract_args(stret)
+    if len(message) > 0:
         pass
     elif textx:
         message = textx.text
@@ -540,13 +547,13 @@ async def stretch(stret):
                      message)
     await stret.edit(reply_text)
 
-@sedenify(outgoing=True, pattern="^.zal(?: |$)(.*)")
+@sedenify(outgoing=True, pattern="^.zal")
 async def zal(zgfy):
     """ Kaos duygusunu çağırın. """
     reply_text = list()
     textx = await zgfy.get_reply_message()
-    message = zgfy.pattern_match.group(1)
-    if message:
+    message = extract_args(zgfy)
+    if len(message) > 0:
         pass
     elif textx:
         message = textx.text
@@ -568,11 +575,11 @@ async def zal(zgfy):
 
     await zgfy.edit("".join(reply_text))
     
-@sedenify(outgoing=True, pattern="^.shout(?: |$)(.*)")
+@sedenify(outgoing=True, pattern="^.shout")
 async def shout(sht):
     textx = await sht.get_reply_message()
-    message = sht.pattern_match.group(1)
-    if message:
+    message = extract_args(sht)
+    if len(message) > 0:
         pass
     elif textx:
         message = textx.text
@@ -602,12 +609,12 @@ async def hoi(hello):
     """ Herkesi selamlayın """
     await hello.edit(choice(HELLOSTR))
 
-@sedenify(outgoing=True, pattern="^.owo(?: |$)(.*)")
+@sedenify(outgoing=True, pattern="^.owo")
 async def faces(owo):
     """ UwU """
     textx = await owo.get_reply_message()
-    message = owo.pattern_match.group(1)
-    if message:
+    message = extract_args(owo)
+    if len(message) > 0:
         pass
     elif textx:
         message = textx.text
@@ -638,32 +645,18 @@ async def shrugger(shg):
 async def runner_lol(run):
     await run.edit(choice(RUNS_STR))
 
-@sedenify(outgoing=True, pattern="^oof$")
+@sedenify(outgoing=True, pattern="^[Oo]of$")
 async def oof(e):
-    t = "oof"
+    t = f"{e.text[0]}of"
     for j in range(16):
-        t = t[:-1] + "of"
+        t = f"{t[:-1]}of"
         await e.edit(t)
 
-@sedenify(outgoing=True, pattern="^Oof$")
-async def Oof(e):
-    t = "Oof"
-    for j in range(16):
-        t = t[:-1] + "of"
-        await e.edit(t)
-
-@sedenify(outgoing=True, pattern="^skrrt$")
+@sedenify(outgoing=True, pattern="^[Ss]krrt$")
 async def skrrt(e):
-    t = "skrrt"
+    t = f"{e.text[0]}krrt"
     for j in range(16):
-        t = t[:-1] + "rt"
-        await e.edit(t)
-        
-@sedenify(outgoing=True, pattern="^Skrrt$")
-async def Skrrt(e):
-    t = "Skrrt"
-    for j in range(16):
-        t = t[:-1] + "rt"
+        t = f"{t[:-1]}rt"
         await e.edit(t)
 
 @sedenify(outgoing=True, pattern="^\.(.*)")
@@ -685,11 +678,11 @@ async def _(event):
             await asyncio.sleep(animation_interval)
             await event.edit(animation_chars[i % 4])
 
-@sedenify(outgoing=True, pattern="^.kalp (.*)")
+@sedenify(outgoing=True, pattern="^.kalp")
 async def _(event):
     if event.fwd_from:
         return
-    input_str = event.pattern_match.group(1)
+    input_str = extract_args(event)
     deq = deque(list("️❤️🧡💛💚💙💜🖤"))
     for _ in range(32):
         await asyncio.sleep(0.1)
@@ -760,12 +753,12 @@ async def clock(event):
     except BaseException:
         return
 
-@sedenify(outgoing=True, pattern="^.mock(?: |$)(.*)")
+@sedenify(outgoing=True, pattern="^.mock")
 async def spongemocktext(mock):
     """ Yap ve gerçek eğlenceyi bul. """
     reply_text = list()
     textx = await mock.get_reply_message()
-    message = mock.pattern_match.group(1)
+    message = extract_args(mock)
     if message:
         pass
     elif textx:
@@ -783,11 +776,11 @@ async def spongemocktext(mock):
 
     await mock.edit("".join(reply_text))
 
-@sedenify(outgoing=True, pattern="^.clap(?: |$)(.*)")
+@sedenify(outgoing=True, pattern="^.clap")
 async def claptext(memereview):
     """ İnsanları övün! """
     textx = await memereview.get_reply_message()
-    message = memereview.pattern_match.group(1)
+    message = extract_args(memereview)
     if message:
         pass
     elif textx:
@@ -802,17 +795,17 @@ async def claptext(memereview):
 
 @sedenify(outgoing=True, pattern=r"^.f (.*)")
 async def payf(event):
-    paytext = event.pattern_match.group(1)
+    paytext = extract_args(event)
     pay = "{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}".format(
         paytext * 8, paytext * 8, paytext * 2, paytext * 2, paytext * 2,
         paytext * 6, paytext * 6, paytext * 2, paytext * 2, paytext * 2,
         paytext * 2, paytext * 2)
     await event.edit(pay)
 
-@sedenify(outgoing=True, pattern="^.lfy (.*)")
+@sedenify(outgoing=True, pattern="^.lfy")
 async def let_me_google_that_for_you(lmgtfy_q):
     textx = await lmgtfy_q.get_reply_message()
-    qry = lmgtfy_q.pattern_match.group(1)
+    qry = extract_args(lmgtfy_q)
     if qry:
         query = str(qry)
     elif textx:
@@ -825,14 +818,14 @@ async def let_me_google_that_for_you(lmgtfy_q):
     await lmgtfy_q.edit(f"İşte, keyfine bak.\
     \n[{query}]({r.json()['shorturl']})")
 
-@sedenify(pattern=r".scam(?: |$)(.*)", outgoing=True)
+@sedenify(pattern=r".scam", outgoing=True)
 async def scam(event):
     """ Sahte sohbet eylemleri için küçük bir komut !! """
     options = [
         'typing', 'contact', 'game', 'location', 'voice', 'round', 'video',
         'photo', 'document', 'cancel'
     ]
-    input_str = event.pattern_match.group(1)
+    input_str = extract_args(event)
     args = input_str.split()
     if len(args) == 0:
         scam_action = choice(options)
@@ -858,11 +851,11 @@ async def scam(event):
     except BaseException:
         return
 
-@sedenify(outgoing=True, pattern='^.type(?: |$)(.*)')
+@sedenify(outgoing=True, pattern='^.type')
 async def typewriter(typew):
     """ Klavyenizi daktilo haline getirmek için küçük bir komut! """
     textx = await typew.get_reply_message()
-    message = typew.pattern_match.group(1)
+    message = extract_args(typew)
     if message:
         pass
     elif textx:

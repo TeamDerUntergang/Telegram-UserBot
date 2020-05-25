@@ -25,8 +25,8 @@ import heroku3
 from git import Repo
 from git.exc import GitCommandError, InvalidGitRepositoryError, NoSuchPathError
 
-from sedenbot import CMD_HELP, HEROKU_APIKEY, HEROKU_APPNAME, STRING_SESSION
-from sedenbot.events import sedenify
+from sedenbot import CMD_HELP, HEROKU_APIKEY, HEROKU_APPNAME, STRING_SESSION, UPSTREAM_REPO_URL
+from sedenbot.events import extract_args, sedenify
 
 async def gen_chlog(repo, diff):
     ch_log = ''
@@ -41,12 +41,12 @@ async def is_off_br(br):
         return 1
     return
 
-@sedenify(outgoing=True, pattern="^.update(?: |$)(.*)")
+@sedenify(outgoing=True, pattern="^.update")
 async def upstream(ups):
     ".update komutu ile botunun güncel olup olmadığını denetleyebilirsin."
     await ups.edit("`Güncellemeler denetleniyor...`")
-    conf = ups.pattern_match.group(1)
-    off_repo = 'https://github.com/TeamDerUntergang/Telegram-UserBot.git'
+    conf = extract_args(ups)
+    off_repo = UPSTREAM_REPO_URL
 
     try:
         txt = "``Güncelleme başarısız oldu! "
@@ -157,6 +157,8 @@ async def upstream(ups):
             await ups.edit(f'{txt}\n`Git hatası! {e}`')
             return
     else:
+        repo.git.pull()
+
         await ups.edit(
             '`Güncelleme başarıyla tamamlandı!\n'
             'Seden yeniden başlatılıyor... Lütfen biraz bekleyin, ardından '

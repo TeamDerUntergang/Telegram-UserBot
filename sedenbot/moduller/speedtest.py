@@ -25,13 +25,13 @@ from telethon import events
 
 from sedenbot.moduller.upload_download import progress, humanbytes, time_formatter
 from sedenbot import CMD_HELP, bot
-from sedenbot.events import sedenify
+from sedenbot.events import extract_args, sedenify
 
-@sedenify(outgoing=True, pattern="^.speedtest ?(.*)")
+@sedenify(outgoing=True, pattern="^.speedtest")
 async def _(event):
     if event.fwd_from:
         return
-    input_str = event.pattern_match.group(1)
+    input_str = extract_args(event)
     as_text = False
     as_document = True
     if input_str == "image":
@@ -110,7 +110,7 @@ async def neardc(event):
                      f"En yakın datacenter : `{result.nearest_dc}`\n"
                      f"Şu anki datacenter : `{result.this_dc}`")
 
-@sedenify(outgoing=True, pattern="^.ping$")
+@sedenify(outgoing=True, pattern="^.ping")
 async def pingme(pong):
     """ .ping komutu userbotun ping değerini herhangi bir sohbette gösterebilir.  """
     start = datetime.now()

@@ -27,9 +27,9 @@ from telethon.tl.types import MessageActionChannelMigrateFrom, ChannelParticipan
 from telethon.errors import (ChannelInvalidError, ChannelPrivateError, ChannelPublicGroupNaError, InviteHashEmptyError, InviteHashExpiredError, InviteHashInvalidError)
 
 from sedenbot import CMD_HELP
-from sedenbot.events import sedenify
+from sedenbot.events import extract_args, sedenify
 
-@sedenify(pattern=".chatinfo(?: |$)(.*)", outgoing=True)
+@sedenify(pattern=".chatinfo", outgoing=True)
 async def info(event):
     await event.edit("`Grup analiz ediliyor...`")
     chat = await get_chatinfo(event)
@@ -42,17 +42,14 @@ async def info(event):
     return
 
 async def get_chatinfo(event):
-    chat = event.pattern_match.group(1)
+    chat = extract_args(event)
     chat_info = None
-    if chat:
-        try:
-            chat = int(chat)
-        except ValueError:
-            pass
-    if not chat:
+    if chat.isdigit():
+        chat = int(chat)
+    else:
         if event.reply_to_msg_id:
             replied_msg = await event.get_reply_message()
-            if replied_msg.fwd_from and replied_msg.fwd_from.channel_id is not None:
+            if replied_msg.fwd_from and replied_msg.fwd_from.channel_id :
                 chat = replied_msg.fwd_from.channel_id
         else:
             chat = event.chat_id
@@ -90,8 +87,8 @@ async def fetch_info(chat, event):
     first_msg_valid = True if msg_info and msg_info.messages and msg_info.messages[0].id == 1 else False
     creator_valid = True if first_msg_valid and msg_info.users else False
     creator_id = msg_info.users[0].id if creator_valid else None
-    creator_firstname = msg_info.users[0].first_name if creator_valid and msg_info.users[0].first_name is not None else "Deleted Account"
-    creator_username = msg_info.users[0].username if creator_valid and msg_info.users[0].username is not None else None
+    creator_firstname = msg_info.users[0].first_name if creator_valid and msg_info.users[0].first_name  else "Deleted Account"
+    creator_username = msg_info.users[0].username if creator_valid and msg_info.users[0].username  else None
     created = msg_info.messages[0].date if first_msg_valid else None
     former_title = msg_info.messages[0].action.title if first_msg_valid and type(msg_info.messages[0].action) is MessageActionChannelMigrateFrom and msg_info.messages[0].action.title != chat_title else None
     try:
@@ -122,7 +119,7 @@ async def fetch_info(chat, event):
     username = "@{}".format(username) if username else None
     creator_username = "@{}".format(creator_username) if creator_username else None
 
-    if admins is None:
+    if not admins:
         try:
             participants_admins = await event.client(GetParticipantsRequest(channel=chat.full_chat.id, filter=ChannelParticipantsAdmins(),
                                                                             offset=0, limit=0, hash=0))
@@ -135,46 +132,46 @@ async def fetch_info(chat, event):
 
     caption = "<b>GRUP BILGISI:</b>\n"
     caption += f"ID: <code>{chat_obj_info.id}</code>\n"
-    if chat_title is not None:
+    if chat_title :
         caption += f"{chat_type} ismi: {chat_title}\n"
-    if former_title is not None:
+    if former_title :
         caption += f"Eski grup: {former_title}\n"
-    if username is not None:
+    if username :
         caption += f"{chat_type} tipi: Herkese açık\n"
         caption += f"Link: {username}\n"
     else:
         caption += f"{chat_type} tipi: Gizli\n"
-    if creator_username is not None:
+    if creator_username :
         caption += f"Oluşturan kişi: {creator_username}\n"
     elif creator_valid:
         caption += f"Oluşturan kişi: <a href=\"tg://user?id={creator_id}\">{creator_firstname}</a>\n"
-    if created is not None:
+    if created :
         caption += f"Oluşturulma tarihi: <code>{created.date().strftime('%b %d, %Y')} - {created.time()}</code>\n"
     else:
         caption += f"Oluşturulma tarihi: <code>{chat_obj_info.date.date().strftime('%b %d, %Y')} - {chat_obj_info.date.time()}</code> {warn_emoji}\n"
     caption += f"Veri merkezi ID: {dc_id}\n"
-    if exp_count is not None:
+    if exp_count :
         chat_level = int((1+sqrt(1+7*exp_count/14))/2)
         caption += f"{chat_type} seviyesi: <code>{chat_level}</code>\n"
-    if messages_viewable is not None:
+    if messages_viewable :
         caption += f"Görüntülenebilir mesajlar: <code>{messages_viewable}</code>\n"
     if messages_sent:
         caption += f"Gönderilen mesajlar: <code>{messages_sent}</code>\n"
     elif messages_sent_alt:
         caption += f"Gönderilen mesajlar: <code>{messages_sent_alt}</code> {warn_emoji}\n"
-    if members is not None:
+    if members :
         caption += f"Üye sayısı: <code>{members}</code>\n"
-    if admins is not None:
+    if admins :
         caption += f"Yönetici sayısı: <code>{admins}</code>\n"
     if bots_list:
         caption += f"Bot sayısı: <code>{bots}</code>\n"
     if members_online:
         caption += f"Çevrimiçi kişi sayısı: <code>{members_online}</code>\n"
-    if restrcited_users is not None:
+    if restrcited_users :
         caption += f"Kısıtlı kullanıcı sayısı: <code>{restrcited_users}</code>\n"
-    if banned_users is not None:
+    if banned_users :
         caption += f"Yasaklanmış kullanıcı sayısı: <code>{banned_users}</code>\n"
-    if group_stickers is not None:
+    if group_stickers :
         caption += f"{chat_type} çıkartma paketi: <a href=\"t.me/addstickers/{chat.full_chat.stickerset.short_name}\">{group_stickers}</a>\n"
     caption += "\n"
     if not broadcast:

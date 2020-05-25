@@ -21,7 +21,7 @@ from os import system
 from requests import get
 
 from sedenbot import LOGS, CMD_HELP
-from sedenbot.events import sedenify
+from sedenbot.events import extract_args, sedenify
 
 # Gelişmiş indirme hızları için en iyi trackerları çağırır, bunun için K-E-N-W-A-Y'e teşekkürler.
 trackers_list = get(
@@ -50,9 +50,9 @@ aria2_is_running = system(cmd)
 aria2 = aria2p.API(aria2p.Client(host="http://localhost", port=6800,
                                  secret=""))
 
-@sedenify(outgoing=True, pattern="^.amag(?: |$)(.*)")
+@sedenify(outgoing=True, pattern="^.amag")
 async def magnet_download(event):
-    magnet_uri = event.pattern_match.group(1)
+    magnet_uri = extract_args(event)
     # Magnet URI'ı kuyruğa ekler.
     try:
         download = aria2.add_magnet(magnet_uri)
@@ -66,9 +66,9 @@ async def magnet_download(event):
     new_gid = await check_metadata(gid)
     await check_progress_for_dl(gid=new_gid, event=event, previous=None)
 
-@sedenify(outgoing=True, pattern="^.ator(?: |$)(.*)")
+@sedenify(outgoing=True, pattern="^.ator")
 async def torrent_download(event):
-    torrent_file_path = event.pattern_match.group(1)
+    torrent_file_path = extract_args(event)
     # Torrent'i kuyruğa ekler.
     try:
         download = aria2.add_torrent(torrent_file_path,
@@ -81,9 +81,9 @@ async def torrent_download(event):
     gid = download.gid
     await check_progress_for_dl(gid=gid, event=event, previous=None)
 
-@sedenify(outgoing=True, pattern="^.aurl(?: |$)(.*)")
+@sedenify(outgoing=True, pattern="^.aurl")
 async def amagnet_download(event):
-    uri = [event.pattern_match.group(1)]
+    uri = [extract_args(event)]
     try:  # URL'yi kuyruğa ekler.
         download = aria2.add_uris(uri, options=None, position=None)
     except Exception as e:
@@ -97,7 +97,7 @@ async def amagnet_download(event):
         new_gid = await check_metadata(gid)
         await progress_status(gid=new_gid, event=event, previous=None)
 
-@sedenify(outgoing=True, pattern="^.aclear(?: |$)(.*)")
+@sedenify(outgoing=True, pattern="^.aclear")
 async def remove_all(event):
     await event.edit("`Devam eden indirmeler temizleniyor... `")
     try:
@@ -109,14 +109,14 @@ async def remove_all(event):
         system("aria2p remove-all")
     await event.edit("`Tüm indirilenler başarıyla temizlendi.`")
 
-@sedenify(outgoing=True, pattern="^.apause(?: |$)(.*)")
+@sedenify(outgoing=True, pattern="^.apause")
 async def pause_all(event):
     # Tüm devam eden indirmeleri duraklatır.
     await event.edit("`İndirmeler duraklatılıyor...`")
     aria2.pause_all(force=True)
     await event.edit("`Devam eden indirmeler başarıyla durduruldu.`")
 
-@sedenify(outgoing=True, pattern="^.aresume(?: |$)(.*)")
+@sedenify(outgoing=True, pattern="^.aresume")
 async def resume_all(event):
     await event.edit("`İndirmeler devam ettiriliyor...`")
     aria2.resume_all()
@@ -124,7 +124,7 @@ async def resume_all(event):
     await sleep(2.5)
     await event.delete()
 
-@sedenify(outgoing=True, pattern="^.ashow(?: |$)(.*)")
+@sedenify(outgoing=True, pattern="^.ashow")
 async def show_all(event):
     output = "output.txt"
     downloads = aria2.get_downloads()

@@ -24,7 +24,7 @@ from collections import deque
 from sedenbot import CMD_HELP, bot
 from sedenbot.events import sedenify
 
-@sedenify(outgoing=True, pattern="^.hava")
+@sedenify(outgoing=True, pattern="^.hava$")
 async def _(event):
     if event.fwd_from:
         return
@@ -34,7 +34,7 @@ async def _(event):
         await event.edit("".join(deq))
         deq.rotate(1)
         
-@sedenify(outgoing=True, pattern="^.dunya")
+@sedenify(outgoing=True, pattern="^.d[uü]nya$")
 async def _(event):
     if event.fwd_from:
         return
@@ -44,7 +44,7 @@ async def _(event):
         await event.edit("".join(deq))
         deq.rotate(1)
         
-@sedenify(outgoing=True, pattern="^.dusunme")
+@sedenify(outgoing=True, pattern="^.d[uü][sş][uü]nme$")
 async def _(event):
     if event.fwd_from:
         return
@@ -54,7 +54,7 @@ async def _(event):
         await event.edit("".join(deq))
         deq.rotate(1)
         
-@sedenify(outgoing=True, pattern="^.yılan")
+@sedenify(outgoing=True, pattern="^.y[ıi]lan$")
 async def _(event):
     if event.fwd_from:
         return
@@ -94,7 +94,7 @@ async def _(event):
         await asyncio.sleep(animation_interval)
         await event.edit(animation_chars[i % 27])
         
-@sedenify(outgoing=True, pattern="^.solar")
+@sedenify(outgoing=True, pattern="^.(solar|g[uü]ne[sş])$")
 async def _(event):
     if event.fwd_from:
         return
@@ -265,13 +265,13 @@ async def sehir(event):
    🌳/🚶           |   🚍         \ 🌴🚴🚴
 🌴/                    |                     \🌲""")
     
-@sedenify(outgoing=True, pattern="^.lmoon")
+@sedenify(outgoing=True, pattern="^.(lmoon|ay)")
 async def lmoon(event):
     if event.fwd_from:
         return 
     await event.edit("🌕🌕🌕🌕🌕🌕🌕🌕\n🌕🌕🌖🌔🌖🌔🌕🌕\n🌕🌕🌗🌔🌖🌓🌕🌕\n🌕🌕🌗🌔🌖🌓🌕🌕\n🌕🌕🌖🌓🌗🌔🌕🌕\n🌕🌕🌗🌑🌑🌓🌕🌕\n🌕🌕🌗👀🌑🌓🌕🌕\n🌕🌕🌘👄🌑🌓🌕🌕\n🌕🌕🌗🌑🌑🌒🌕🌕\n🌕🌖🌑🌑🌑🌑🌔🌕\n🌕🌘🌑🌑🌑🌑🌒🌕\n🌖🌑🌑🌑🌑🌑🌑🌔\n🌕🤜🏻🌑🌑🌑🌑🤛🏻🌕\n🌕🌖🌑🌑🌑🌑🌔🌕\n🌘🌑🌑🌑🌑🌑🌑🌒\n🌕🌕🌕🌕🌕🌕🌕🌕")
     
-@sedenify(outgoing=True, pattern="^.kuculme")
+@sedenify(outgoing=True, pattern="^.k[uü][cç][uü]lme")
 async def _(event):
     if event.fwd_from:
         return

@@ -22,8 +22,8 @@ from asyncio import sleep
 from telethon.events import StopPropagation
 
 from sedenbot import (AFKREASON, COUNT_MSG, CMD_HELP, ISAFK, BOTLOG,
-                     BOTLOG_CHATID, USERS, PM_AUTO_BAN)
-from sedenbot.events import sedenify
+                     BOTLOG_CHATID, USERS, PM_AUTO_BAN, bot)
+from sedenbot.events import extract_args, sedenify
 
 # ========================= CONSTANTS ============================
 AFKSTR = [
@@ -59,21 +59,22 @@ async def mention_afk(mention):
     global ISAFK
     if mention.message.mentioned and not (await mention.get_sender()).bot:
         if ISAFK:
+            me = await bot.get_me()
             if mention.sender_id not in USERS:
                 if AFKREASON:
-                    await mention.reply(f"Sahibim halen AFK.\
+                    await mention.reply(f"[{me.first_name}](tg://user?id={me.id}) hâlâ AFK.\
                         \nSebep: `{AFKREASON}`")
                 else:
-                    await mention.reply(str(choice(AFKSTR)))
+                    await mention.reply(f"```{choice(AFKSTR)}```")
                 USERS.update({mention.sender_id: 1})
                 COUNT_MSG = COUNT_MSG + 1
-            elif mention.sender_id in USERS:
+            else:
                 if USERS[mention.sender_id] % randint(2, 4) == 0:
                     if AFKREASON:
-                        await mention.reply(f"Sahibim halen AFK.\
+                        await mention.reply(f"[{me.first_name}](tg://user?id={me.id}) hâlâ AFK.\
                             \nSebep: `{AFKREASON}`")
                     else:
-                        await mention.reply(str(choice(AFKSTR)))
+                        await mention.reply(f"```{choice(AFKSTR)}```")
                     USERS[mention.sender_id] = USERS[mention.sender_id] + 1
                     COUNT_MSG = COUNT_MSG + 1
                 else:
@@ -97,38 +98,38 @@ async def afk_on_pm(sender):
         else:
             apprv = True
         if apprv and ISAFK:
+            me = await bot.get_me()
             if sender.sender_id not in USERS:
                 if AFKREASON:
-                    await sender.reply(f"Sahibim şu an AFK.\
+                    await sender.reply(f"[{me.first_name}](tg://user?id={me.id}) hâlâ AFK.\
                     \nSebep: `{AFKREASON}`")
                 else:
-                    await sender.reply(str(choice(AFKSTR)))
+                    await sender.reply(f"```{choice(AFKSTR)}```")
                 USERS.update({sender.sender_id: 1})
                 COUNT_MSG = COUNT_MSG + 1
-            elif apprv and sender.sender_id in USERS:
+            else:
                 if USERS[sender.sender_id] % randint(2, 4) == 0:
                     if AFKREASON:
-                        await sender.reply(f"Sahibim halen AFK.\
+                        await sender.reply(f"[{me.first_name}](tg://user?id={me.id}) hâlâ AFK.\
                         \nSebep: `{AFKREASON}`")
                     else:
-                        await sender.reply(str(choice(AFKSTR)))
+                        await sender.reply(f"```{choice(AFKSTR)}```")
                     USERS[sender.sender_id] = USERS[sender.sender_id] + 1
                     COUNT_MSG = COUNT_MSG + 1
                 else:
                     USERS[sender.sender_id] = USERS[sender.sender_id] + 1
                     COUNT_MSG = COUNT_MSG + 1
 
-@sedenify(outgoing=True, pattern="^.afk(?: |$)(.*)", disable_errors=True)
+@sedenify(outgoing=True, pattern="^.afk", disable_errors=True)
 async def set_afk(afk_e):
     """ .afk komutu siz afk iken insanları afk olduğunuza dair bilgilendirmeye yarar. """
-    message = afk_e.text
-    string = afk_e.pattern_match.group(1)
+    message = extract_args(afk_e)
     global ISAFK
     global AFKREASON
-    if string:
-        AFKREASON = string
+    if len(message) > 0:
+        AFKREASON = message
         await afk_e.edit(f"Artık AFK'yım.\
-        \nSebep: `{string}`")
+        \nSebep: `{AFKREASON}`")
     else:
         await afk_e.edit("Artık AFK'yım.")
     if BOTLOG:

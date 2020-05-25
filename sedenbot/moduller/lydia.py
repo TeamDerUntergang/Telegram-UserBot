@@ -14,20 +14,13 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-import io
 import asyncio
-import logging
-import coffeehouse
-import coffeehouse as cf
 
-from time import time
 from coffeehouse.lydia import LydiaAI
 from coffeehouse.api import API
-from telethon import events
 
-from sedenbot.events import sedenify
-from sedenbot import BOTLOG, BOTLOG_CHATID, CMD_HELP, bot, LOGS
-from sedenbot import LYDIA_API_KEY
+from sedenbot.events import extract_args, sedenify
+from sedenbot import CMD_HELP, LOGS, LYDIA_API_KEY
 
 async def lydia_init():
     try:
@@ -45,7 +38,7 @@ if LYDIA_API_KEY:
     api_client = API(api_key)
     lydia = LydiaAI(api_client)
 
-@sedenify(outgoing=True, pattern="^.repcf$")
+@sedenify(outgoing=True, pattern="^.repcf")
 async def repcf(event):
     if event.fwd_from:
         return
@@ -59,7 +52,7 @@ async def repcf(event):
     except Exception as e:
         await event.edit(str(e))
 
-@sedenify(outgoing=True, pattern="^.addcf$")
+@sedenify(outgoing=True, pattern="^.addcf")
 async def addcf(event):
     if event.fwd_from:
         return
@@ -70,14 +63,14 @@ async def addcf(event):
     if reply_msg:
         session = lydia.create_session()
         session_id = session.id
-        if reply_msg.from_id is None:
+        if not reply_msg.from_id:
             return await event.edit("Geçersiz kullanıcı türü.")
         ACC_LYDIA.update({(event.chat_id & reply_msg.from_id): session})
         await event.edit("Lydia, {} kullanıcısı için {} sohbetinde başarıyla etkinleştirildi!".format(str(reply_msg.from_id), str(event.chat_id)))
     else:
         await event.edit("Lydia AI'yı etkinleştirmek için bir kullanıcıyı yanıtlayın")
 
-@sedenify(outgoing=True, pattern="^.remcf$")
+@sedenify(outgoing=True, pattern="^.remcf")
 async def remcf(event):
     if event.fwd_from:
         return

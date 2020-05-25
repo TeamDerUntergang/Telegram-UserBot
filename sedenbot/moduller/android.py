@@ -23,11 +23,11 @@ from requests import get
 from bs4 import BeautifulSoup
 
 from sedenbot import CMD_HELP
-from sedenbot.events import sedenify
+from sedenbot.events import extract_args, extract_args_arr, sedenify
 
 GITHUB = 'https://github.com'
 
-@sedenify(outgoing=True, pattern="^.magisk$")
+@sedenify(outgoing=True, pattern="^.magisk")
 async def magisk(request):
     """ Güncel Magisk sürümleri """
     magisk_dict = {
@@ -48,11 +48,11 @@ async def magisk(request):
                     f'[Uninstaller]({data["uninstaller"]["link"]})\n'
     await request.edit(releases)
 
-@sedenify(outgoing=True, pattern=r"^.device(?: |$)(\S*)")
+@sedenify(outgoing=True, pattern=r"^.device")
 async def device_info(request):
     """ Kod adı ile cihaz hakkında bilgi alın """
     textx = await request.get_reply_message()
-    codename = request.pattern_match.group(1)
+    codename = extract_args(request)
     if codename:
         pass
     elif textx:
@@ -73,12 +73,13 @@ async def device_info(request):
         reply = f"`{codename} cihazı için bilgi bulanamadı!`\n"
     await request.edit(reply)
 
-@sedenify(outgoing=True, pattern=r"^.codename(?: |)([\S]*)(?: |)([\s\S]*)")
+@sedenify(outgoing=True, pattern=r"^.codename")
 async def codename_info(request):
     """ Cihazın kod adını bulmak için arama yapın """
     textx = await request.get_reply_message()
-    brand = request.pattern_match.group(1).lower()
-    device = request.pattern_match.group(2).lower()
+    arr = extract_args_arr(request)
+    brand = arr[0].lower()
+    device = arr[1].lower()
     if brand and device:
         pass
     elif textx:
@@ -104,12 +105,13 @@ async def codename_info(request):
         reply = f"`{device} bulunamadı`\n"
     await request.edit(reply)
 
-@sedenify(outgoing=True, pattern=r"^.specs(?: |)([\S]*)(?: |)([\s\S]*)")
+@sedenify(outgoing=True, pattern=r"^.specs")
 async def devices_specifications(request):
     """ Mobil cihaz özellikleri """
     textx = await request.get_reply_message()
-    brand = request.pattern_match.group(1).lower()
-    device = request.pattern_match.group(2).lower()
+    arr = extract_args_arr(request)
+    brand = arr[0].lower()
+    device = arr[1].lower()
     if brand and device:
         pass
     elif textx:
@@ -156,11 +158,11 @@ async def devices_specifications(request):
             reply += f'**{title}**: {data}\n'
     await request.edit(reply)
 
-@sedenify(outgoing=True, pattern=r"^.twrp(?: |$)(\S*)")
+@sedenify(outgoing=True, pattern=r"^.twrp")
 async def twrp(request):
     """ Android cihazlar için TWRP """
     textx = await request.get_reply_message()
-    device = request.pattern_match.group(1)
+    device = extract_args(request)
     if device:
         pass
     elif textx:

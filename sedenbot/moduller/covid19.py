@@ -27,7 +27,7 @@ from sedenbot.events import sedenify
 async def covid(event):
     try:
         request = get('https://covid19.saglik.gov.tr/')
-        result = BeautifulSoup(request.text, features="lxml")
+        result = BeautifulSoup(request.text, 'html.parser')
     except:
         await event.edit("`Bir hata oluştu.`")
         return

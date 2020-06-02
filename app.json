@@ -27,11 +27,6 @@
       "description": "python3 GenerateStringSession.py dosyasını yerel olarak çalıştırarak bu değeri alın.",
       "required": true
     },
-    "HEROKU_MEMEZ": {
-      "description": "UserBot bir Heroku Dyno üzerinde çalışıyorsa, bu değer True olmalıdır.",
-      "value": "True",
-      "required": true
-    },
     "HEROKU_APIKEY": {
       "description": "Heroku API Key, 'https://dashboard.heroku.com/account' adresinden alın.",
       "value": ""

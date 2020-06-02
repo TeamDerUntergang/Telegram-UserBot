@@ -21,13 +21,33 @@ import json
 import requests
 import urllib.parse
 
-from os import popen
+from os import popen, path, mkdir, chmod
 from random import choice
 from bs4 import BeautifulSoup
 from humanize import naturalsize
 
 from sedenbot import CMD_HELP
 from sedenbot.events import extract_args, sedenify
+from asyncio import run as arun
+
+async def load_bins():
+    # CloudMail.ru ve MEGA.nz ayarlama
+    if not path.exists('bin'):
+        mkdir('bin')
+
+    binaries = {
+        "https://raw.githubusercontent.com/NaytSeyd/megadown/master/megadown":
+        "bin/megadown",
+        "https://raw.githubusercontent.com/NaytSeyd/cmrudl.py/master/cmrudl.py":
+        "bin/cmrudl"
+    }
+
+    for binary, pth in binaries.items():
+        with open(pth, 'wb') as load:
+            load.write(requests.get(binary).content)
+        chmod(pth, 0o755)
+
+arun(load_bins())
 
 @sedenify(outgoing=True, pattern=r"^.direct")
 async def direct_link_generator(request):
@@ -100,7 +120,7 @@ def gdrive(url: str) -> str:
             return reply
         name = 'Doğrudan İndirme Linki'
     except KeyError:
-        page = BeautifulSoup(download.content, 'lxml')
+        page = BeautifulSoup(download.content, 'html.parser')
         export = drive + page.find('a', {'id': 'uc-download-link'}).get('href')
         name = page.find('span', {'class': 'uc-name-size'}).text
         response = requests.get(export,
@@ -127,7 +147,7 @@ def zippy_share(url: str) -> str:
     session = requests.Session()
     base_url = re.search('http.+.com', link).group()
     response = session.get(link)
-    page_soup = BeautifulSoup(response.content, "lxml")
+    page_soup = BeautifulSoup(response.content, 'html.parser')
     scripts = page_soup.find_all("script", {"type": "text/javascript"})
     for script in scripts:
         if "getElementById('dlbutton')" in script.text:
@@ -214,7 +234,7 @@ def mediafire(url: str) -> str:
         reply = "`MediaFire linki bulunamadı`\n"
         return reply
     reply = ''
-    page = BeautifulSoup(requests.get(link).content, 'lxml')
+    page = BeautifulSoup(requests.get(link).content, 'html.parser')
     info = page.find('a', {'aria-label': 'Download file'})
     dl_url = info.get('href')
     size = re.findall(r'\(.*\)', info.text)[0]
@@ -251,7 +271,7 @@ def osdn(url: str) -> str:
         reply = "`OSDN linki bulunamadı`\n"
         return reply
     page = BeautifulSoup(
-        requests.get(link, allow_redirects=True).content, 'lxml')
+        requests.get(link, allow_redirects=True).content, 'html.parser')
     info = page.find('a', {'class': 'mirror_link'})
     link = urllib.parse.unquote(osdn_link + info['href'])
     reply = f"Mirrors for __{link.split('/')[-1]}__\n"
@@ -339,7 +359,7 @@ def useragent():
         requests.get(
             'https://developers.whatismybrowser.com/'
             'useragents/explore/operating_system_name/android/').content,
-        'lxml').findAll('td', {'class': 'useragent'})
+        'html.parser').findAll('td', {'class': 'useragent'})
     user_agent = choice(useragents)
     return user_agent.text
 

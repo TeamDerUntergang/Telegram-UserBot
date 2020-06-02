@@ -34,7 +34,7 @@ async def ezanvakti(event):
         if knum < 0:
             raise ValueError
         request = get(f'https://namazvakitleri.diyanet.gov.tr/tr-TR/{knum}')
-        result = BeautifulSoup(request.text, features="lxml")
+        result = BeautifulSoup(request.text, 'html.parser')
     except:
         await event.edit(f"`{konum} için bir bilgi bulunamadı.`")
         return

@@ -21,6 +21,7 @@ import re
 import time
 import asyncio
 import shutil
+import wikipedia
 
 from bs4 import BeautifulSoup
 from time import sleep
@@ -35,7 +36,6 @@ from wikipedia import summary
 from wikipedia.exceptions import DisambiguationError, PageError
 from urbandict import define
 from requests import get
-from search_engine_parser import GoogleSearch
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from googletrans import LANGUAGES, Translator
@@ -191,27 +191,19 @@ async def moni(event):
 async def gsearch(q_event):
     """ .google komutu ile basit Google aramaları gerçekleştirilebilir """
     match = extract_args(q_event)
+    if len(match) < 1:
+        await q_event.edit('`Komut kullanımı hatalı.`')
+        return
     page = findall(r"page=\d+", match)
     try:
         page = page[0]
         page = page.replace("page=", "")
         match = match.replace("page=" + page[0], "")
-    except IndexError:
+        page = int(page)
+    except:
         page = 1
-    search_args = (str(match), int(page))
-    gsearch = GoogleSearch()
-    gresults = await gsearch.async_search(*search_args)
-    msg = ""
-    for i in range(10):
-        try:
-            title = gresults["titles"][i]
-            link = gresults["links"][i]
-            desc = gresults["descriptions"][i]
-            msg += f"[{title}]({link})\n`{desc}`\n\n"
-        except IndexError:
-            break
-    await q_event.edit("**Arama Sorgusu:**\n`" + match + "`\n\n**Sonuçlar:**\n" +
-                       msg,
+    msg = await do_gsearch(match, page)
+    await q_event.edit(f"**Arama Sorgusu:**\n`{match}`\n\n**Sonuçlar:**\n{msg}",
                        link_preview=False)
 
     if BOTLOG:
@@ -220,9 +212,42 @@ async def gsearch(q_event):
             match + " `sözcüğü başarıyla Google'da aratıldı!`",
         )
 
+async def do_gsearch(query, page):
+
+    def find_page(num):
+        return (num - 1) * 10;
+
+    def parse_key(keywords):
+        return keywords.replace(' ','+')
+        
+    def get_result(res):
+        link = res.find('a')['href']
+        title = res.find('h3').text
+        desc = res.find('span', {'class':['st']}).text
+        if len(desc.strip()) < 1:
+            desc = 'Açıklama bulunamadı.'
+        return f'[{title}]({link})\n`{desc}`'
+
+    query = parse_key(query)
+    page = find_page(page)
+    req = get(f'https://www.google.com/search?q={query}&start={find_page(page)}',
+            headers={
+                    'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.138 Safari/537.36',
+                    'Content-Type': 'text/html'
+                }
+          )
+    soup = BeautifulSoup(req.text, 'html.parser')
+    res1 = soup.findAll('div', {'class':['rc']})
+    out = ""
+    for i in range(0, len(res1)):
+        res = res1[i]
+        out += f"{i+1}-{get_result(res)}\n\n"
+    return out
+
 @sedenify(outgoing=True, pattern=r"^.wiki")
 async def wiki(wiki_q):
     """ .wiki komutu Vikipedi üzerinden bilgi çeker. """
+    wikipedia.set_lang("tr")
     match = extract_args(wiki_q)
     try:
         summary(match)
@@ -343,13 +368,13 @@ async def imdb(e):
         page = get("https://www.imdb.com/find?ref_=nv_sr_fn&q=" + final_name +
                    "&s=all")
         lnk = str(page.status_code)
-        soup = BeautifulSoup(page.content, 'lxml')
+        soup = BeautifulSoup(page.content, 'html.parser')
         odds = soup.findAll("tr", "odd")
         mov_title = odds[0].findNext('td').findNext('td').text
         mov_link = "http://www.imdb.com/" + \
             odds[0].findNext('td').findNext('td').a['href']
         page1 = get(mov_link)
-        soup = BeautifulSoup(page1.content, 'lxml')
+        soup = BeautifulSoup(page1.content, 'html.parser')
         if soup.find('div', 'poster'):
             poster = soup.find('div', 'poster').img['src']
         else:
@@ -546,12 +571,13 @@ async def youtube_search(query,
 @sedenify(outgoing=True, pattern=r"^.rip")
 async def download_video(v_url):
     """ .rip komutu ile YouTube ve birkaç farklı siteden medya çekebilirsin. """
-    arr = extract_args(v_url).split(' ', 1)
-    if len(arr) < 2 or arr[0].lower() not in ['audio','video']:
+    arr = v_url.text.split(' ', 1)
+    arr[0] = arr[0][4:].lower()
+    if len(arr) < 2 or arr[0] not in ['audio','video']:
         await v_url.edit("`Komut kullanımı hatalı.`")
         return
     url = arr[1]
-    type = arr[0].lower()
+    type = arr[0]
 
     await v_url.edit("`İndirmeye hazırlanıyor...`")
 

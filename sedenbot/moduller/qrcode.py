@@ -56,7 +56,7 @@ async def parseqr(qr_e):
         await qr_e.edit("decode başarısız oldu.")
         return
     try:
-        soup = BeautifulSoup(t_response, "html.parser")
+        soup = BeautifulSoup(t_response, 'html.parser')
         qr_contents = soup.find_all("pre")[0].text
         await qr_e.edit(qr_contents)
     except:

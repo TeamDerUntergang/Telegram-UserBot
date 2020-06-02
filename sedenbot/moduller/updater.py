@@ -19,14 +19,19 @@
 #
 
 import sys
-from os import execl, remove, path
+import asyncio
 import heroku3
 
 from git import Repo
+from shutil import rmtree
+from os import remove, execle, path, makedirs, getenv, environ
 from git.exc import GitCommandError, InvalidGitRepositoryError, NoSuchPathError
 
-from sedenbot import CMD_HELP, HEROKU_APIKEY, HEROKU_APPNAME, STRING_SESSION, UPSTREAM_REPO_URL
+from sedenbot import CMD_HELP, bot, HEROKU_APIKEY, HEROKU_APPNAME, UPSTREAM_REPO_URL
 from sedenbot.events import extract_args, sedenify
+
+requirements_path = path.join(
+    path.dirname(path.dirname(path.dirname(__file__))), 'requirements.txt')
 
 async def gen_chlog(repo, diff):
     ch_log = ''
@@ -35,41 +40,59 @@ async def gen_chlog(repo, diff):
         ch_log += f'•[{c.committed_datetime.strftime(d_form)}]: {c.summary} <{c.author}>\n'
     return ch_log
 
-async def is_off_br(br):
-    off_br = ['seden']
-    if br in off_br:
-        return 1
-    return
+async def update_requirements():
+    reqs = str(requirements_path)
+    try:
+        process = await asyncio.create_subprocess_shell(
+            ' '.join([sys.executable, "-m", "pip", "install", "-r", reqs]),
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE)
+        await process.communicate()
+        return process.returncode
+    except Exception as e:
+        return repr(e)
 
-@sedenify(outgoing=True, pattern="^.update")
+@sedenify(outgoing=True, pattern=r"^\.update(?: |$)(.*)")
 async def upstream(ups):
-    ".update komutu ile botunun güncel olup olmadığını denetleyebilirsin."
-    await ups.edit("`Güncellemeler denetleniyor...`")
+    await ups.edit(f"`SedenBot için güncellemeler denetleniyor...`")
     conf = extract_args(ups)
     off_repo = UPSTREAM_REPO_URL
+    force_update = False
 
     try:
-        txt = "``Güncelleme başarısız oldu! "
-        txt += "Bazı sorunlarla karşılaştık.`\n\n**LOG:**\n"
+        txt = f"`Güncelleme başarısız oldu!"
+        txt += f"Bazı sorunlarla karşılaştık.`\n\n**LOG:**\n"
         repo = Repo()
     except NoSuchPathError as error:
         await ups.edit(f'{txt}\n`{error} klasörü bulunamadı.`')
-        return
-    except InvalidGitRepositoryError as error:
-        await ups.edit(f"`{error} klasörü bir git reposu gibi görünmüyor.\
-            \nFakat bu sorunu .update now komutuyla botu zorla güncelleyerek çözebilirsin.`")
+        repo.__del__()
         return
     except GitCommandError as error:
         await ups.edit(f'{txt}\n`Git hatası! {error}`')
+        repo.__del__()
         return
+    except InvalidGitRepositoryError as error:
+        if conf != "now":
+            await ups.edit(
+                f"`{error} klasörü bir git reposu gibi görünmüyor.\
+            \nFakat bu sorunu .update now komutuyla botu zorla güncelleyerek çözebilirsin.`"
+            )
+            return
+        repo = Repo.init()
+        origin = repo.create_remote('upstream', off_repo)
+        origin.fetch()
+        force_update = True
+        repo.create_head('master', origin.refs.seden)
+        repo.heads.seden.set_tracking_branch(origin.refs.sql)
+        repo.heads.seden.checkout(True)
 
     ac_br = repo.active_branch.name
-    if not await is_off_br(ac_br):
+    if ac_br != 'seden':
         await ups.edit(
-            f'**[Güncelleyici]:**` Galiba seden botunu modifiye ettin ve kendi branşını kullanıyorsun: ({ac_br}). '
-            'Bu durum güncelleyicinin kafasını karıştırıyor,'
-            'Güncelleme nereden çekilecek?'
-            'Lütfen seden botunu resmi repodan kullan.`')
+            f'**[SedenBot Güncelleyici]:**`Galiba botunun branch ismini değiştirdin. Kullandığın branch ismi: ({ac_br}). '
+            f'Böyle olursa botunu güncelleyemem. Çünkü branch ismi uyuşmuyor..'
+            f'Lütfen botunu SedenBot resmi repodan kullan.`')
+        repo.__del__()
         return
 
     try:
@@ -79,16 +102,19 @@ async def upstream(ups):
 
     ups_rem = repo.remote('upstream')
     ups_rem.fetch(ac_br)
+
     changelog = await gen_chlog(repo, f'HEAD..upstream/{ac_br}')
 
-    if not changelog:
-        await ups.edit(f'\n`Botun` **tamamen güncel!** `Branch:` **{ac_br}**\n')
+    if not changelog and not force_update:
+        await ups.edit(
+            f'\n`Botun` **tamamen güncel!** `Branch:` **{ac_br}**\n')
+        repo.__del__()
         return
 
-    if conf != "now":
+    if conf != "now" and not force_update:
         changelog_str = f'**{ac_br} için yeni güncelleme mevcut!\n\nDeğişiklikler:**\n`{changelog}`'
         if len(changelog_str) > 4096:
-            await ups.edit("`Değişiklik listesi çok büyük, dosya olarak görüntülemelisin.`")
+            await ups.edit(f"`Değişiklik listesi çok büyük, dosya olarak görüntülemelisin.`")
             file = open("degisiklikler.txt", "w+")
             file.write(changelog_str)
             file.close()
@@ -100,72 +126,65 @@ async def upstream(ups):
             remove("degisiklikler.txt")
         else:
             await ups.edit(changelog_str)
-        await ups.respond('`Güncellemeyi yapmak için \".update now\" komutunu kullan.`')
+        await ups.respond(f'`Güncellemeyi yapmak için \".update now\" komutunu kullan.`')
         return
 
-    await ups.edit('`Bot güncelleştiriliyor...`')
-
-    ups_rem.fetch(ac_br)
-    repo.git.reset('--hard', 'seden')
-
-    if HEROKU_APIKEY != None:
-        heroku = heroku3.from_key(HEROKU_APIKEY)
-        if HEROKU_APPNAME != None:
-            try:
-                heroku_app = heroku.apps()[HEROKU_APPNAME]
-            except KeyError:
-                await ups.edit(
-                    "```HATA: HEROKU_APPNAME değişkeni hatalı! Lütfen uygulama adınızın "
-                    "HEROKU_APIKEY ile doğru olduğundan emin olun.```")
-                return
-        else:
-            await ups.edit(
-                "```HATA: HEROKU_APPNAME değişkeni ayarlanmadı! Lütfen "
-                "Heroku uygulama adınızı değişkene girin.```")
-            return
-
+    if force_update:
         await ups.edit(
-            "`Heroku yapılandırması bulundu! Güncelleyici Seden'i güncellemeye ve yeniden başlatmaya çalışacak."
-            " Bu işlem otomatik olacaktır. İşlem bitince Seden'in çalışıp çalışmadığını kontrol etmeyi deneyin.\n"
-            "\".alive\" komutu ile deneyebilirsin.`\n"
-            "**BOT YENIDEN BAŞLATILIYOR..**")
-        if not STRING_SESSION:
-            repo.git.add('sedenbot.session', force=True)
-        if path.isfile('config.env'):
-            repo.git.add('config.env', force=True)
-        
-        repo.git.checkout("seden")
-        
-        repo.config_writer().set_value("user", "name",
-                                       "SedenBot Updater").release()
-        repo.config_writer().set_value("user", "email",
-                                       "<>").release()
-        repo.git.pull()
-        heroku_remote_url = heroku_app.git_url.replace(
-            "https://", f"https://api:{HEROKU_APIKEY}@")
-
-        remote = None
-        if 'heroku' in repo.remotes:
-            remote = repo.remote('heroku')
-            remote.set_url(heroku_remote_url)
-        else:
-            remote = repo.create_remote('heroku', heroku_remote_url)
-
-        try:
-            remote.push(refspec="HEAD:refs/heads/seden", force=True)
-        except GitCommandError as e:
-            await ups.edit(f'{txt}\n`Git hatası! {e}`')
-            return
+            f'`Güncel SedenBot kodu zorla eşitleniyor...`')
     else:
-        repo.git.pull()
-
-        await ups.edit(
-            '`Güncelleme başarıyla tamamlandı!\n'
-            'Seden yeniden başlatılıyor... Lütfen biraz bekleyin, ardından '
-            '".alive" komutunu kullanarak SedenBotun çalışıp çalışmadığnıı kontrol edin.`')
-
-        await ups.client.disconnect()
-    execl(sys.executable, sys.executable, *sys.argv)
+        await ups.edit(f'`Bot güncelleştiriliyor lütfen bekle...`')
+    if HEROKU_APIKEY is not None:
+        heroku = heroku3.from_key(HEROKU_APIKEY)
+        heroku_app = None
+        heroku_applications = heroku.apps()
+        if not HEROKU_APPNAME:
+            await ups.edit(
+                f'`SedenBot Güncelleyiciyi kullanabilmek için HEROKU_APPNAME değişkenini tanımlamalısın. Aksi halde güncelleyici çalışmaz.`'
+            )
+            repo.__del__()
+            return
+        for app in heroku_applications:
+            if app.name == HEROKU_APPNAME:
+                heroku_app = app
+                break
+        if heroku_app is None:
+            await ups.edit(
+                f'{txt}\n`Heroku değişkenleri yanlış veya eksik tanımlanmış.`'
+            )
+            repo.__del__()
+            return
+        await ups.edit(f'`SedenBot Güncelleniyor..\
+                        \nBu işlem 4-5 dakika sürebilir, lütfen sabırla bekle. Beklemene değer :)`'
+                       )
+        ups_rem.fetch(ac_br)
+        repo.git.reset("--hard", "FETCH_HEAD")
+        heroku_git_url = heroku_app.git_url.replace(
+            "https://", "https://api:" + HEROKU_APIKEY + "@")
+        if "heroku" in repo.remotes:
+            remote = repo.remote("heroku")
+            remote.set_url(heroku_git_url)
+        else:
+            remote = repo.create_remote("heroku", heroku_git_url)
+        try:
+            remote.push(refspec="HEAD:refs/heads/master", force=True)
+        except GitCommandError as error:
+            await ups.edit(f'{txt}\n`Karşılaşılan hatalar burada:\n{error}`')
+            repo.__del__()
+            return
+        await ups.edit(f'`Güncelleme başarıyla tamamlandı!\n'
+                       f'SedenBot yeniden başlatılıyor sabırla beklediğin için teşekkür ederiz :)`')
+    else:
+        try:
+            ups_rem.pull(ac_br)
+        except GitCommandError:
+            repo.git.reset("--hard", "FETCH_HEAD")
+        await update_requirements()
+        await ups.edit(f'`Güncelleme başarıyla tamamlandı!\n'
+                       f'SedenBot yeniden başlatılıyor sabırla beklediğin için teşekkür ederiz :)`')
+        args = [sys.executable, "seden.py"]
+        execle(sys.executable, *args, environ)
+        return
 
 CMD_HELP.update({
     'update':

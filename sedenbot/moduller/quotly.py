@@ -55,7 +55,7 @@ async def _(event):
               print(e.__class__)
 
           if not response:
-              await event.edit("`Botdan cevap alamadım!`")
+              await event.edit(f"`Botdan cevap alamadım! Bunun sebebi bulunduğun sohbete {chat} ekli olması olabilir.`")
           elif response.text.startswith("Merhaba!"):
              await event.edit("`Gizlilik ayarları yüzenden alıntı yapamadım`")
           else: 

@@ -27,7 +27,6 @@ import requests
 from PIL import Image
 from io import BytesIO
 from datetime import datetime
-from pySmartDL import SmartDL
 from hachoir.metadata import extractMetadata
 from hachoir.parser import createParser
 from collections import defaultdict

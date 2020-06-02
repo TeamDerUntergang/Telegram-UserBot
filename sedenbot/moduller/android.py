@@ -122,7 +122,7 @@ async def devices_specifications(request):
         return
     all_brands = BeautifulSoup(
         get('https://www.devicespecifications.com/tr/brand-more').content,
-        'lxml').find('div', {
+        'html.parser').find('div', {
             'class': 'brand-listing-container-news'
         }).findAll('a')
     brand_page_url = None
@@ -132,13 +132,13 @@ async def devices_specifications(request):
         ][0]
     except IndexError:
         await request.edit(f'`{brand} bilinmeyen marka!`')
-    devices = BeautifulSoup(get(brand_page_url).content, 'lxml') \
+    devices = BeautifulSoup(get(brand_page_url).content, 'html.parser') \
         .findAll('div', {'class': 'model-listing-container-80'})
     device_page_url = None
     try:
         device_page_url = [
             i.a['href']
-            for i in BeautifulSoup(str(devices), 'lxml').findAll('h3')
+            for i in BeautifulSoup(str(devices), 'html.parser').findAll('h3')
             if device in i.text.strip().lower()
         ]
     except IndexError:
@@ -147,7 +147,7 @@ async def devices_specifications(request):
         device_page_url = device_page_url[:2]
     reply = ''
     for url in device_page_url:
-        info = BeautifulSoup(get(url).content, 'lxml')
+        info = BeautifulSoup(get(url).content, 'html.parser')
         reply = '\n**' + info.title.text.split('-')[0].strip() + '**\n\n'
         info = info.find('div', {'id': 'model-brief-specifications'})
         specifications = re.findall(r'<b>.*?<br/>', str(info))
@@ -175,7 +175,7 @@ async def twrp(request):
         reply = f"`{device} için resmi twrp bulunamadı!`\n"
         await request.edit(reply)
         return
-    page = BeautifulSoup(url.content, 'lxml')
+    page = BeautifulSoup(url.content, 'html.parser')
     download = page.find('table').find('tr').find('a')
     dl_link = f"https://dl.twrp.me{download['href']}"
     dl_file = download.text

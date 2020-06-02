@@ -23,7 +23,7 @@ from requests import get
 from os import path, remove
 
 from telethon.errors.rpcerrorlist import PhoneNumberInvalidError
-from . import BRAIN_CHECKER, BLACKLIST, LOGS, bot
+from . import BRAIN_CHECKER, BLACKLIST, LOGS, bot, CONSOLE_LOGGER_VERBOSE
 from .moduller import ALL_MODULES
 
 INVALID_PH = '\nHATA: Girilen telefon numarası geçersiz' \
@@ -69,12 +69,15 @@ except PhoneNumberInvalidError:
 
 for module_name in ALL_MODULES:
     try:
+        LOGS.info(f'{module_name} yükleniyor ...')
         import_module("sedenbot.moduller." + module_name)
-    except:
+    except Exception as e:
+        if CONSOLE_LOGGER_VERBOSE:
+            raise e
         LOGS.warn(f"{module_name} modülü yüklenirken bir hata oluştu.")
 
 LOGS.info("Botunuz çalışıyor! Herhangi bir sohbete .alive yazarak Test edin."
-          " Yardıma ihtiyacınız varsa, Destek grubumuza gelin t.me/SedenUserBotSupport")
+          " Yardıma ihtiyacınız varsa, Destek grubumuza gelin https://telegram.me/SedenUserBotSupport")
 LOGS.info("Bot sürümünüz Seden v3.2")
 
 bot.run_until_disconnected()

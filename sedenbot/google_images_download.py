@@ -60,7 +60,6 @@ def user_input():
             for key, value in json_file['Records'][record].items():
                 arguments[key] = value
             records.append(arguments)
-        records_count = len(records)
     else:
         # Taking command line arguments from users
         parser = argparse.ArgumentParser()

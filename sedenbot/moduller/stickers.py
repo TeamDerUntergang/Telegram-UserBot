@@ -44,9 +44,9 @@ DIZCILIK_STR = [
     "Bay dızcı bu çıkartmayı dızlıyor... ",
 ]
 
-@sedenify(outgoing=True, pattern="^.dızla")
+@sedenify(outgoing=True, pattern="^.(d[ıi]zla|kang)")
 async def dizla(args):
-    """ .dızla komutu çıkartmaları başka paketten alır ya da yeni bir çıkartma oluşturur. """
+    """ .kang komutu çıkartmaları başka paketten alır ya da yeni bir çıkartma oluşturur. """
     user = await bot.get_me()
     if not user.username:
         user.username = user.first_name
@@ -275,7 +275,7 @@ async def resize_photo(photo):
 
     return image
 
-@sedenify(outgoing=True, pattern="^.dızbilgisi")
+@sedenify(outgoing=True, pattern="^.packinfo")
 async def dizbilgisi(event):
     if not event.is_reply:
         await event.edit("`Hiçlikten bir bilgi çekemem, sence yapabilir miyim?!`")
@@ -308,25 +308,25 @@ async def dizbilgisi(event):
         if document_sticker.emoticon not in pack_emojis:
             pack_emojis.append(document_sticker.emoticon)
 
-    OUTPUT = f"**Sticker başlığı:** `{get_stickerset.set.title}\n`" \
-        f"**Sticker kısa adı:** `{get_stickerset.set.short_name}`\n" \
-        f"**Resmi mi:** `{get_stickerset.set.official}`\n" \
-        f"**Arşivlenmiş mi:** `{get_stickerset.set.archived}`\n" \
-        f"**Paketteki çıkartma sayısı:** `{len(get_stickerset.packs)}`\n" \
+    OUTPUT = f"**Sticker paketi başlığı:** `{get_stickerset.set.title}\n`" \
+        f"**Sticker paketi kısa adı:** `{get_stickerset.set.short_name}`\n" \
+        f"**Resmi paket mi ?:** `{get_stickerset.set.official}`\n" \
+        f"**Arşivlenmiş mi ?:** `{get_stickerset.set.archived}`\n" \
+        f"**Paketteki sticker sayısı:** `{len(get_stickerset.packs)}`\n" \
         f"**Paketteki emoji sayısı:**\n{' '.join(pack_emojis)}"
 
     await event.edit(OUTPUT)
 
 CMD_HELP.update({
     "stickers":
-    ".dızla\
-\nKullanım: .dızla ile bir çıkartmaya ya da resme yanıtlayarak kendi çıkartma paketinize çıkartma olarak ekleyebilirsiniz.\
-\n\n.dızla [emoji(ler)]\
-\nKullanım: .dızla gibi çalışır fakat istediğiniz emojiyi çıkartmanın emojisi olarak belirtir.\
-\n\n.dızla [numara]\
+    ".kang\
+\nKullanım: .kang ile bir çıkartmaya ya da resme yanıtlayarak kendi çıkartma paketinize çıkartma olarak ekleyebilirsiniz.\
+\n\n.kang [emoji(ler)]\
+\nKullanım: .kang gibi çalışır fakat istediğiniz emojiyi çıkartmanın emojisi olarak belirtir.\
+\n\n.kang [numara]\
 \nKullanım: Çıkartmayı ya da resmi belirtilen pakete ekler fakat emoji olarak şu kullanılır: 🤔 \
-\n\n.dızla [emoji(ler)] [numara]\
+\n\n.kang [emoji(ler)] [numara]\
 \nKullanım: Çıkartmayı ya da resmi belirtilen pakete ekler ve belirttiğiniz emoji çıkartmanın emojisi olarak kullanılır.\
-\n\n.dızbilgisi\
+\n\n.packinfo\
 \nKullanım: Çıkartma paketi hakkında bilgi verir."
 })

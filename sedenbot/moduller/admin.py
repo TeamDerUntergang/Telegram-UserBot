@@ -121,6 +121,9 @@ async def set_group_photo(gpic):
 @sedenify(incoming=True, from_users=BRAIN_CHECKER, pattern="^.promote")
 async def promote(promt):
     """ .promote komutu ile belirlenen kişiyi yönetici yapar """
+    if not promt.is_group:
+        await promt.edit("`Bunun bir grup olduğunu sanmıyorum.`")
+        return
     # Hedef sohbeti almak
     chat = await promt.get_chat()
     # Yetkiyi sorgula
@@ -170,6 +173,9 @@ async def promote(promt):
 @sedenify(outgoing=True, pattern="^.demote")
 async def demote(dmod):
     """ .demote komutu belirlenen kişiyi yöneticilikten çıkarır """
+    if not dmod.is_group:
+        await dmod.edit("`Bunun bir grup olduğunu sanmıyorum.`")
+        return
     # Yetki kontrolü
     chat = await dmod.get_chat()
     admin = chat.admin_rights
@@ -218,6 +224,9 @@ async def demote(dmod):
 @sedenify(outgoing=True, pattern="^.ban")
 async def ban(bon):
     """ .ban komutu belirlenen kişiyi gruptan yasaklar """
+    if not bon.is_group:
+        await bon.edit("`Bunun bir grup olduğunu sanmıyorum.`")
+        return
     # Yetki kontrolü
     chat = await bon.get_chat()
     admin = chat.admin_rights
@@ -274,6 +283,9 @@ async def ban(bon):
 @sedenify(outgoing=True, pattern="^.unban")
 async def nothanos(unbon):
     """ .unban komutu belirlenen kişinin yasağını kaldırır """
+    if not unbon.is_group:
+        await unbon.edit("`Bunun bir grup olduğunu sanmıyorum.`")
+        return
     # Yetki kontrolü
     chat = await unbon.get_chat()
     admin = chat.admin_rights
@@ -311,6 +323,9 @@ async def spider(spdr):
     """
     Bu fonksiyon temelde susturmaya yarar
     """
+    if not spdr.is_group:
+        await spdr.edit("`Bunun bir grup olduğunu sanmıyorum.`")
+        return
     # Fonksiyonun SQL modu altında çalışıp çalışmadığını kontrol et
     try:
         from sedenbot.moduller.sql_helper.spam_mute_sql import mute
@@ -381,6 +396,9 @@ async def mutmsg(spdr, user, reason):
 @sedenify(outgoing=True, pattern="^.unmute")
 async def unmoot(unmot):
     """ .unmute komutu belirlenin kişinin sesini açar (yani grupta tekrardan konuşabilir) """
+    if not unmot.is_group:
+        await unmot.edit("`Bunun bir grup olduğunu sanmıyorum.`")
+        return
     # Yetki kontrolü
     chat = await unmot.get_chat()
     admin = chat.admin_rights
@@ -429,6 +447,9 @@ async def unmoot(unmot):
 @sedenify(incoming=True)
 async def muter(moot):
     """ Sessize alınan kullanıcıların mesajlarını silmek için kullanılır """
+    if not moot.is_group:
+        await moot.edit("`Bunun bir grup olduğunu sanmıyorum.`")
+        return
     try:
         from sedenbot.moduller.sql_helper.spam_mute_sql import is_muted
         from sedenbot.moduller.sql_helper.gmute_sql import is_gmuted
@@ -462,6 +483,9 @@ async def muter(moot):
 @sedenify(outgoing=True, pattern="^.ungmute")
 async def ungmoot(un_gmute):
     """ .ungmute komutu belirlenen kişinin küresel susturulmasını kaldırır """
+    if not un_gmute.is_group:
+        await un_gmute.edit("`Bunun bir grup olduğunu sanmıyorum.`")
+        return
     # Yetki kontrolü
     chat = await un_gmute.get_chat()
     admin = chat.admin_rights
@@ -503,6 +527,9 @@ async def ungmoot(un_gmute):
 @sedenify(outgoing=True, pattern="^.gmute")
 async def gspider(gspdr):
     """ .gmute komutu belirlenen kişiyi küresel olarak susturur """
+    if not gspdr.is_group:
+        await gspdr.edit("`Bunun bir grup olduğunu sanmıyorum.`")
+        return
     # Yetki kontrolü
     chat = await gspdr.get_chat()
     admin = chat.admin_rights
@@ -551,7 +578,9 @@ async def gspider(gspdr):
 @sedenify(outgoing=True, pattern="^.zombies", groups_only=False)
 async def rm_deletedacc(show):
     """ .zombies komutu bir sohbette tüm hayalet / silinmiş / zombi hesaplarını listeler. """
-
+    if not show.is_group:
+        await show.edit("`Bunun bir grup olduğunu sanmıyorum.`")
+        return
     con = extract_args(show).lower()
     del_u = 0
     del_status = "`Silinmiş hesap bulunamadı, grup temiz`"
@@ -614,28 +643,12 @@ async def rm_deletedacc(show):
             f"**{del_u}** tane silinmiş hesap çıkartıldı !!\
             \nGRUP: {show.chat.title}(`{show.chat_id}`)")
 
-@sedenify(outgoing=True, pattern="^.admins$")
-async def get_admin(show):
-    """ .admins komutu girilen gruba ait yöneticileri listeler """
-    info = await show.client.get_entity(show.chat_id)
-    title = info.title if info.title else "this chat"
-    mentions = f'<b>{title} grubunun yöneticileri:</b> \n'
-    try:
-        async for user in show.client.iter_participants(
-                show.chat_id, filter=ChannelParticipantsAdmins):
-            if not user.deleted:
-                link = f"<a href=\"tg://user?id={user.id}\">{user.first_name}</a>"
-                userid = f"<code>{user.id}</code>"
-                mentions += f"\n{link} {userid}"
-            else:
-                mentions += f"\nDeleted Account <code>{user.id}</code>"
-    except ChatAdminRequiredError as err:
-        mentions += " " + str(err) + "\n"
-    await show.edit(mentions, parse_mode="html")
-
 @sedenify(outgoing=True, pattern="^.pin$")
 async def pin(msg):
     """ .pin komutu verildiği grupta ki yazıyı & medyayı sabitler """
+    if not msg.is_group:
+        await msg.edit("`Bunun bir grup olduğunu sanmıyorum.`")
+        return
     # Yönetici kontrolü
     chat = await msg.get_chat()
     admin = chat.admin_rights
@@ -680,6 +693,9 @@ async def pin(msg):
 @sedenify(outgoing=True, pattern="^.kick")
 async def kick(usr):
     """ .kick komutu belirlenen kişiyi gruptan çıkartır """
+    if not usr.is_group:
+        await usr.edit("`Bunun bir grup olduğunu sanmıyorum.`")
+        return
     # Yetki kontrolü
     chat = await usr.get_chat()
     admin = chat.admin_rights
@@ -725,45 +741,58 @@ async def kick(usr):
             f"KULLANICI: [{user.first_name}](tg://user?id={user.id})\n"
             f"GRUP: {usr.chat.title}(`{usr.chat_id}`)\n")
 
-@sedenify(outgoing=True, pattern="^.users$")
+@sedenify(outgoing=True, pattern="^.(admins|bots|user(s|sdel))")
 async def get_users(show):
     """ .users komutu girilen gruba ait kişileri listeler """
+    if not show.is_group:
+        await show.edit("`Bunun bir grup olduğunu sanmıyorum.`")
+        return
+    cmd = show.text.split(' ', 1)
+    users = cmd[0][1:5] == 'user'
+    showdel = users and cmd[0][-3:] == 'del'
+    bots = not users and cmd[0][1:5] == 'bots'
+    admins = not bots and cmd[0][1:7] == 'admins'
     info = await show.client.get_entity(show.chat_id)
-    title = info.title if info.title else "this chat"
-    mentions = '{} grubunda bulunan kişiler: \n'.format(title)
+    title = info.title if info.title else "Bu sohbet"
+
+    mentions = ''
+    filtr = None
+    if users:
+        mentions = f'{title} içinde bulunan{" silinmiş" if showdel else ""} kişiler: \n'
+    elif admins:
+        mentions = f'{title} içinde bulunan yöneticiler: \n'
+        filtr = ChannelParticipantsAdmins
+    elif bots:
+        mentions = f'{title} içinde bulunan botlar: \n'
+        filtr = ChannelParticipantsBots
+
     try:
-        searchq = extract_args(show)
-        if len(searchq) < 1:
-            async for user in show.client.iter_participants(show.chat_id):
-                if not user.deleted:
-                    mentions += f"\n[{user.first_name}](tg://user?id={user.id}) `{user.id}`"
-                else:
-                    mentions += f"\nSilinen hesap `{user.id}`"
-        else:
-            async for user in show.client.iter_participants(
-                    show.chat_id, search=f'{searchq}'):
-                if not user.deleted:
-                    mentions += f"\n[{user.first_name}](tg://user?id={user.id}) `{user.id}`"
-                else:
-                    mentions += f"\nSilinen hesap `{user.id}`"
+        searchq = cmd[1] if users and len(cmd) > 1 else ''
+        async for user in show.client.iter_participants(
+                show.chat_id,
+                search=f'{searchq if len(searchq) > 0 else ""}',
+                filter=filtr):
+            if not user.deleted and showdel:
+                continue
+            mentions += f"\n[{'Silinmiş hesap' if user.deleted else user.first_name}](tg://user?id={user.id}) `{user.id}`"
     except Exception as err:
         mentions += " " + str(err) + "\n"
     try:
         await show.edit(mentions)
     except MessageTooLongError:
         await show.edit(
-            "Lanet olsun, bu büyük bir grup. Kullanıcı listesini dosya olarak gönderiyorum.")
+             "Lanet olsun, bu büyük bir grup. "
+            f"{'Silinmiş k' if showdel else 'K'}ullanıcı listesini dosya olarak gönderiyorum.")
         file = open("userslist.txt", "w+")
         file.write(mentions)
         file.close()
         await show.client.send_file(
             show.chat_id,
             "userslist.txt",
-            caption='{} grubundaki kişiler'.format(title),
+            caption=f"{title} grubundaki{' silinmiş' if showdel else ''} kişiler",
             reply_to=show.id,
         )
         remove("userslist.txt")
-
 
 async def get_user_from_event(event):
     """ Kullanıcıyı argümandan veya yanıtlanan mesajdan alın. """
@@ -814,129 +843,6 @@ async def get_user_from_id(user, event):
         return None
 
     return user_obj
-
-@sedenify(outgoing=True, pattern="^.usersdel$")
-async def get_usersdel(show):
-    """ .usersdel komutu grup içinde ki silinen hesapları gösterir """
-    info = await show.client.get_entity(show.chat_id)
-    title = info.title if info.title else "this chat"
-    mentions = '{} grubunda bulunan silinmiş hesaplar: \n'.format(title)
-    try:
-        searchq = extract_args(show)
-        if len(searchq) < 1:
-            async for user in show.client.iter_participants(show.chat_id):
-                if user.deleted:
-                    mentions += f"\nDeleted Account `{user.id}`"
-        else:
-            async for user in show.client.iter_participants(
-                    show.chat_id, search=f'{searchq}'):
-                if user.deleted:
-                    mentions += f"\nDeleted Account `{user.id}`"
-    except ChatAdminRequiredError as err:
-        mentions += " " + str(err) + "\n"
-    try:
-        await show.edit(mentions)
-    except MessageTooLongError:
-        await show.edit(
-            "Lanet olsun, bu büyük bir grup. Silinen kullanıcılar listesini dosya olarak gönderiyorum.")
-        file = open("userslist.txt", "w+")
-        file.write(mentions)
-        file.close()
-        await show.client.send_file(
-            show.chat_id,
-            "deleteduserslist.txt",
-            caption='{} grubuna ait olan silinmiş hesaplar:'.format(title),
-            reply_to=show.id,
-        )
-        remove("deleteduserslist.txt")
-
-
-async def get_userdel_from_event(event):
-    """ Silinen kullanıcıyı argümandan veya yanıtlanan mesajdan alın. """
-    msg = extract_args(event)
-    args = msg.split(' ', 1)
-    extra = None
-    if event.reply_to_msg_id and not len(args) == 2:
-        previous_message = await event.get_reply_message()
-        user_obj = await event.client.get_entity(previous_message.from_id)
-        extra = msg
-    elif args:
-        user = args[0]
-        if len(args) == 2:
-            extra = args[1]
-
-        if user.isnumeric():
-            user = int(user)
-
-        if not user:
-            await event.edit("`Silinen kullanıcının kullanıcı adını, ID'sini veya yanıtını iletin!`")
-            return
-
-        if event.message.entities :
-            probable_user_mention_entity = event.message.entities[0]
-
-            if isinstance(probable_user_mention_entity,
-                          MessageEntityMentionName):
-                user_id = probable_user_mention_entity.user_id
-                user_obj = await event.client.get_entity(user_id)
-                return user_obj
-        try:
-            user_obj = await event.client.get_entity(user)
-        except Exception as err:
-            await event.edit(str(err))
-            return None
-
-    return user_obj, extra
-
-
-async def get_userdel_from_id(user, event):
-    if isinstance(user, str):
-        user = int(user)
-
-    try:
-        user_obj = await event.client.get_entity(user)
-    except Exception as err:
-        await event.edit(str(err))
-        return None
-
-    return user_obj
-
-@sedenify(outgoing=True, pattern="^.bots$", groups_only=True)
-async def get_bots(show):
-    """ .bots komutu gruba ait olan botları listeler """
-    info = await show.client.get_entity(show.chat_id)
-    title = info.title if info.title else "this chat"
-    mentions = f'<b> {title} grubunda bulunan botlar:</b>\n'
-    try:
-       # if isinstance(message.to_id, PeerChat):
-        #    await show.edit("`Sadece süper grupların botlara sahip olabileceğini duydum.`")
-        #   return
-       # else:
-        async for user in show.client.iter_participants(
-                show.chat_id, filter=ChannelParticipantsBots):
-            if not user.deleted:
-                link = f"<a href=\"tg://user?id={user.id}\">{user.first_name}</a>"
-                userid = f"<code>{user.id}</code>"
-                mentions += f"\n{link} {userid}"
-            else:
-                mentions += f"\nSilinmiş bot <code>{user.id}</code>"
-    except ChatAdminRequiredError as err:
-        mentions += " " + str(err) + "\n"
-    try:
-        await show.edit(mentions, parse_mode="html")
-    except MessageTooLongError:
-        await show.edit(
-            "Lanet olsun, burada çok fazla bot var. Botların listesini dosya olarak gönderiyorum.")
-        file = open("botlist.txt", "w+")
-        file.write(mentions)
-        file.close()
-        await show.client.send_file(
-            show.chat_id,
-            "botlist.txt",
-            caption='{} grubunda bulunan botlar:'.format(title),
-            reply_to=show.id,
-        )
-        remove("botlist.txt")
 
 CMD_HELP.update({
     "admin":

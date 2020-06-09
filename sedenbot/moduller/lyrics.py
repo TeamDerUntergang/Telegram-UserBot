@@ -18,7 +18,7 @@ import os
 import random
 import lyricsgenius
 
-from sedenbot import CMD_HELP, LOGS, GENIUS
+from sedenbot import CMD_HELP, LOGS, GENIUS_API_TOKEN
 from sedenbot.events import extract_args, sedenify
 
 @sedenify(outgoing=True, pattern="^.lyrics")
@@ -31,11 +31,11 @@ async def lyrics(lyric):
                          "Örnek: `Stabil - Reenkarne`")
         return
 
-    if not GENIUS:
+    if not GENIUS_API_TOKEN:
         await lyric.edit(
             "`Lütfen Genius tokeni ayarlayınız. Teşekkürler!`")
     else:
-        genius = lyricsgenius.Genius(GENIUS)
+        genius = lyricsgenius.Genius(GENIUS_API_TOKEN)
         try:
             args = args.split('-')
             artist = args[0].strip()

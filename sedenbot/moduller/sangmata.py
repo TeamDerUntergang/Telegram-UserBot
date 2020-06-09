@@ -57,7 +57,7 @@ async def _(event):
           if not response:
               await event.edit("`Botdan cevap alamadım!`")
           elif response.text.startswith("Forward"):
-             await event.edit("`Gizlilik ayarları yüzenden alıntı yapamadım`")
+             await event.edit("`Gizlilik ayarları yüzünden alıntı yapamadım`")
           else: 
              await event.edit(response.text)
           sleep(1)

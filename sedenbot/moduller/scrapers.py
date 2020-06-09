@@ -284,7 +284,7 @@ async def urban_dict(ud_e):
     try:
         define(query)
     except HTTPError:
-        await ud_e.edit(f"Üzgünüm, {query} için hiçbir sonuç bulunamadı.")
+        await ud_e.edit(f"Üzgünüm, **{query}** için hiçbir sonuç bulunamadı.")
         return
     mean = define(query)
     deflen = sum(len(i) for i in mean[0]["def"])
@@ -311,9 +311,9 @@ async def urban_dict(ud_e):
         if BOTLOG:
             await ud_e.client.send_message(
                 BOTLOG_CHATID,
-                query + "`sözcüğünün UrbanDictionary sorgusu başarıyla gerçekleştirildi!`")
+                query + " `sözcüğünün UrbanDictionary sorgusu başarıyla gerçekleştirildi!`")
     else:
-        await ud_e.edit(query + "**için hiçbir sonuç bulunamadı**")
+        await ud_e.edit(query + " **için hiçbir sonuç bulunamadı**")
 
 @sedenify(outgoing=True, pattern=r"^.tts")
 async def text_to_speech(query):
@@ -463,7 +463,7 @@ async def translateme(trans):
 
     source_lan = LANGUAGES[f'{reply_text.src.lower()}']
     transl_lan = LANGUAGES[f'{reply_text.dest.lower()}']
-    reply_text = f"Şu dilden:**{source_lan.title()}**\nŞu dile:**{transl_lan.title()}:**\n\n{reply_text.text}"
+    reply_text = f"Şu dilden: **{source_lan.title()}**\nŞu dile: **{transl_lan.title()}:**\n\n{reply_text.text}"
 
     await trans.edit(reply_text)
     if BOTLOG:

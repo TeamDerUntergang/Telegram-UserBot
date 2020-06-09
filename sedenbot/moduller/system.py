@@ -18,15 +18,15 @@
 
 from asyncio import create_subprocess_shell as asyncrunapp
 from asyncio.subprocess import PIPE as asyncPIPE
-from platform import python_version, uname
 from shutil import which
 from os import remove
-from telethon import version
 
+from sedenbot.moduller.lovers import saniye
+from sedenbot.moduller.ecem import ecem
 from sedenbot import CMD_HELP, ALIVE_MESAJI
 from sedenbot.events import extract_args, sedenify
 # ================= CONSTANT =================
-KULLANICIMESAJI = str(ALIVE_MESAJI) if ALIVE_MESAJI else uname().node
+KULLANICIMESAJI = ALIVE_MESAJI
 # ============================================
 @sedenify(outgoing=True, pattern="^.neofetch$")
 async def sysdetails(sysd):
@@ -72,7 +72,7 @@ async def bot_ver(event):
             + str(stderr.decode().strip())
 
         await event.edit("[Seden UserBot](https://telegram.dog/SedenUserBot) `Versiyonu: "
-                         f"{verout} v3.2"
+                         f"{verout} v3.3"
                          "` \n"
                          "`Toplam değişiklik: "
                          f"{revout}"
@@ -126,17 +126,22 @@ async def pipcheck(pip):
 
 @sedenify(outgoing=True, pattern="^.alive$")
 async def amialive(alive):
+    if KULLANICIMESAJI.lower() == 'ecem':
+        await ecem(alive)
+        return
+    elif KULLANICIMESAJI.lower() == 'saniye':
+        await saniye(alive)
+        return
     await alive.edit(f"`{KULLANICIMESAJI}`")
         
 @sedenify(outgoing=True, pattern="^.alives")
 async def alivename(kullanici):
-    message = kullanici.text
+    message = extract_args(kullanici)
     output = 'Kullanım: .alives <alive mesajı>'
-    if not (message == '.alives' or message[7:8] != ' '):
-        newuser = message[8:]
+    if len(message) > 0:
         global KULLANICIMESAJI
-        KULLANICIMESAJI = newuser
-        output = 'Alive mesajı, ' + newuser + ' olarak ayarlandı !'
+        KULLANICIMESAJI = message
+        output = f'Alive mesajı, {KULLANICIMESAJI} olarak ayarlandı!'
     await kullanici.edit("`" f"{output}" "`")
     
 @sedenify(outgoing=True, pattern="^.resalive$")

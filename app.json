@@ -65,10 +65,6 @@
       "value": "/usr/bin/chromium",
       "required": false
     },
-    "OPEN_WEATHER_MAP_APPID": {
-      "description": "https://api.openweathermap.org/data/2.5/weather adresinden kendi APPID'inizi (API key) edinin.",
-      "required": false
-    },
     "BOTLOG": {
       "description": "Günlüğe kaydetmeyi açmak istiyorsanız, bunu True olarak ayarlayın",
       "value": "False"
@@ -83,10 +79,6 @@
     },
     "GENIUS_API_TOKEN": {
       "description": "Genius API Key, 'https://genius.com/developers' adresinden alın.",
-      "required": false
-    },
-    "GENIUS": {
-      "description": "Buraya aldığınız Genius API Token'i yazın.",
       "required": false
     },
     "AUTO_PP": {
@@ -158,7 +150,7 @@
       "required": false
     },
     "DEFAULT_BIO": {
-      "description": "Varsayılan profil biyografisi.",
+      "description": "Varsayılan profil biyografisi. (Lastfm modülü için)",
       "value": "#TeamDerUntergang",
       "required": false
     },

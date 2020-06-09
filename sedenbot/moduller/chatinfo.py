@@ -19,20 +19,25 @@
 from math import sqrt
 from emoji import emojize
 from datetime import datetime
+from re import search
 
 from telethon.utils import get_input_location
 from telethon.tl.functions.channels import GetFullChannelRequest, GetParticipantsRequest
 from telethon.tl.functions.messages import GetHistoryRequest, CheckChatInviteRequest, GetFullChatRequest
-from telethon.tl.types import MessageActionChannelMigrateFrom, ChannelParticipantsAdmins
-from telethon.errors import (ChannelInvalidError, ChannelPrivateError, ChannelPublicGroupNaError, InviteHashEmptyError, InviteHashExpiredError, InviteHashInvalidError)
+from telethon.tl.types import MessageActionChannelMigrateFrom, ChannelParticipantsAdmins, MessageEntityMentionName
+from telethon.errors import (ChannelInvalidError, ChannelPrivateError, 
+                             ChannelPublicGroupNaError, InviteHashEmptyError, 
+                             InviteHashExpiredError, InviteHashInvalidError)
 
 from sedenbot import CMD_HELP
 from sedenbot.events import extract_args, sedenify
 
-@sedenify(pattern=".chatinfo", outgoing=True)
+@sedenify(pattern="^.chatinfo", outgoing=True)
 async def info(event):
     await event.edit("`Grup analiz ediliyor...`")
     chat = await get_chatinfo(event)
+    if not chat:
+        return
     caption = await fetch_info(chat, event)
     try:
         await event.edit(caption, parse_mode="html")
@@ -44,15 +49,19 @@ async def info(event):
 async def get_chatinfo(event):
     chat = extract_args(event)
     chat_info = None
-    if chat.isdigit():
+    if len(chat) > 0 and search('^-?\d+$', chat):
         chat = int(chat)
+    elif event.reply_to_msg_id:
+        replied_msg = await event.get_reply_message()
+        if replied_msg.fwd_from and replied_msg.fwd_from.channel_id :
+            chat = replied_msg.fwd_from.channel_id
+    elif event.message.entities:
+        entity = event.message.entities[0]
+        if isinstance(entity, MessageEntityMentionName):
+            chat = entity.user_id
     else:
-        if event.reply_to_msg_id:
-            replied_msg = await event.get_reply_message()
-            if replied_msg.fwd_from and replied_msg.fwd_from.channel_id :
-                chat = replied_msg.fwd_from.channel_id
-        else:
-            chat = event.chat_id
+        chat = event.chat_id
+
     try:
         chat_info = await event.client(GetFullChatRequest(chat))
     except:
@@ -68,7 +77,7 @@ async def get_chatinfo(event):
             await event.edit("`Kanal veya süpergrup mevcut değil`")
             return None
         except (TypeError, ValueError) as err:
-            await event.edit(str(err))
+            await event.edit("`Baktığım şey bir kanal/grup olmayabilir`")
             return None
     return chat_info
 
@@ -200,6 +209,6 @@ async def fetch_info(chat, event):
 
 CMD_HELP.update({
     "chatinfo":
-    ".chatinfo [isteğe bağlı: <grup id/davet linki>] \
+    ".chatinfo [isteğe bağlı: <grup id/grup linki (@ ile)>] \
     \nKullanım: Bir grup hakkında bilgi alır. Bazı bilgiler eksik izinler nedeniyle sınırlı olabilir."
 })

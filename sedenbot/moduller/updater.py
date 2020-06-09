@@ -18,13 +18,13 @@
 # Bu modül commit sayısına bağlı olarak botu günceller.
 #
 
-import sys
+from sys import executable, argv
 import asyncio
 import heroku3
 
 from git import Repo
 from shutil import rmtree
-from os import remove, execle, path, makedirs, getenv, environ
+from os import remove, execl, path, makedirs, getenv, environ
 from git.exc import GitCommandError, InvalidGitRepositoryError, NoSuchPathError
 
 from sedenbot import CMD_HELP, bot, HEROKU_APIKEY, HEROKU_APPNAME, UPSTREAM_REPO_URL
@@ -44,7 +44,7 @@ async def update_requirements():
     reqs = str(requirements_path)
     try:
         process = await asyncio.create_subprocess_shell(
-            ' '.join([sys.executable, "-m", "pip", "install", "-r", reqs]),
+            ' '.join([executable, "-m", "pip", "install", "-r", reqs]),
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE)
         await process.communicate()
@@ -52,7 +52,7 @@ async def update_requirements():
     except Exception as e:
         return repr(e)
 
-@sedenify(outgoing=True, pattern=r"^\.update(?: |$)(.*)")
+@sedenify(outgoing=True, pattern=r"^.update(?: |$)(.*)")
 async def upstream(ups):
     await ups.edit(f"`SedenBot için güncellemeler denetleniyor...`")
     conf = extract_args(ups)
@@ -133,14 +133,14 @@ async def upstream(ups):
         await ups.edit(
             f'`Güncel SedenBot kodu zorla eşitleniyor...`')
     else:
-        await ups.edit(f'`Bot güncelleştiriliyor lütfen bekle...`')
+        await ups.edit('`Bot güncelleştiriliyor, lütfen bekle...`')
     if HEROKU_APIKEY is not None:
         heroku = heroku3.from_key(HEROKU_APIKEY)
         heroku_app = None
         heroku_applications = heroku.apps()
         if not HEROKU_APPNAME:
             await ups.edit(
-                f'`SedenBot Güncelleyiciyi kullanabilmek için HEROKU_APPNAME değişkenini tanımlamalısın. Aksi halde güncelleyici çalışmaz.`'
+                '`SedenBot Güncelleyiciyi kullanabilmek için HEROKU_APPNAME değişkenini tanımlamalısın. Aksi halde güncelleyici çalışmaz.`'
             )
             repo.__del__()
             return
@@ -154,7 +154,7 @@ async def upstream(ups):
             )
             repo.__del__()
             return
-        await ups.edit(f'`SedenBot Güncelleniyor..\
+        await ups.edit('`SedenBot Güncelleniyor..\
                         \nBu işlem 4-5 dakika sürebilir, lütfen sabırla bekle. Beklemene değer :)`'
                        )
         ups_rem.fetch(ac_br)
@@ -172,19 +172,24 @@ async def upstream(ups):
             await ups.edit(f'{txt}\n`Karşılaşılan hatalar burada:\n{error}`')
             repo.__del__()
             return
-        await ups.edit(f'`Güncelleme başarıyla tamamlandı!\n'
-                       f'SedenBot yeniden başlatılıyor sabırla beklediğin için teşekkür ederiz :)`')
+        await ups.edit('`Güncelleme başarıyla tamamlandı!\n'
+                       'SedenBot yeniden başlatılıyor, sabırla beklediğin için teşekkür ederiz :)`')
     else:
         try:
             ups_rem.pull(ac_br)
         except GitCommandError:
             repo.git.reset("--hard", "FETCH_HEAD")
         await update_requirements()
-        await ups.edit(f'`Güncelleme başarıyla tamamlandı!\n'
-                       f'SedenBot yeniden başlatılıyor sabırla beklediğin için teşekkür ederiz :)`')
-        args = [sys.executable, "seden.py"]
-        execle(sys.executable, *args, environ)
-        return
+        await ups.edit('`Güncelleme başarıyla tamamlandı!\n'
+                       'SedenBot yeniden başlatılıyor, sabırla beklediğin için teşekkür ederiz :)`')
+
+    try:
+        await bot.disconnect()
+    except:
+        pass
+
+    execl(executable, executable, *argv)
+    
 
 CMD_HELP.update({
     'update':

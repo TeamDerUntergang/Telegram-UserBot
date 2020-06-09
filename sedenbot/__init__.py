@@ -23,10 +23,10 @@ from logging import basicConfig, getLogger, INFO, DEBUG
 from distutils.util import strtobool as sb
 from math import ceil
 
+from pylast import LastFMNetwork, md5
 from dotenv import load_dotenv
 from requests import get
 from telethon.sync import TelegramClient, custom, events
-from telethon.tl.functions.channels import JoinChannelRequest
 from telethon.sessions import StringSession
 from telethon.utils import get_peer_id
 load_dotenv("config.env")
@@ -110,8 +110,7 @@ AUTO_PP = os.environ.get("AUTO_PP", None)
 CHROME_DRIVER = os.environ.get("CHROME_DRIVER", None)
 GOOGLE_CHROME_BIN = os.environ.get("GOOGLE_CHROME_BIN", None)
 
-# OpenWeatherMap API Key
-OPEN_WEATHER_MAP_APPID = os.environ.get("OPEN_WEATHER_MAP_APPID", None)
+# Hava durumu varsayılan şehir
 WEATHER_DEFCITY = os.environ.get("WEATHER_DEFCITY", None)
 
 # Lydia API
@@ -131,7 +130,6 @@ TZ_NUMBER = int(os.environ.get("TZ_NUMBER", 1))
 # Temiz Karşılama
 CLEAN_WELCOME = sb(os.environ.get("CLEAN_WELCOME", "True"))
 
-
 # Last.fm modülü
 BIO_PREFIX = os.environ.get("BIO_PREFIX", None)
 DEFAULT_BIO = os.environ.get("DEFAULT_BIO", None)
@@ -140,6 +138,14 @@ LASTFM_API = os.environ.get("LASTFM_API", None)
 LASTFM_SECRET = os.environ.get("LASTFM_SECRET", None)
 LASTFM_USERNAME = os.environ.get("LASTFM_USERNAME", None)
 LASTFM_PASSWORD_PLAIN = os.environ.get("LASTFM_PASSWORD", None)
+LASTFM_PASS = md5(LASTFM_PASSWORD_PLAIN)
+if LASTFM_API and LASTFM_SECRET and LASTFM_USERNAME and LASTFM_PASS:
+    lastfm = LastFMNetwork(api_key=LASTFM_API,
+                           api_secret=LASTFM_SECRET,
+                           username=LASTFM_USERNAME,
+                           password_hash=LASTFM_PASS)
+else:
+    lastfm = None
 
 # Google Drive Modülü
 G_DRIVE_CLIENT_ID = os.environ.get("G_DRIVE_CLIENT_ID", None)
@@ -154,7 +160,7 @@ BOT_TOKEN = os.environ.get("BOT_TOKEN", None)
 BOT_USERNAME = os.environ.get("BOT_USERNAME", None)
 
 # Genius modülünün çalışması için buradan değeri alın https://genius.com/developers her ikisi de aynı değerlere sahiptir
-GENIUS = os.environ.get("GENIUS", None) or os.environ.get("GENIUS_API_TOKEN", None)
+GENIUS_API_TOKEN = os.environ.get("GENIUS_API_TOKEN", None)
 
 # Ayarlanabilir PM izin verilmedi mesajı
 PM_UNAPPROVED = os.environ.get("PM_UNAPPROVED", None)
@@ -212,9 +218,6 @@ with bot:
         quit(1)
 
     try:
-        bot(JoinChannelRequest("@SedenUserBot"))
-        bot(JoinChannelRequest("@SedenUserBotSupport"))
-
         if not BOT_TOKEN:
             raise Exception()
 

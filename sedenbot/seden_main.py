@@ -78,6 +78,6 @@ for module_name in ALL_MODULES:
 
 LOGS.info("Botunuz çalışıyor! Herhangi bir sohbete .alive yazarak Test edin."
           " Yardıma ihtiyacınız varsa, Destek grubumuza gelin https://telegram.me/SedenUserBotSupport")
-LOGS.info("Bot sürümünüz Seden v3.2")
+LOGS.info("Bot sürümünüz Seden v3.3")
 
 bot.run_until_disconnected()

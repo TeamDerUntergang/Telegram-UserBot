@@ -14,7 +14,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-from asyncio import sleep, run
+from asyncio import sleep
 from pylast import User, WSError, LastFMNetwork, md5
 from re import sub
 from urllib import parse
@@ -27,9 +27,7 @@ from telethon.tl.functions.users import GetFullUserRequest
 from telethon.tl.types import User as Userbot
 from telethon.errors.rpcerrorlist import FloodWaitError
 
-from sedenbot import (CMD_HELP, BOTLOG, BOTLOG_CHATID, DEFAULT_BIO, bot, 
-                     BIO_PREFIX, LASTFM_API, LASTFM_SECRET, 
-                     LASTFM_USERNAME, LASTFM_PASSWORD_PLAIN)
+from sedenbot import CMD_HELP, BOTLOG, BOTLOG_CHATID, DEFAULT_BIO, BIO_PREFIX, lastfm, LASTFM_USERNAME, bot
 from sedenbot.events import extract_args, sedenify
 
 # =================== CONSTANT ===================
@@ -54,21 +52,8 @@ else:
 LASTFMCHECK = False
 RUNNING = False
 LastLog = False
-LASTFM_PASS = md5(LASTFM_PASSWORD_PLAIN)
-lastfm = None
-async def load_lastfm():
-    try:
-        if LASTFM_API and LASTFM_SECRET and LASTFM_USERNAME and LASTFM_PASS:
-            lastfm = LastFMNetwork(api_key=LASTFM_API,
-                           api_secret=LASTFM_SECRET,
-                           username=LASTFM_USERNAME,
-                           password_hash=LASTFM_PASS)
-    except:
-        lastfm = None
-
-run(load_lastfm())
-
 # ================================================
+
 @sedenify(outgoing=True, pattern="^.lastfm")
 async def last_fm(lastFM):
     """ .lastfm komutu last.fm'den verileri çeker. """
@@ -97,7 +82,6 @@ async def last_fm(lastFM):
         playing = User(LASTFM_USERNAME, lastfm).get_now_playing()
         output = f"[{LASTFM_USERNAME}]({username}) __en son şunu dinledi:__\n\n"
         for i, track in enumerate(recent):
-            print(i)
             printable = await artist_and_song(track)
             tags = await gettags(track)
             rectrack = parse.quote_plus(str(printable))

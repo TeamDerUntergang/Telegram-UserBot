@@ -17,18 +17,23 @@
 # Deepfry modülü kaynak kodu: https://github.com/Ovyerus/deeppyer
 # @NaytSeyd tarafından portlanmıştır.
 
-import io
+from io import BytesIO
 
+from random import randint, uniform
 from PIL import Image, ImageEnhance, ImageOps
 from telethon.tl.types import DocumentAttributeFilename
 
 from sedenbot import bot, CMD_HELP
 from sedenbot.events import extract_args, sedenify
 
-@sedenify(pattern="^.deepfry", outgoing=True) 
+@sedenify(pattern="^.(deepf|f)ry", outgoing=True) 
 async def deepfryer(event):
+
+    text = event.text.split(' ', 1)
+    fry = text[0][1:4] == 'fry'
+
     try:
-        frycount = int(extract_args(event))
+        frycount = int(text[1])
         if frycount < 1:
             raise ValueError
     except:
@@ -51,16 +56,16 @@ async def deepfryer(event):
 
     # Fotoğrafı (yüksek çözünürlük) bayt dizisi olarak indir
     await event.edit("`Medya indiriliyor...`")
-    image = io.BytesIO()
+    image = BytesIO()
     await event.client.download_media(data, image)
     image = Image.open(image)
 
     # Resime uygula
     await event.edit("`Medyaya deepfry uygulanıyor...`")
     for _ in range(frycount):
-        image = await deepfry(image)
+        image = await deepfry(image, fry)
 
-    fried_io = io.BytesIO()
+    fried_io = BytesIO()
     fried_io.name = "image.jpeg"
     image.save(fried_io, "JPEG")
     fried_io.seek(0)
@@ -68,28 +73,52 @@ async def deepfryer(event):
     await event.reply(file=fried_io)
 
 
-async def deepfry(img: Image) -> Image:
-    img = img.copy().convert("RGB")
+async def deepfry(img: Image, fry: bool) -> Image:
+    colors = None
+    if fry:
+        colors = (
+            (randint(50, 200), randint(40, 170), randint(40, 190)),
+            (randint(190, 255), randint(170, 240), randint(180, 250))
+        )
 
     # Resim formatı ayarla
-    img = img.convert("RGB")
+    img = img.copy().convert("RGB")
     width, height = img.width, img.height
-    img = img.resize((int(width ** .75), int(height ** .75)), resample=Image.LANCZOS)
-    img = img.resize((int(width ** .88), int(height ** .88)), resample=Image.BILINEAR)
-    img = img.resize((int(width ** .9), int(height ** .9)), resample=Image.BICUBIC)
+
+    temp_num = uniform(.8, .9) if fry else .75
+    img = img.resize((int(width ** temp_num), int(height ** temp_num)), resample=Image.LANCZOS)
+
+    temp_num = uniform(.85, .95) if fry else .88
+    img = img.resize((int(width ** temp_num), int(height ** temp_num)), resample=Image.BILINEAR)
+
+    temp_num = uniform(.89, .98) if fry else .9
+    img = img.resize((int(width ** temp_num), int(height ** temp_num)), resample=Image.BICUBIC)
     img = img.resize((width, height), resample=Image.BICUBIC)
-    img = ImageOps.posterize(img, 4)
+
+    temp_num = randint(3, 7) if fry else 4
+    img = ImageOps.posterize(img, temp_num)
 
     # Renk yerleşimi oluştur
     overlay = img.split()[0]
-    overlay = ImageEnhance.Contrast(overlay).enhance(2)
-    overlay = ImageEnhance.Brightness(overlay).enhance(1.5)
 
-    overlay = ImageOps.colorize(overlay, Color.RED, Color.YELLOW)
+    temp_num = uniform(1.0, 2.0) if fry else 2
+    overlay = ImageEnhance.Contrast(overlay).enhance(temp_num)
+
+    temp_num = uniform(1.0, 2.0) if fry else 1.5
+    overlay = ImageEnhance.Brightness(overlay).enhance(temp_num)
+
+    overlay = ImageOps.colorize(
+        overlay, 
+        colors[0] if fry else (254, 0, 2), 
+        colors[1] if fry else (255, 255, 15)
+    )
 
     # Kırmızı ve sarıyı ana görüntüye yerleştir ve keskinleştir
-    img = Image.blend(img, overlay, .75)
-    img = ImageEnhance.Sharpness(img).enhance(100)
+    temp_num = uniform(0.1, 0.4) if fry else .75
+    img = Image.blend(img, overlay, temp_num)
+
+    temp_num = randint(5, 300) if fry else 100
+    img = ImageEnhance.Sharpness(img).enhance(temp_num)
 
     return img
 
@@ -114,12 +143,8 @@ async def check_media(reply_message):
     else:
         return data
 
-class Color:
-    RED = (254, 0, 2)
-    YELLOW = (255, 255, 15)
-
 CMD_HELP.update({
     "deepfry":
-    ".deepfry [numara 1-5]\
+    ".deepfry veya .fry [numara 1-5]\
     \nKullanım: Belirlenen görüntüye deepfry efekti uygular."
 })

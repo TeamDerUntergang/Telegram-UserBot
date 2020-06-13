@@ -5,6 +5,7 @@ beautifulsoup4>=4.8.1
 cowpy
 dnspython
 emoji
+fake_useragent
 gitpython
 google-api-python-client
 google-auth-oauthlib

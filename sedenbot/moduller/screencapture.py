@@ -14,38 +14,40 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-import io
-import traceback
+from io import BytesIO
 
+from base64 import b64decode
 from re import match
-from selenium import webdriver
+from selenium.webdriver import Chrome
 from asyncio import sleep
 from selenium.webdriver.chrome.options import Options
+from os.path import exists
 
-from sedenbot import GOOGLE_CHROME_BIN, CHROME_DRIVER, CMD_HELP
+from sedenbot import CHROME_DRIVER, CMD_HELP
 from sedenbot.events import extract_args, sedenify
 
-@sedenify(pattern=r".ss", outgoing=True)
+@sedenify(pattern=r"^.ss", outgoing=True)
 async def capture(url):
     """ .ss komutu, belirttiğin herhangi bir siteden ekran görüntüsü alır ve sohbete gönderir. """
     await url.edit("`İşleniyor...`")
-    chrome_options = Options()
-    chrome_options.add_argument("--headless")
-    chrome_options.add_argument("--test-type")
-    chrome_options.binary_location = GOOGLE_CHROME_BIN
-    chrome_options.add_argument('--ignore-certificate-errors')
-    chrome_options.add_argument("--disable-dev-shm-usage")
-    chrome_options.add_argument("--no-sandbox")
-    chrome_options.add_argument('--disable-gpu')
-    driver = webdriver.Chrome(executable_path=CHROME_DRIVER,
-                              options=chrome_options)
     input_str = extract_args(url)
-    link_match = match(r'\bhttps?://.*\.\S+', input_str)
+    link_match = match(r'\bhttp(.*)?://.*\.\S+', input_str)
     if link_match:
         link = link_match.group()
     else:
         await url.edit("`Ekran görüntüsü alabilmem için geçerli bir bağlantı vermelisin.`")
         return
+    chrome_options = Options()
+    CHROME_BINARY = "/usr/bin/chromium-browser"
+    if exists("/usr/bin/chromium"):
+        CHROME_BINARY = "/usr/bin/chromium"
+    chrome_options.add_argument("--headless")
+    chrome_options.binary_location = CHROME_BINARY
+    chrome_options.add_argument("--window-size=1920x1080")
+    chrome_options.add_argument("--disable-dev-shm-usage")
+    chrome_options.add_argument("--no-sandbox")
+    chrome_options.add_argument("--disable-gpu")
+    driver = Chrome(executable_path=CHROME_DRIVER, options=chrome_options)
     driver.get(link)
     height = driver.execute_script(
         "return Math.max(document.body.scrollHeight, document.body.offsetHeight, document.documentElement.clientHeight, document.documentElement.scrollHeight, document.documentElement.offsetHeight);"
@@ -54,19 +56,19 @@ async def capture(url):
         "return Math.max(document.body.scrollWidth, document.body.offsetWidth, document.documentElement.clientWidth, document.documentElement.scrollWidth, document.documentElement.offsetWidth);"
     )
     driver.set_window_size(width + 125, height + 125)
-    wait_for = height / 1000
+    wait_for = int(height / 1000)
     await url.edit(f"`Sayfanın ekran görüntüsü oluşturuluyor...`\
     \n`Sayfanın yüksekliği: {height} piksel`\
     \n`Sayfanın genişliği: {width} piksel`\
-    \n`Sayfanın yüklenmesi için {int(wait_for)} saniye beklendi.`")
-    await sleep(int(wait_for))
-    im_png = driver.get_screenshot_as_png()
+    \n`Sayfanın yüklenmesi için {wait_for} saniye beklendi.`")
+    await sleep(wait_for)
+    im_png = driver.get_screenshot_as_base64()
     # Sayfanın ekran görüntüsü kaydedilir.
     driver.close()
     message_id = url.message.id
     if url.reply_to_msg_id:
         message_id = url.reply_to_msg_id
-    with io.BytesIO(im_png) as out_file:
+    with BytesIO(b64decode(im_png)) as out_file:
         out_file.name = "ekran_goruntusu.png"
         await url.edit("`Ekran görüntüsü karşıya yükleniyor...`")
         await url.client.send_file(url.chat_id,

@@ -23,11 +23,13 @@ import asyncio
 import shutil
 import wikipedia
 
+from io import BytesIO
+from base64 import b64decode
 from bs4 import BeautifulSoup
 from time import sleep
 from html import unescape
 from re import findall
-from selenium import webdriver
+from selenium.webdriver import Chrome
 from urllib.parse import quote_plus
 from urllib.error import HTTPError
 from selenium.webdriver.support.ui import Select
@@ -51,8 +53,7 @@ from asyncio import sleep
 from telethon.tl.types import DocumentAttributeAudio
 
 from sedenbot.moduller.upload_download import progress, humanbytes, time_formatter
-from sedenbot.google_images_download import googleimagesdownload
-from sedenbot import CMD_HELP, BOTLOG, BOTLOG_CHATID, YOUTUBE_API_KEY, CHROME_DRIVER, GOOGLE_CHROME_BIN
+from sedenbot import CMD_HELP, BOTLOG, BOTLOG_CHATID, YOUTUBE_API_KEY, CHROME_DRIVER
 from sedenbot.events import extract_args, sedenify
 
 CARBONLANG = "auto"
@@ -84,14 +85,13 @@ async def carbon_api(e):
     url = CARBON.format(code=code, lang=CARBONLANG)
     chrome_options = Options()
     chrome_options.add_argument("--headless")
-    chrome_options.binary_location = GOOGLE_CHROME_BIN
     chrome_options.add_argument("--window-size=1920x1080")
     chrome_options.add_argument("--disable-dev-shm-usage")
     chrome_options.add_argument("--no-sandbox")
     chrome_options.add_argument("--disable-gpu")
     prefs = {'download.default_directory': './'}
     chrome_options.add_experimental_option('prefs', prefs)
-    driver = webdriver.Chrome(executable_path=CHROME_DRIVER,
+    driver = Chrome(executable_path=CHROME_DRIVER,
                               options=chrome_options)
     driver.get(url)
     await e.edit("`İşleniyor...\nTamamlanma Oranı: 50%`")
@@ -107,8 +107,6 @@ async def carbon_api(e):
     }
     command_result = driver.execute("send_command", params)
     driver.find_element_by_xpath("//button[contains(text(),'Export')]").click()
-    # driver.find_element_by_xpath("//button[contains(text(),'4x')]").click()
-    # driver.find_element_by_xpath("//button[contains(text(),'PNG')]").click()
     await e.edit("`İşleniyor...\nTamamlanma Oranı: 75%`")
     # İndirme için bekleniyor
     while not os.path.isfile("./carbon.png"):
@@ -130,34 +128,60 @@ async def carbon_api(e):
     # Karşıya yüklemenin ardından carbon.png kaldırılıyor
     await e.delete()  # Mesaj siliniyor
 
+# @frknkrc44 tarafından baştan yazıldı
 @sedenify(outgoing=True, pattern="^.img")
 async def img_sampler(event):
     """ .img komutu Google'da resim araması yapar. """
-    await event.edit("İşleniyor...")
     query = extract_args(event)
     lim = findall(r"lim=\d+", query)
     try:
         lim = lim[0]
         lim = lim.replace("lim=", "")
         query = query.replace("lim=" + lim[0], "")
+        lim = int(lim)
     except IndexError:
         lim = 5
-    response = googleimagesdownload()
 
-    # creating list of arguments
-    arguments = {
-        "keywords": query,
-        "limit": lim,
-        "format": "jpg",
-        "no_directory": "no_directory"
-    }
-
-    # passing the arguments to the function
-    paths = response.download(arguments)
-    lst = paths[0][query]
+    if len(query) < 1:
+        await event.edit('`Bir arama terimi girmelisiniz.`')
+        return
+    await event.edit("`İşleniyor...`")
+    
+    url = f'https://www.google.com/search?tbm=isch&q={query}&gbv=2&sa=X&biw=1920&bih=1080'
+    chrome_options = Options()
+    chrome_options.add_argument("--headless")
+    chrome_options.add_argument("--window-size=1920x1080")
+    chrome_options.add_argument("--disable-dev-shm-usage")
+    chrome_options.add_argument("--no-sandbox")
+    chrome_options.add_argument("--disable-gpu")
+    driver = Chrome(executable_path=CHROME_DRIVER,
+                              options=chrome_options)
+    driver.get(url)
+    count = 1
+    files = []
+    for i in driver.find_elements_by_xpath('//div[contains(@class,"isv-r PNCib MSM1fd BUooTd")]'):
+        i.click()
+        try_count = 0
+        while len(element := driver.find_elements_by_xpath('//img[contains(@class,"n3VNCb") and contains(@src,"http")]')) < 1 and try_count < 20:
+            try_count += 1
+            asyncio.sleep(.1)
+        if len(element) < 1:
+            continue
+        link = element[0].get_attribute('src')
+        temp_file = BytesIO(get(link).content)
+        temp_file.name = f'result_{count}.jpeg'
+        files.append(temp_file)
+        asyncio.sleep(1)
+        driver.find_elements_by_xpath('//a[contains(@class,"hm60ue")]')[0].click()
+        count += 1
+        if lim < count:
+            break
+        asyncio.sleep(1)
+    
+    driver.quit()
+    
     await event.client.send_file(
-        await event.client.get_input_entity(event.chat_id), lst)
-    shutil.rmtree(os.path.dirname(os.path.abspath(lst[0])))
+        await event.client.get_input_entity(event.chat_id), files)
     await event.delete()
 
 @sedenify(outgoing=True, pattern="^.currency (.*)")

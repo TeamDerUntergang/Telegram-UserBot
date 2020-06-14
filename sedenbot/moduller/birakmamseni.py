@@ -13,14 +13,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
+# Credits @Adem68
 
 from requests import post
 from fake_useragent import UserAgent
 from sedenbot import CMD_HELP
 from sedenbot.events import sedenify
 
-
-@sedenify(pattern="^.birakmamseni$", outgoing=True)
+@sedenify(pattern="^.b[ıi]rakmamseni$", outgoing=True)
 async def birakmamseni(event):
     ua = UserAgent()
     url = 'https://birakmamseni.org/'
@@ -44,19 +44,18 @@ async def birakmamseni(event):
         return
 
     sonuc = ("**⚫⚪ Bırakmam Seni Kampanyası Verileri ⚫⚪**\n\n" +
-             "Şu an itibarıyla BIRAKMAM SENİ kampanyası kapsamında " +
+             "Şu an itibarıyla **BIRAKMAM SENİ** kampanyası kapsamında " +
              f"`{count}` 🖤🤍 adet destekte bulunuldu.\n" +
-             f"\nHaydi sen de hemen BÜYÜK BEŞİKTAŞ’IMIZA 🦅 destek ol !\n" +
+             f"\nHaydi sen de hemen **BÜYÜK BEŞİKTAŞ’IMIZA** 🦅 destek ol !\n" +
              f"\n[https://birakmamseni.org](https://birakmamseni.org/)\n" +
-             f"`\n************************************************************************************************\n`" +
+             f"`\n=============================\n`" +
              f"`SMS, Havale/Eft ve Posta Çeki kanalları ile gelen destekler periyodik olarak sayaca eklenmektedir.`\n" +
-             f"`************************************************************************************************`")
+             f"`=============================`")
 
     await event.edit(sonuc)
 
-
 CMD_HELP.update({
     "birakmamseni":
-        ".birakmamseni \
-        \nKullanım: Beşiktaş'ın Bırakmam Seni kampanyasına yapılan destek sayısını göstermektedir."
+    ".birakmamseni \
+    \nKullanım: Beşiktaş'ın Bırakmam Seni kampanyasına yapılan destek sayısını göstermektedir."
 })

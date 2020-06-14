@@ -1,53 +1,21 @@
-# Biz Arch Linux kullanıyoruz <3
-FROM archlinux:latest
+# Credits @NaytSeyd
+FROM naytseyd/sedenbot:latest
 
-# Gerekyi paketleri yükle
-RUN pacman -Syyu --noconfirm \
-    aria2 \
-    curl \
-    chromium \
-    ffmpeg \
-    figlet \
-    gcc \
-    git \
-    jq \
-    libevent \
-    libffi \
-    libjpeg \
-    libpng \
-    libpqxx \
-    libsystemd \
-    libwebp \
-    libxml2 \
-    libxslt \
-    linux-headers \
-    musl \
-    neofetch \
-    nss \
-    openssl \
-    postgresql \
-    postgresql-client \
-    python3 \
-    python-pip \
-    pv \
-    sudo \
-    tzdata \
-    util-linux \
-    wget  
-
-# Repoyu klonla ve çalışma dizinini hazırla
-RUN git clone https://github.com/TeamDerUntergang/Telegram-UserBot -b seden /root/seden
-RUN mkdir /root/seden/bin/
-WORKDIR /root/seden/
-
-# Oturum ve yapılandırmayı kopyala (varsa)
-COPY ./sample_config.env ./userbot.session* ./config.env* /root/seden/
+# Maintainer
+MAINTAINER Ahmet Acikgoz <NaytSeyd@yandex.com>
 
 # Zaman dilimini ayarla
 ENV TZ=Europe/Istanbul
 
-# Gerekli pip modüllerini kur
-RUN pip3 install -r requirements.txt
+# Çalışma dizini
+ENV PATH="/root/sedenuser/bin:$PATH"
+WORKDIR /root/sedenuser
+
+# Repoyu klonla
+RUN git clone -b seden https://github.com/TeamDerUntergang/Telegram-UserBot /root/sedenuser
+
+# Oturum ve yapılandırmayı kopyala (varsa)
+COPY ./sample_config.env ./sedenbot.session* ./config.env* /root/sedenuser/
 
 # Botu çalıştır
 CMD ["python3","seden.py"]

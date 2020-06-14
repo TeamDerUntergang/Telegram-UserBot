@@ -108,7 +108,6 @@ AUTO_PP = os.environ.get("AUTO_PP", None)
 
 # Chrome sürücüsü ve Google Chrome dosyaları
 CHROME_DRIVER = os.environ.get("CHROME_DRIVER", None)
-GOOGLE_CHROME_BIN = os.environ.get("GOOGLE_CHROME_BIN", None)
 
 # Hava durumu varsayılan şehir
 WEATHER_DEFCITY = os.environ.get("WEATHER_DEFCITY", None)

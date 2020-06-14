@@ -60,11 +60,6 @@
       "value": "/usr/bin/chromedriver",
       "required": false
     },
-    "GOOGLE_CHROME_BIN": {
-      "description": "Selenium tabanlı modüller için Google Chrome (veya) Chromium binary konumu.",
-      "value": "/usr/bin/chromium",
-      "required": false
-    },
     "BOTLOG": {
       "description": "Günlüğe kaydetmeyi açmak istiyorsanız, bunu True olarak ayarlayın",
       "value": "False"
@@ -82,7 +77,7 @@
       "required": false
     },
     "AUTO_PP": {
-      "description": "Autopp modülünün çalışması için gerekli olan değişkendir. Çalışması için kullanacağınız resmin direk adresini girmeniz gerekiyor.",
+      "description": "Autopp modülünün çalışması için gerekli olan değişkendir. Çalışması için kullanacağınız resmin direkt adresini girmeniz gerekiyor.",
       "required": false      
     },
     "BOTLOG_CHATID": {

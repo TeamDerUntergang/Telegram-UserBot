@@ -20,7 +20,7 @@
 from sedenbot import CMD_HELP, BOT_USERNAME
 from sedenbot.events import sedenify
 
-@sedenify(outgoing=True, pattern="^.yardım")
+@sedenify(outgoing=True, pattern="^.yard[ıi]m")
 async def yardim(event):
     tgbotusername = BOT_USERNAME
     if tgbotusername and len(tgbotusername) > 4:

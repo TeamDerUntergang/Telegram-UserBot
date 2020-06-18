@@ -16,19 +16,18 @@
 
 """ Çıkartma oluşturmak ya da çalmak için yapılmış UserBot modülüdür. Teşekkürler @rupansh """
 
-import io
-import math
-import random
-import urllib.request
+from io import BytesIO
+from math import floor
+from random import choice
+from urllib.request import urlopen, Request
 
 from os import remove
 from PIL import Image
 from telethon.tl.types import DocumentAttributeFilename, MessageMediaPhoto
 from telethon.tl.functions.messages import GetStickerSetRequest
-from telethon.tl.types import InputStickerSetID
-from telethon.tl.types import DocumentAttributeSticker
+from telethon.tl.types import InputStickerSetID, DocumentAttributeSticker
 
-from sedenbot import bot, CMD_HELP
+from sedenbot import bot, CMD_HELP, me
 from sedenbot.events import sedenify
 
 DIZCILIK_STR = [
@@ -36,18 +35,20 @@ DIZCILIK_STR = [
     "Yaşasın dızcılık...",
     "Bu çıkartmayı kendi paketime davet ediyorum...",
     "Bunu dızlamam lazım...",
-    "Hey bu güzel bir çıkartma!\nHemen dızlıyorum..",
+    "Hey bu güzel bir çıkartma!\nHemen dızlıyorum...",
     "Çıkartmanı dızlıyorum\nhahaha.",
     "Hey şuraya bak. (☉｡☉)!→\nBen bunu dızlarken...",
     "Güller kırmızı menekşeler mavi, bu çıkartmayı paketime dızlayarak havalı olacağım...",
     "Çıkartma hapsediliyor...",
     "Bay dızcı bu çıkartmayı dızlıyor... ",
+    "Sonunda Ecem'in seveceği bir çıkartma dızlıyorum...",
+    "Ecem, bu dız senin için...",
 ]
 
 @sedenify(outgoing=True, pattern="^.(d[ıi]zla|kang)")
 async def dizla(args):
-    """ .kang komutu çıkartmaları başka paketten alır ya da yeni bir çıkartma oluşturur. """
-    user = await bot.get_me()
+    """ .dızla komutu çıkartmaları başka paketten alır ya da yeni bir çıkartma oluşturur. """
+    user = me
     if not user.username:
         user.username = user.first_name
     message = await args.get_reply_message()
@@ -58,19 +59,16 @@ async def dizla(args):
 
     if message and message.media:
         if isinstance(message.media, MessageMediaPhoto):
-            await args.edit(f"`{random.choice(DIZCILIK_STR)}`")
-            photo = io.BytesIO()
+            photo = BytesIO()
             photo = await bot.download_media(message.photo, photo)
         elif "image" in message.media.document.mime_type.split('/'):
-            await args.edit(f"`{random.choice(DIZCILIK_STR)}`")
-            photo = io.BytesIO()
+            photo = BytesIO()
             await bot.download_file(message.media.document, photo)
             if (DocumentAttributeFilename(file_name='sticker.webp') in
                     message.media.document.attributes):
                 emoji = message.media.document.attributes[1].alt
                 emojibypass = True
         elif "tgsticker" in message.media.document.mime_type:
-            await args.edit(f"`{random.choice(DIZCILIK_STR)}`")
             await bot.download_file(message.media.document,
                                     'AnimatedSticker.tgs')
 
@@ -85,6 +83,7 @@ async def dizla(args):
         else:
             await args.edit("`Desteklenmeyen dosya!`")
             return
+        await args.edit(f"`{choice(DIZCILIK_STR)}`")
     else:
         await args.edit("`Bunu dızlayamam...`")
         return
@@ -108,7 +107,7 @@ async def dizla(args):
         packname = f"a{user.id}_by_{user.username}_{pack}"
         packnick = f"@{user.username}'s UserBot pack {pack}"
         cmd = '/newpack'
-        file = io.BytesIO()
+        file = BytesIO()
 
         if not is_anim:
             image = await resize_photo(photo)
@@ -119,8 +118,7 @@ async def dizla(args):
             packnick += " (Animasyonlu)"
             cmd = '/newanimated'
 
-        response = urllib.request.urlopen(
-            urllib.request.Request(f'http://t.me/addstickers/{packname}'))
+        response = urlopen(Request(f'http://t.me/addstickers/{packname}'))
         htmlstr = response.read().decode("utf8").split('\n')
 
         if "  A <strong>Telegram</strong> user has created the <strong>Sticker&nbsp;Set</strong>." not in htmlstr:
@@ -266,14 +264,53 @@ async def resize_photo(photo):
             scale = 512 / size2
             size1new = size1 * scale
             size2new = 512
-        size1new = math.floor(size1new)
-        size2new = math.floor(size2new)
+        size1new = floor(size1new)
+        size2new = floor(size2new)
         sizenew = (size1new, size2new)
         image = image.resize(sizenew)
     else:
         image.thumbnail(maxsize)
 
     return image
+
+
+@sedenify(outgoing=True, pattern='^.getsticker$')
+async def getsticker(event):
+    reply = await event.get_reply_message()
+    if not reply:
+        await event.edit('`Lütfen bir mesaj alıntılayın.`')
+        return
+    
+    if not (reply.media and
+            DocumentAttributeFilename(file_name='sticker.webp')
+            in reply.media.document.attributes):
+        await event.edit('`Bu bir çıkartma olmayabilir.`')
+        return
+
+    photo = BytesIO()
+    await bot.download_file(reply.media.document, photo)
+    photo.name = f'sedenbot_{reply.media.document.id}.png'
+    photo.seek(0)
+
+    await event.client.send_file(event.chat_id, photo, force_document=True)
+    await event.delete()
+
+
+@sedenify(outgoing=True, pattern='^.stickerid$')
+async def getstickerid(event):
+    reply = await event.get_reply_message()
+    if not reply:
+        await event.edit('`Lütfen bir mesaj alıntılayın.`')
+        return
+    
+    if not (reply.media and (
+            DocumentAttributeFilename(file_name='sticker.webp')
+            in reply.media.document.attributes or
+            "tgsticker" in reply.media.document.mime_type)):
+        await event.edit('`Bu bir çıkartma olmayabilir.`')
+        return
+        
+    await event.edit(f'**Çıkartma ID:** `{reply.media.document.id}`')
 
 @sedenify(outgoing=True, pattern="^.packinfo")
 async def dizbilgisi(event):
@@ -319,14 +356,18 @@ async def dizbilgisi(event):
 
 CMD_HELP.update({
     "stickers":
-    ".kang\
-\nKullanım: .kang ile bir çıkartmaya ya da resme yanıtlayarak kendi çıkartma paketinize çıkartma olarak ekleyebilirsiniz.\
-\n\n.kang [emoji(ler)]\
-\nKullanım: .kang gibi çalışır fakat istediğiniz emojiyi çıkartmanın emojisi olarak belirtir.\
-\n\n.kang [numara]\
+    ".dızla\
+\nKullanım: .dızla ile bir çıkartmaya ya da resme yanıtlayarak kendi çıkartma paketinize çıkartma olarak ekleyebilirsiniz.\
+\n\n.dızla [emoji(ler)]\
+\nKullanım: .dızla gibi çalışır fakat istediğiniz emojiyi çıkartmanın emojisi olarak belirtir.\
+\n\n.dızla [numara]\
 \nKullanım: Çıkartmayı ya da resmi belirtilen pakete ekler fakat emoji olarak şu kullanılır: 🤔 \
-\n\n.kang [emoji(ler)] [numara]\
+\n\n.dızla [emoji(ler)] [numara]\
 \nKullanım: Çıkartmayı ya da resmi belirtilen pakete ekler ve belirttiğiniz emoji çıkartmanın emojisi olarak kullanılır.\
+\n\n.getsticker\
+\nKullanım: Yanıtlanan çıkartmayı png dosya biçiminde gönderir.\
+\n\n.stickerid\
+\nKullanım: Yanıtlanan çıkartmanın ID numarasını verir.\
 \n\n.packinfo\
 \nKullanım: Çıkartma paketi hakkında bilgi verir."
 })

@@ -29,7 +29,6 @@ async def filter_incoming_handler(handler):
         try:
             from sedenbot.moduller.sql_helper.filter_sql import get_filters
         except:
-            await handler.edit("`Bot Non-SQL modunda çalışıyor!!`")
             return
         name = handler.raw_text
         filters = get_filters(handler.chat_id)
@@ -44,7 +43,7 @@ async def filter_incoming_handler(handler):
             elif pro and trigger.reply:
                 await handler.reply(trigger.reply)
 
-@sedenify(outgoing=True, pattern="^.filter")
+@sedenify(outgoing=True, pattern="^.addfilter")
 async def add_new_filter(new_handler):
     """ .filter komutu bir sohbete yeni filtreler eklemeye izin verir """
     try:
@@ -52,38 +51,43 @@ async def add_new_filter(new_handler):
     except:
         await new_handler.edit("`Bot Non-SQL modunda çalışıyor!!`")
         return
-    arr = extract_args(new_handler).split(' ', 1)
-    if len(arr) < 2:
+    args = extract_args(new_handler)
+    if len(args) < 1:
         await new_handler.edit("`Komut kullanımı hatalı.`")
         return
+    arr = args.split(' ', 1)
     keyword = arr[0]
-    string = arr[1]
+    string = None if len(arr) < 2 else arr[1]
     msg = await new_handler.get_reply_message()
     msg_id = None
-    if msg and msg.media and not string:
-        if BOTLOG_CHATID:
-            await new_handler.client.send_message(
-                BOTLOG_CHATID, f"#FILTER\
-            \nGrup ID: {new_handler.chat_id}\
-            \nFiltre: {keyword}\
-            \n\nBu mesaj filtrenin cevaplanması için kaydedildi, lütfen bu mesajı silmeyin!"
-            )
-            msg_o = await new_handler.client.forward_messages(
-                entity=BOTLOG_CHATID,
-                messages=msg,
-                from_peer=new_handler.chat_id,
-                silent=True)
-            msg_id = msg_o.id
+    if msg:
+        if msg.media:
+            if BOTLOG_CHATID:
+                await new_handler.client.send_message(
+                    BOTLOG_CHATID, f"#FILTER\
+                \nGrup ID: {new_handler.chat_id}\
+                \nFiltre: {keyword}\
+                \n\nBu mesaj filtrenin cevaplanması için kaydedildi, lütfen bu mesajı silmeyin!"
+                )
+                msg_o = await new_handler.client.forward_messages(
+                    entity=BOTLOG_CHATID,
+                    messages=msg,
+                    from_peer=new_handler.chat_id,
+                    silent=True)
+                msg_id = msg_o.id
+            else:
+                await new_handler.edit(
+                    "`Bir medyanın filtreye karşılık olarak kaydedilebilmesi için BOTLOG_CHATID değerinin ayarlanması gerekli.`"
+                )
+                return
         else:
-            await new_handler.edit(
-                "`Bir medyanın filtreye karşılık olarak kaydedilebilmesi için BOTLOG_CHATID değerinin ayarlanması gerekli.`"
-            )
-            return
-    elif new_handler.reply_to_msg_id and not string:
-        rep_msg = await new_handler.get_reply_message()
-        string = rep_msg.text
+            rep_msg = await new_handler.get_reply_message()
+            string = rep_msg.text
+    elif not string:
+        await new_handler.edit("`Komut kullanımı hatalı.`")
+        return
     success = " **{}** `filtresi {}`"
-    if add_filter(str(new_handler.chat_id), keyword, string, msg_id) is True:
+    if add_filter(str(new_handler.chat_id), keyword, string, msg_id):
         await new_handler.edit(success.format(keyword, 'eklendi'))
     else:
         await new_handler.edit(success.format(keyword, 'güncellendi'))
@@ -107,7 +111,6 @@ async def remove_a_filter(r_handler):
 async def kick_marie_filter(event):
     """ .rmfilters komutu Marie'de (ya da onun tabanındaki botlarda) \
         kayıtlı olan notları silmeye yarar. """
-    cmd = event.text[0]
     bot_type = extract_args(event).lower()
     if bot_type not in ["marie", "rose"]:
         await event.edit("`Bu bot henüz desteklenmiyor.`")
@@ -155,7 +158,7 @@ CMD_HELP.update({
     "filter":
     ".filters\
     \nKullanım: Bir sohbetteki tüm userbot filtrelerini listeler.\
-    \n\n.filter <filtrelenecek kelime> <cevaplanacak metin> ya da bir mesajı .filter <filtrelenecek kelime>\
+    \n\n.addfilter <filtrelenecek kelime> <cevaplanacak metin> ya da bir mesajı .filter <filtrelenecek kelime>\
     \nKullanım: 'filtrelenecek kelime' olarak istenilen şeyi kaydeder.\
     \nBot her 'filtrelenecek kelime' yi algıladığında o mesaja cevap verecektir.\
     \nDosyalardan çıkartmalara her türlü şeyle çalışır.\

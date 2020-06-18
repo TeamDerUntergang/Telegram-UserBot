@@ -1,6 +1,6 @@
 import aiohttp
 
-from userbot.modules.rextester.langs import languages
+from sedenbot.moduller.rextester.langs import languages
 
 
 class Rextester(object):

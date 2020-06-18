@@ -15,45 +15,39 @@
 #
 
 """ UserBot hazırlanışı. """
-import os
-import re
-
 from sys import version_info
+if version_info[0] < 3 or version_info[1] < 8:
+    LOGS.info("En az python 3.8 sürümüne sahip olmanız gerekir. "
+              "Birden fazla özellik buna bağlıdır. Bot kapatılıyor.")
+    quit(1)
+
+from os import environ
+from re import compile as recomp
+from re import search as resr
+
 from logging import basicConfig, getLogger, INFO, DEBUG
 from distutils.util import strtobool as sb
 from math import ceil
 
 from pylast import LastFMNetwork, md5
 from dotenv import load_dotenv
-from requests import get
 from telethon.sync import TelegramClient, custom, events
 from telethon.sessions import StringSession
-from telethon.utils import get_peer_id
 load_dotenv("config.env")
 
 # Bot günlükleri kurulumu:
-CONSOLE_LOGGER_VERBOSE = sb(os.environ.get("CONSOLE_LOGGER_VERBOSE", "False"))
+CONSOLE_LOGGER_VERBOSE = sb(environ.get("CONSOLE_LOGGER_VERBOSE", "False"))
 
 ASYNC_POOL = []
-
-if CONSOLE_LOGGER_VERBOSE:
-    basicConfig(
-        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-        level=DEBUG,
-    )
-else:
-    basicConfig(format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-                level=INFO)
+basicConfig(
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    level=DEBUG if CONSOLE_LOGGER_VERBOSE else INFO,
+)
 LOGS = getLogger(__name__)
-
-if version_info[0] < 3 or version_info[1] < 8:
-    LOGS.info("En az python 3.8 sürümüne sahip olmanız gerekir."
-              "Birden fazla özellik buna bağlıdır. Bot kapatılıyor.")
-    quit(1)
 
 # Yapılandırmanın önceden kullanılan değişkeni kullanarak düzenlenip düzenlenmediğini kontrol edin.
 # Temel olarak, yapılandırma dosyası için kontrol.
-CONFIG_CHECK = os.environ.get(
+CONFIG_CHECK = environ.get(
     "___________LUTFEN_______BU_____SATIRI_____SILIN__________", None)
 
 if CONFIG_CHECK:
@@ -63,80 +57,81 @@ if CONFIG_CHECK:
     quit(1)
 
 # Telegram API KEY ve HASH
-API_KEY = os.environ.get("API_KEY", None)
-API_HASH = os.environ.get("API_HASH", None)
+API_KEY = environ.get("API_KEY", None)
+API_HASH = environ.get("API_HASH", None)
 
 # UserBot Session String
-STRING_SESSION = os.environ.get("STRING_SESSION", None)
+STRING_SESSION = environ.get("STRING_SESSION", None)
 
 # Kanal / Grup ID yapılandırmasını günlüğe kaydetme.
-BOTLOG_CHATID = int(os.environ.get("BOTLOG_CHATID", None))
+BOTLOG_CHATID = environ.get("BOTLOG_CHATID", None)
+BOTLOG_CHATID = int(BOTLOG_CHATID) if BOTLOG_CHATID and resr('^-?\d+$', BOTLOG_CHATID) else None
 
 # Alive Mesajını değiştirme.
-ALIVE_MESAJI = os.environ.get("ALIVE_MESAJI", "Merhaba Seden! Seni Seviyorum ❤️")
+ALIVE_MESAJI = environ.get("ALIVE_MESAJI", "Merhaba Seden! Seni Seviyorum ❤️")
 
 # UserBot günlükleme özelliği.
-BOTLOG = sb(os.environ.get("BOTLOG", "False"))
-LOGSPAMMER = sb(os.environ.get("LOGSPAMMER", "False"))
+BOTLOG = sb(environ.get("BOTLOG", "False"))
+LOGSPAMMER = sb(environ.get("LOGSPAMMER", "False"))
 
 # Hey! Bu bir bot. Endişelenme ;)
-PM_AUTO_BAN = sb(os.environ.get("PM_AUTO_BAN", "False"))
+PM_AUTO_BAN = sb(environ.get("PM_AUTO_BAN", "False"))
 
 # Güncelleyici için Heroku hesap bilgileri.
-HEROKU_APPNAME = os.environ.get("HEROKU_APPNAME", None)
-HEROKU_APIKEY = os.environ.get("HEROKU_APIKEY", None)
+HEROKU_APPNAME = environ.get("HEROKU_APPNAME", None)
+HEROKU_APIKEY = environ.get("HEROKU_APIKEY", None)
 
 # Güncelleyici için özel (fork) repo linki.
-UPSTREAM_REPO_URL = os.environ.get(
+UPSTREAM_REPO_URL = environ.get(
     "UPSTREAM_REPO_URL",
     "https://github.com/TeamDerUntergang/Telegram-UserBot.git")
 
 # Ayrıntılı konsol günlügü
-CONSOLE_LOGGER_VERBOSE = sb(os.environ.get("CONSOLE_LOGGER_VERBOSE", "False"))
+CONSOLE_LOGGER_VERBOSE = sb(environ.get("CONSOLE_LOGGER_VERBOSE", "False"))
 
 # SQL Veritabanı
-DB_URI = os.environ.get("DATABASE_URL", None)
+DB_URI = environ.get("DATABASE_URL", None)
 
 # OCR API key
-OCR_SPACE_API_KEY = os.environ.get("OCR_SPACE_API_KEY", None)
+OCR_SPACE_API_KEY = environ.get("OCR_SPACE_API_KEY", None)
 
 # remove.bg API key
-REM_BG_API_KEY = os.environ.get("REM_BG_API_KEY", None)
+REM_BG_API_KEY = environ.get("REM_BG_API_KEY", None)
 
 # AUTO PP
-AUTO_PP = os.environ.get("AUTO_PP", None)
+AUTO_PP = environ.get("AUTO_PP", None)
 
 # Chrome sürücüsü ve Google Chrome dosyaları
-CHROME_DRIVER = os.environ.get("CHROME_DRIVER", None)
+CHROME_DRIVER = environ.get("CHROME_DRIVER", None)
 
 # Hava durumu varsayılan şehir
-WEATHER_DEFCITY = os.environ.get("WEATHER_DEFCITY", None)
+WEATHER_DEFCITY = environ.get("WEATHER_DEFCITY", None)
 
 # Lydia API
-LYDIA_API_KEY = os.environ.get("LYDIA_API_KEY", None)
+LYDIA_API_KEY = environ.get("LYDIA_API_KEY", None)
 
 # Anti Spambot
-ANTI_SPAMBOT = sb(os.environ.get("ANTI_SPAMBOT", "False"))
-ANTI_SPAMBOT_SHOUT = sb(os.environ.get("ANTI_SPAMBOT_SHOUT", "False"))
+ANTI_SPAMBOT = sb(environ.get("ANTI_SPAMBOT", "False"))
+ANTI_SPAMBOT_SHOUT = sb(environ.get("ANTI_SPAMBOT_SHOUT", "False"))
 
 # Youtube API key
-YOUTUBE_API_KEY = os.environ.get("YOUTUBE_API_KEY", None)
+YOUTUBE_API_KEY = environ.get("YOUTUBE_API_KEY", None)
 
 # Saat & Tarih - Ülke ve Saat Dilimi
-COUNTRY = str(os.environ.get("COUNTRY", ""))
-TZ_NUMBER = int(os.environ.get("TZ_NUMBER", 1))
+COUNTRY = str(environ.get("COUNTRY", ""))
+TZ_NUMBER = int(environ.get("TZ_NUMBER", 3))
 
 # Temiz Karşılama
-CLEAN_WELCOME = sb(os.environ.get("CLEAN_WELCOME", "True"))
+CLEAN_WELCOME = sb(environ.get("CLEAN_WELCOME", "True"))
 
 # Last.fm modülü
-BIO_PREFIX = os.environ.get("BIO_PREFIX", None)
-DEFAULT_BIO = os.environ.get("DEFAULT_BIO", None)
+BIO_PREFIX = environ.get("BIO_PREFIX", None)
+DEFAULT_BIO = environ.get("DEFAULT_BIO", None)
 
-LASTFM_API = os.environ.get("LASTFM_API", None)
-LASTFM_SECRET = os.environ.get("LASTFM_SECRET", None)
-LASTFM_USERNAME = os.environ.get("LASTFM_USERNAME", None)
-LASTFM_PASSWORD_PLAIN = os.environ.get("LASTFM_PASSWORD", None)
+LASTFM_API = environ.get("LASTFM_API", None)
+LASTFM_SECRET = environ.get("LASTFM_SECRET", None)
+LASTFM_USERNAME = environ.get("LASTFM_USERNAME", None)
+LASTFM_PASSWORD_PLAIN = environ.get("LASTFM_PASSWORD", None)
 LASTFM_PASS = md5(LASTFM_PASSWORD_PLAIN)
 if LASTFM_API and LASTFM_SECRET and LASTFM_USERNAME and LASTFM_PASS:
     lastfm = LastFMNetwork(api_key=LASTFM_API,
@@ -147,22 +142,22 @@ else:
     lastfm = None
 
 # Google Drive Modülü
-G_DRIVE_CLIENT_ID = os.environ.get("G_DRIVE_CLIENT_ID", None)
-G_DRIVE_CLIENT_SECRET = os.environ.get("G_DRIVE_CLIENT_SECRET", None)
-G_DRIVE_AUTH_TOKEN_DATA = os.environ.get("G_DRIVE_AUTH_TOKEN_DATA", None)
-GDRIVE_FOLDER_ID = os.environ.get("GDRIVE_FOLDER_ID", None)
-TEMP_DOWNLOAD_DIRECTORY = os.environ.get("TMP_DOWNLOAD_DIRECTORY",
+G_DRIVE_CLIENT_ID = environ.get("G_DRIVE_CLIENT_ID", None)
+G_DRIVE_CLIENT_SECRET = environ.get("G_DRIVE_CLIENT_SECRET", None)
+G_DRIVE_AUTH_TOKEN_DATA = environ.get("G_DRIVE_AUTH_TOKEN_DATA", None)
+GDRIVE_FOLDER_ID = environ.get("GDRIVE_FOLDER_ID", None)
+TEMP_DOWNLOAD_DIRECTORY = environ.get("TMP_DOWNLOAD_DIRECTORY",
                                          "./downloads")
 
 # Inline bot çalışması için
-BOT_TOKEN = os.environ.get("BOT_TOKEN", None)
-BOT_USERNAME = os.environ.get("BOT_USERNAME", None)
+BOT_TOKEN = environ.get("BOT_TOKEN", None)
+BOT_USERNAME = environ.get("BOT_USERNAME", None)
 
 # Genius modülünün çalışması için buradan değeri alın https://genius.com/developers her ikisi de aynı değerlere sahiptir
-GENIUS_API_TOKEN = os.environ.get("GENIUS_API_TOKEN", None)
+GENIUS_API_TOKEN = environ.get("GENIUS_API_TOKEN", None)
 
 # Ayarlanabilir PM izin verilmedi mesajı
-PM_UNAPPROVED = os.environ.get("PM_UNAPPROVED", None)
+PM_UNAPPROVED = environ.get("PM_UNAPPROVED", None)
 
 CMD_HELP = {}
 
@@ -171,12 +166,7 @@ CMD_HELP = {}
 """
 
 # 'bot' değişkeni
-if STRING_SESSION:
-    # pylint: devre dışı=geçersiz ad
-    bot = TelegramClient(StringSession(STRING_SESSION), API_KEY, API_HASH)
-else:
-    # pylint: devre dışı=geçersiz ad
-    bot = TelegramClient("sedenbot", API_KEY, API_HASH)
+bot = TelegramClient(StringSession(STRING_SESSION if STRING_SESSION else "sedenbot"), API_KEY, API_HASH)
 
 async def check_botlog_chatid():
     if not BOTLOG_CHATID and LOGSPAMMER:
@@ -247,9 +237,9 @@ with bot:
             modulo_page = page_number % max_num_pages
             if len(pairs) > number_of_rows:
                 pairs = pairs[modulo_page * number_of_rows:number_of_rows * (modulo_page + 1)] + \
-                    [
-                    (custom.Button.inline("⬅️Geri", data="{}_prev({})".format(prefix, modulo_page)),
-                     custom.Button.inline("İleri➡️", data="{}_next({})".format(prefix, modulo_page)))
+                [
+                    (custom.Button.inline("⬅️ Geri", data=f"{prefix}_prev({modulo_page})"),
+                     custom.Button.inline("İleri ➡️", data=f"{prefix}_next({modulo_page})"))
                 ]
             return pairs
 
@@ -287,7 +277,7 @@ with bot:
                     text="""@SedenUserBot'u kullanmayı deneyin!
 Hesabınızı bot'a çevirebilirsiniz ve bunları kullanabilirsiniz. Unutmayın, siz başkasının botunu yönetemezsiniz! Alttaki GitHub adresinden tüm kurulum detayları anlatılmıştır.""",
                     buttons=[
-                        [custom.Button.url("Kanala Katıl", "https://t.me/SedenUserBot"), custom.Button.url(
+                        [custom.Button.url("Kanala Katıl", "https://t.me/SedenUserBot"), custom.custom.Button.url(
                             "Gruba Katıl", "https://t.me/SedenUserBotSupport")],
                         [custom.Button.url(
                             "GitHub", "https://github.com/TeamDerUntergang/Telegram-UserBot")]
@@ -297,7 +287,7 @@ Hesabınızı bot'a çevirebilirsiniz ve bunları kullanabilirsiniz. Unutmayın,
             await event.answer([result] if result else None)
 
         @tgbot.on(events.callbackquery.CallbackQuery(  # pylint:disable=E0602
-            data=re.compile(b"helpme_next\((.+?)\)")
+            data=recomp(b"helpme_next\((.+?)\)")
         ))
         async def on_plug_in_callback_query_handler(event):
             if event.query.user_id == uid:  # pylint:disable=E0602
@@ -312,7 +302,7 @@ Hesabınızı bot'a çevirebilirsiniz ve bunları kullanabilirsiniz. Unutmayın,
                 await event.answer(reply_pop_up_alert, cache_time=0, alert=True)
 
         @tgbot.on(events.callbackquery.CallbackQuery(  # pylint:disable=E0602
-            data=re.compile(b"helpme_prev\((.+?)\)")
+            data=recomp(b"helpme_prev\((.+?)\)")
         ))
         async def on_plug_in_callback_query_handler(event):
             if event.query.user_id == uid:  # pylint:disable=E0602
@@ -330,7 +320,7 @@ Hesabınızı bot'a çevirebilirsiniz ve bunları kullanabilirsiniz. Unutmayın,
                 await event.answer(reply_pop_up_alert, cache_time=0, alert=True)
 
         @tgbot.on(events.callbackquery.CallbackQuery(  # pylint:disable=E0602
-            data=re.compile(b"ub_modul_(.*)")
+            data=recomp(b"ub_modul_(.*)")
         ))
         async def on_plug_in_callback_query_handler(event):
             if event.query.user_id == uid:  # pylint:disable=E0602

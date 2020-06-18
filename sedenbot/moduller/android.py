@@ -16,11 +16,12 @@
 
 """ Android ile ilgili komutları içeren UserBot modülü """
 
-import re
+from re import sub
 import json
 
 from requests import get
 from bs4 import BeautifulSoup
+from urllib.parse import urlencode
 
 from sedenbot import CMD_HELP
 from sedenbot.events import extract_args, extract_args_arr, sedenify
@@ -77,11 +78,13 @@ async def device_info(request):
 async def codename_info(request):
     """ Cihazın kod adını bulmak için arama yapın """
     textx = await request.get_reply_message()
-    arr = extract_args_arr(request)
-    brand = arr[0].lower()
-    device = arr[1].lower()
-    if brand and device:
-        pass
+    arr = extract_args(request)
+    brand = arr
+    device = arr
+    if " " in arr:
+        args = arr.split(' ', 1)
+        brand = args[0].lower()
+        device = args[1].lower()
     elif textx:
         brand = textx.text.split(' ')[0]
         device = ' '.join(textx.text.split(' ')[1:])
@@ -92,71 +95,132 @@ async def codename_info(request):
                           "certified-android-devices/master/by_brand.json").text)
     devices_lower = {k.lower():v for k,v in data.items()} # Lower brand names in JSON
     devices = devices_lower.get(brand)
-    results = [i for i in devices if i["name"].lower() == device.lower() or i["model"].lower() == device.lower()]
-    if results:
-        reply = f"**{brand} {device} için arama sonuçları**:\n\n"
-        if len(results) > 8:
-            results = results[:8]
-        for item in results:
-            reply += f"**Kod Adı**: {item['device']}\n" \
-                     f"**İsim**: {item['name']}\n" \
-                     f"**Model**: {item['model']}\n\n"
-    else:
+    if not devices:
         reply = f"`{device} bulunamadı`\n"
+    else:
+        results = [i for i in devices if device.lower() in i["name"].lower() or device.lower() in i["model"].lower()]
+        if results:
+            reply = f"**{brand} {device} için arama sonuçları**:\n\n"
+            if len(results) > 8:
+                results = results[:8]
+            for item in results:
+                reply += f"**Kod Adı**: {item['device']}\n" \
+                         f"**İsim**: {item['name']}\n" \
+                         f"**Model**: {item['model']}\n\n"
+        else:
+            reply = f"`{device} bulunamadı`\n"
     await request.edit(reply)
 
+
+# @frknkrc44 tarafından baştan yazılmıştır
 @sedenify(outgoing=True, pattern=r"^.specs")
-async def devices_specifications(request):
-    """ Mobil cihaz özellikleri """
-    textx = await request.get_reply_message()
-    arr = extract_args_arr(request)
-    brand = arr[0].lower()
-    device = arr[1].lower()
-    if brand and device:
-        pass
-    elif textx:
-        brand = textx.text.split(' ')[0]
-        device = ' '.join(textx.text.split(' ')[1:])
-    else:
-        await request.edit("`Kullanım: .specs <marka> <cihaz>`")
+async def specs(event):
+    args = extract_args(event)
+    if len(args) < 1:
+        await event.edit('`Kullanım: .specs <cihaz>`')
         return
-    all_brands = BeautifulSoup(
-        get('https://www.devicespecifications.com/tr/brand-more').content,
-        'html.parser').find('div', {
-            'class': 'brand-listing-container-news'
-        }).findAll('a')
-    brand_page_url = None
-    try:
-        brand_page_url = [
-            i['href'] for i in all_brands if brand == i.text.strip().lower()
-        ][0]
-    except IndexError:
-        await request.edit(f'`{brand} bilinmeyen marka!`')
-    devices = BeautifulSoup(get(brand_page_url).content, 'html.parser') \
-        .findAll('div', {'class': 'model-listing-container-80'})
-    device_page_url = None
-    try:
-        device_page_url = [
-            i.a['href']
-            for i in BeautifulSoup(str(devices), 'html.parser').findAll('h3')
-            if device in i.text.strip().lower()
-        ]
-    except IndexError:
-        await request.edit(f"`{device} bulunamadı!`")
-    if len(device_page_url) > 2:
-        device_page_url = device_page_url[:2]
-    reply = ''
-    for url in device_page_url:
-        info = BeautifulSoup(get(url).content, 'html.parser')
-        reply = '\n**' + info.title.text.split('-')[0].strip() + '**\n\n'
-        info = info.find('div', {'id': 'model-brief-specifications'})
-        specifications = re.findall(r'<b>.*?<br/>', str(info))
-        for item in specifications:
-            title = re.findall(r'<b>(.*?)</b>', item)[0].strip()
-            data = re.findall(r'</b>: (.*?)<br/>', item)[0]\
-                .replace('<b>', '').replace('</b>', '').strip()
-            reply += f'**{title}**: {data}\n'
-    await request.edit(reply)
+    
+    link = find_device(args)
+
+    if not link:
+        await event.edit('`Bu cihaza dair bir bilgi bulunamadı veya '
+                         'çok fazla istek attınız.`')
+        return
+    
+    req = get(link)
+    soup = BeautifulSoup(req.text, features='html.parser')
+        
+    def get_spec(query, key='data-spec', cls='td'):
+        try:
+            result = soup.find(cls,{key:query.split()}).text.strip()
+            result = "Bilgi alınamadı" if len(result) < 1 else result
+            return result
+        except:
+            return "Bilgi alınamadı"
+
+    title = get_spec('specs-phone-name-title', 'class', 'h1')
+    launch = get_spec('released-hl', cls='span')
+    body = sub(', ','g, ', get_spec('body-hl', cls='span'))
+    os = get_spec('os-hl', cls='span')
+    storage = get_spec('internalmemory')
+    stortyp = get_spec('memoryother')
+    dispsize = get_spec('displaysize-hl', cls='span')
+    dispres = get_spec('displayres-hl', cls='div')
+    bcampx = get_spec('cam1modules')
+    bcamft = get_spec('cam1features')
+    bcamvd = get_spec('cam1video')
+    fcampx = get_spec('cam2modules')
+    fcamft = get_spec('cam2features')
+    fcamvd = get_spec('cam2video')
+    cpuname = get_spec('chipset')
+    cpuchip = get_spec('cpu')
+    gpuname = get_spec('gpu')
+    battery = get_spec('batdescription1')
+    wlan = get_spec('wlan')
+    bluetooth = get_spec('bluetooth')
+    gps = get_spec('gps')
+    usb = get_spec('usb')
+    sensors = get_spec('sensors')
+    sarus = sub('\s\s+',', ',get_spec('sar-us'))
+    sareu = sub('\s\s+',', ',get_spec('sar-eu'))
+    
+    await event.edit(f'**{title}**\n\n'
+                     f'**Çıkış tarihi:** `{launch}\n`'
+                     f'**Ağırlık ve kalınlık:** `{body}`\n'
+                     f'**SAR değeri (ABD):** `{sarus}`\n'
+                     f'**SAR değeri (Avr):** `{sareu}`\n'
+                     f'**İşletim sistemi:** `{os}`\n'
+                     f'**İşlemci:** `{cpuname}`\n'
+                     f'**İşlemci çekirdekleri:** `{cpuchip}`\n'
+                     f'**Grafik işlemci:** `{gpuname}`\n'
+                     f'**Bellek:** `{storage}\n`'
+                     f'**Bellek tipi:** `{stortyp}`\n'
+                     f'**Ekran boyutu:** `{dispsize}`\n'
+                     f'**Ekran çözünürlüğü:** `{dispres}`\n'
+                     f'**Arka kamera(lar):**\n`{bcampx}`\n'
+                     f'**Arka kamera özellikleri:** `{bcamft}`\n'
+                     f'**Arka kamera video kaydı:** `{bcamvd}`\n'
+                     f'**Ön kamera(lar):**\n`{fcampx}`\n'
+                     f'**Ön kamera özellikleri:** `{fcamft}`\n'
+                     f'**Ön kamera video kaydı:** `{fcamvd}`\n'
+                     f'**Pil:** `{battery}`\n'
+                     f'**Kablosuz:** `{wlan}`\n'
+                     f'**Bluetooth:** `{bluetooth}`\n'
+                     f'**GPS:** `{gps}`\n'
+                     f'**Sensörler:** `{sensors}`\n'
+                     f'\nDaha fazlası için: {link}')
+
+
+# @frknkrc44, GSMArena üzerinden cihaz bulma
+def find_device(query):
+    raw_query = query.lower()
+
+    def replace_query(query):
+        return urlencode({'sSearch':query})
+
+    query = replace_query(raw_query)
+    req = get(f"https://www.gsmarena.com/res.php3?{query}",
+              {'User-Agent':'Mozilla/5.0 (compatible; Googlebot/2.1; '
+                            '+http://www.google.com/bot.html)'})
+    soup = BeautifulSoup(req.text, features='html.parser')
+
+    if 'Too' in soup.find('title').text: # GSMArena geçici ban atarsa
+        return None
+
+    res = soup.findAll('div',{'class':['makers']})
+    
+    if not res or len(res) < 1: # hiçbir cihaz bulunamazsa
+        return None
+    
+    res = res[0].findAll('li')
+
+    for item in res:
+        name = str(item.find('span'))
+        name = sub('(<|</)span>','',name)
+        if name[name.find('>')+1:].lower() == raw_query or sub('<br(>|/>)',' ', name).lower() == raw_query:
+            link = f"https://www.gsmarena.com/{item.find('a')['href']}"
+            return link
+    return None
 
 @sedenify(outgoing=True, pattern=r"^.twrp")
 async def twrp(request):

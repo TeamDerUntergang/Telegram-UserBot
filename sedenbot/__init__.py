@@ -39,6 +39,7 @@ load_dotenv("config.env")
 CONSOLE_LOGGER_VERBOSE = sb(environ.get("CONSOLE_LOGGER_VERBOSE", "False"))
 
 ASYNC_POOL = []
+VALID_PROXY_URL = []
 basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     level=DEBUG if CONSOLE_LOGGER_VERBOSE else INFO,

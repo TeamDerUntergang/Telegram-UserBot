@@ -23,8 +23,9 @@ from requests import get
 from bs4 import BeautifulSoup
 from urllib.parse import urlencode
 
-from sedenbot import CMD_HELP
+from sedenbot import CMD_HELP, VALID_PROXY_URL
 from sedenbot.events import extract_args, extract_args_arr, sedenify
+from random import choice
 
 GITHUB = 'https://github.com'
 
@@ -120,14 +121,20 @@ async def specs(event):
         await event.edit('`Kullanım: .specs <cihaz>`')
         return
     
-    link = find_device(args)
+    await event.edit('`Proxy getiriliyor ...`')
+    proxy = get_random_proxy()
+    await event.edit('`Proxy bağlantısı sağlanıyor ...`')
+    link = find_device(args, proxy)
 
     if not link:
         await event.edit('`Bu cihaza dair bir bilgi bulunamadı veya '
                          'çok fazla istek attınız.`')
         return
     
-    req = get(link)
+    req = get(link,
+              {'User-Agent':'Mozilla/5.0 (compatible; Googlebot/2.1; '
+                            '+http://www.google.com/bot.html)'},
+              proxies=proxy)
     soup = BeautifulSoup(req.text, features='html.parser')
         
     def get_spec(query, key='data-spec', cls='td'):
@@ -192,7 +199,7 @@ async def specs(event):
 
 
 # @frknkrc44, GSMArena üzerinden cihaz bulma
-def find_device(query):
+def find_device(query, proxy):
     raw_query = query.lower()
 
     def replace_query(query):
@@ -201,7 +208,8 @@ def find_device(query):
     query = replace_query(raw_query)
     req = get(f"https://www.gsmarena.com/res.php3?{query}",
               {'User-Agent':'Mozilla/5.0 (compatible; Googlebot/2.1; '
-                            '+http://www.google.com/bot.html)'})
+                            '+http://www.google.com/bot.html)'},
+              proxies=proxy)
     soup = BeautifulSoup(req.text, features='html.parser')
 
     if 'Too' in soup.find('title').text: # GSMArena geçici ban atarsa
@@ -249,6 +257,59 @@ async def twrp(request):
         f'[{dl_file}]({dl_link}) - __{size}__\n' \
         f'**Güncelleme tarihi:** __{date}__\n'
     await request.edit(reply)
+
+def _xget_random_proxy():
+    try_valid = tuple(VALID_PROXY_URL[0].split(':')) if len(VALID_PROXY_URL) > 0 else None
+    if try_valid:
+        valid = _try_proxy(try_valid)
+        if valid[0] == 200 and "<title>Too" not in valid[1]:
+            return try_valid
+        
+    head = {
+        "Accept-Encoding":"gzip, deflate, sdch",
+        "Accept-Language":"en-US,en;q=0.8",
+        "User-Agent":"ArabyBot (compatible; Mozilla/5.0; GoogleBot; FAST Crawler 6.4; http://www.araby.com;)",
+        "Referer":"https://www.google.com/search?q=sslproxies",
+    }
+
+    req = get('https://sslproxies.org/', head)
+    soup = BeautifulSoup(req.text, 'html.parser')
+    res = soup.find('table', {'id':'proxylisttable'}).find('tbody')
+    res = res.findAll('tr')
+    for item in res:
+        infos = item.findAll('td')
+        ip = infos[0].text
+        port = infos[1].text
+        proxy = (ip, port)
+        if _try_proxy(proxy)[0] == 200:
+            return proxy
+            
+    return None
+
+ 
+def _try_proxy(proxy):
+    try:
+        prxy = f"{proxy[0]}:{proxy[1]}"
+        req = get('https://www.gsmarena.com/', proxies={"http":prxy,"https":prxy}, timeout=1)
+        if req.status_code == 200:
+           return (200, req.text)
+        raise Exception
+    except:
+        return (404, None)
+
+
+def get_random_proxy():
+    proxy = _xget_random_proxy()
+    proxy = f"{proxy[0]}:{proxy[1]}"
+    VALID_PROXY_URL.clear()
+    VALID_PROXY_URL.append(proxy)
+
+    proxy_dict = {
+        "https": proxy,
+    }
+
+    return proxy_dict
+
 
 CMD_HELP.update({
     "android":

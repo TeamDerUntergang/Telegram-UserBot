@@ -258,6 +258,44 @@ async def twrp(request):
         f'**Güncelleme tarihi:** __{date}__\n'
     await request.edit(reply)
 
+@sedenify(outgoing=True, pattern=r"^.o(rangef|f)(ox|rp)")
+async def ofox(event):
+    if len(args := extract_args(event)) < 1:
+        await event.edit('`Komut kullanımı hatalı.`')
+        return
+
+    await event.edit('`Resmi cihaz listesi kontrol ediliyor ...`')
+    OFOX_REPO = 'https://sourceforge.net/projects/orangefox/files'
+    req = get(OFOX_REPO)
+    soup = BeautifulSoup(req.text, 'html.parser')
+    folders = [i['title'] for i in soup.findAll('tr',{'class':['folder']}) 
+               if i['title'] not in ['untested', 'test_builds']]
+
+    if not args in folders:
+        await event.edit(f'`{args} kod adı muhtemelen resmi bir cihaza ait değil. `{OFOX_REPO}` adresinden kontrol edebilirsiniz.`')
+        return
+
+    req = get(f'{OFOX_REPO}/{args}')
+    soup = BeautifulSoup(req.text, 'html.parser')
+    files = soup.findAll('tr', {'class':['file']})
+    out = ""
+    for f in files:
+        if f['title'][-3:] == 'zip':
+            title = f['title']
+            version = sub(f'OrangeFox-|-{args}(.*).zip','',title)
+            date = f.find('td', {'headers': ['files_date_h']}).text
+            count = f.find('span', {'class': ['count']})
+            count = count.text if count else 0
+            dlink = f"https://master.dl.sourceforge.net/project/orangefox/{args}/{title}"
+            out += f"[{version}]({dlink}) {date} ({count} defa indirildi)\n"
+            
+    if len(out) < 1:
+        await event.edit('`Muhtemelen bu liste boş.`')
+        return
+    
+    await event.edit(f'**OrangeFox Recovery ({args}):**\n{out}')
+
+
 def _xget_random_proxy():
     try_valid = tuple(VALID_PROXY_URL[0].split(':')) if len(VALID_PROXY_URL) > 0 else None
     if try_valid:
@@ -322,5 +360,7 @@ CMD_HELP.update({
 \n\n.specs <marka> <cihaz>\
 \nKullanım: Cihaz özellikleri hakkında bilgi alın.\
 \n\n.twrp <kod adı>\
-\nKullanım: Hedeflenen cihaz için resmi olan güncel twrp sürümlerini alın."
+\nKullanım: Hedeflenen cihaz için resmi olan güncel TWRP sürümlerini alın.\
+\n\n.orangefox <kod adı>\
+\nKullanım: Hedeflenen cihaz için resmi olan güncel OrangeFox Recovery sürümlerini alın."
 })

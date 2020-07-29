@@ -72,7 +72,7 @@ async def bot_ver(event):
             + str(stderr.decode().strip())
 
         await event.edit("[Seden UserBot](https://telegram.dog/SedenUserBot) `Versiyonu: "
-                         f"{verout} v3.4"
+                         f"{verout} v3.5 EOL"
                          "` \n"
                          "`Toplam değişiklik: "
                          f"{revout}"

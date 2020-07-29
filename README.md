@@ -3,7 +3,7 @@
 
 # Seden-UserBot
 
-### CI derlemesi başarılı, ancak yerel olarak çalışırken hala sözdizimi hataları alıyorsanız, muhtemelen kaynakla ilgili bir sorun değil, python sürümünüzle alakalı bir sorun.
+* Bu bota daha destek verilmeyecektir. Yeni yaptığımız projemize [buradan](https://github.com/TeamDerUntergang/Telegram-SedenUserBot) erişebilirsiniz.
 
 ### # Heroku Deploy
 [![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/TeamDerUntergang/Telegram-UserBot/tree/seden)
